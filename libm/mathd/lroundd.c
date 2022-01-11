@@ -93,12 +93,12 @@ long int lround(double x)
     } else if ((uint32_t)exponent_less_1023 < (8 * sizeof(long int)) - 1) {
         /* 32bit long: exponent_less_1023 in [20,30] */
         /* 64bit long: exponent_less_1023 in [20,62] */
-        if (exponent_less_1023 >= 52) {
+        if (exponent_less_1023 >= 52) {         /* LCOV_EXCL_BR_LINE */
             /* 64bit long: exponent_less_1023 in [52,62] */
             /* 64bit long: shift amt in [32,42] */
-            result = ((long int) msw << (exponent_less_1023 - 20))
+            result = ((long int) msw << (exponent_less_1023 - 20))      /* LCOV_EXCL_LINE */
                      /* 64bit long: shift amt in [0,10] */
-                     | ((long int) lsw << (exponent_less_1023 - 52));
+                     | ((long int) lsw << (exponent_less_1023 - 52));   /* LCOV_EXCL_LINE */
         } else {
             /* 32bit long: exponent_less_1023 in [20,30] */
             /* 64bit long: exponent_less_1023 in [20,51] */

@@ -111,12 +111,12 @@ long int lrint(double x)
     } else if ((uint32_t)_j0 < (8 * sizeof(long int)) - 1) {
         /* 32bit return: _j0 in [20,30] */
         /* 64bit return: _j0 in [20,62] */
-        if (_j0 >= 52) {
+        if (_j0 >= 52) {        /* LCOV_EXCL_BR_LINE */
             /* 64bit return: _j0 in [52,62] */
             /* 64bit return: left shift amt in [32,42] */
-            result = ((long int)((_i0 & 0x000fffff) | 0x00100000) << (_j0 - 20)) |
+            result = ((long int)((_i0 & 0x000fffff) | 0x00100000) << (_j0 - 20)) |  /* LCOV_EXCL_LINE */
                      /* 64bit return: right shift amt in [0,10] */
-                     ((long int) i1 << (_j0 - 52));
+                     ((long int) i1 << (_j0 - 52));         /* LCOV_EXCL_LINE */
         } else {
             /* 32bit return: _j0 in [20,30] */
             /* 64bit return: _j0 in [20,51] */
