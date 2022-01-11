@@ -16,9 +16,9 @@ float modff(float x, float *iptr)
     int32_t _i0, _j0;
     uint32_t i;
 
-    assert(iptr != (void*)0);
-    if(iptr == (void*)0) {
-        iptr = &_xi;
+    assert(iptr != (void*)0);   /* LCOV_EXCL_LINE */
+    if(iptr == (void*)0) {      /* LCOV_EXCL_LINE */
+        iptr = &_xi;            /* LCOV_EXCL_LINE */
     }
 
     GET_FLOAT_WORD(_i0, x);

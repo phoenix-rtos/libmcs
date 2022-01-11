@@ -18,9 +18,9 @@ float frexpf(float x, int *eptr)
     int _xexp = 0;
     int32_t hx, ix;
 
-    assert(eptr != (void*)0);
-    if(eptr == (void*)0) {
-        eptr = &_xexp;
+    assert(eptr != (void*)0);   /* LCOV_EXCL_LINE */
+    if(eptr == (void*)0) {      /* LCOV_EXCL_LINE */
+        eptr = &_xexp;          /* LCOV_EXCL_LINE */
     }
 
     GET_FLOAT_WORD(hx, x);

@@ -19,9 +19,9 @@ float remquof(float x, float y, int *quo)
     uint32_t sx, sq;
     float y_half;
 
-    assert(quo != (void*)0);
-    if(quo == (void*)0) {
-        quo = &_quo;
+    assert(quo != (void*)0);    /* LCOV_EXCL_LINE */
+    if(quo == (void*)0) {       /* LCOV_EXCL_LINE */
+        quo = &_quo;            /* LCOV_EXCL_LINE */
     }
     *quo = 0;
 

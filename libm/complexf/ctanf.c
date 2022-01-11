@@ -63,9 +63,9 @@ float complex ctanf(float complex z)
         d = __ctansf(z);
     }
 
-    if (d == 0.0f) {
-        w = CMPLXF(HUGE_VALF, HUGE_VALF);
-        return w;
+    if (d == 0.0f) {                        /* LCOV_EXCL_BR_LINE */
+        w = CMPLXF(HUGE_VALF, HUGE_VALF);   /* LCOV_EXCL_LINE */
+        return w;                           /* LCOV_EXCL_LINE */
     }
 
     /* w = sinf(2.0f * crealf(z)) / d + (sinhf(2.0f * cimagf(z)) / d) * I; */

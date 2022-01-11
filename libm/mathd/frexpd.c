@@ -81,9 +81,9 @@ double frexp(double x, int *eptr)
     int _xexp = 0;
     int32_t hx, ix, lx;
 
-    assert(eptr != (void*)0);
-    if(eptr == (void*)0) {
-        eptr = &_xexp;
+    assert(eptr != (void*)0);   /* LCOV_EXCL_LINE */
+    if(eptr == (void*)0) {      /* LCOV_EXCL_LINE */
+        eptr = &_xexp;          /* LCOV_EXCL_LINE */
     }
 
     EXTRACT_WORDS(hx, lx, x);

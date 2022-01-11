@@ -116,9 +116,9 @@ double remquo(double x, double y, int *quo)
     uint32_t sx, sq, lx, ly;
     double y_half;
 
-    assert(quo != (void*)0);
-    if(quo == (void*)0) {
-        quo = &_quo;
+    assert(quo != (void*)0);    /* LCOV_EXCL_LINE */
+    if(quo == (void*)0) {       /* LCOV_EXCL_LINE */
+        quo = &_quo;            /* LCOV_EXCL_LINE */
     }
     *quo = 0;
 

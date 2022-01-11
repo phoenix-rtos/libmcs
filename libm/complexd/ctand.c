@@ -99,9 +99,9 @@ double complex ctan(double complex z)
         d = __ctans(z);
     }
 
-    if (d == 0.0) {
-        w = CMPLX(HUGE_VAL, HUGE_VAL);
-        return w;
+    if (d == 0.0) {                     /* LCOV_EXCL_BR_LINE */
+        w = CMPLX(HUGE_VAL, HUGE_VAL);  /* LCOV_EXCL_LINE */
+        return w;                       /* LCOV_EXCL_LINE */
     }
 
     /* w = sin(2.0 * creal(z)) / d + (sinh(2.0 * cimag(z)) / d) * I; */

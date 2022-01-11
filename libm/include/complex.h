@@ -186,7 +186,7 @@ float crealf(float complex);
         return (z.f);
     }
 
-    #ifdef __LIBMCS_LONG_DOUBLE_IS_64BITS
+    #ifdef __LIBMCS_LONG_DOUBLE_IS_64BITS               /* LCOV_EXCL_START */
         static inline long double complex CMPLXL(long double x, long double y)
         {
             union {
@@ -196,7 +196,7 @@ float crealf(float complex);
 
             return (z.f);
         }
-    #endif /* #ifdef __LIBMCS_LONG_DOUBLE_IS_64BITS */
+    #endif /* #ifdef __LIBMCS_LONG_DOUBLE_IS_64BITS */  /* LCOV_EXCL_STOP */
 #endif
 
 #ifdef __cplusplus

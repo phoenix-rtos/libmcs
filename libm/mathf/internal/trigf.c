@@ -203,7 +203,7 @@ static inline int __rem_pio2f_internal(float *x, float *y, int e0, int nx)
 
                 /* in case that iq[] does have a contribution, subtract the order of magnitude
                    of this contribution from the complement of z so that z + iq can be computed. */
-                if (carry != 0) {
+                if (carry != 0) {   /* LCOV_EXCL_BR_LINE */
                     z -= scalbnf(one, (int32_t)q0);
                     /* Given the following decimal example of: z = 0.7 and iq = 0.01 for the angle z + iq = 0.71
                        the complements would be z = 1 - z = 0.3 and iq = 0.1 - iq = 0.09
@@ -222,18 +222,18 @@ static inline int __rem_pio2f_internal(float *x, float *y, int e0, int nx)
             }
 
             if (j == 0) { /* need recomputation */
-                for (k = 1; (jk - k >= 0) && (iq[jk - k] == 0); k++) { /* k = no. of terms needed */
+                for (k = 1; (jk - k >= 0) && (iq[jk - k] == 0); k++) { /* k = no. of terms needed */    /* LCOV_EXCL_BR_LINE */
                 }
 
                 /* add q[jz+1] to q[jz+k]
                    don't pull more terms of ipio2[] than available
                    and don't overflow f[] */
                 for (i = jz + 1; i <= jz + k; i++) {
-                    if ((jv + i < 66) &&
-                        (jx + i < 20)) {
+                    if ((jv + i < 66) &&    /* LCOV_EXCL_BR_LINE */
+                        (jx + i < 20)) {    /* LCOV_EXCL_BR_LINE */
                         f[jx + i] = (float) ipio2[jv + i];
                     } else{
-                        exhausted = true;
+                        exhausted = true;   /* LCOV_EXCL_LINE */
                     }
 
                     for (j = 0, fw = 0.0f; j <= jx; j++) {
@@ -250,13 +250,13 @@ static inline int __rem_pio2f_internal(float *x, float *y, int e0, int nx)
     /* The original authors of the algorithm Payne and Hanek estimate the
        amount of needed recomputing to be low. Currently only 2 recomputes
        are observed at most */
-    } while (recompute && !exhausted);
+    } while (recompute && !exhausted);  /* LCOV_EXCL_BR_LINE */
 
     /* chop off zero terms */
     if (z == 0.0f) {
         q0 -= 8;
 
-        for (jz -= 1; jz>=0; --jz) {
+        for (jz -= 1; jz>=0; --jz) {    /* LCOV_EXCL_BR_LINE */
             if (iq[jz]!=0) {
                 break;
             }
