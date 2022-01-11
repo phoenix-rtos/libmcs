@@ -81,7 +81,7 @@ double sqrt(double x)
     if (ix0 <= 0) {
         if (((ix0 & (~sign)) | ix1) == 0) {
             return x;    /* sqrt(+-0) = +-0 */
-        } else if (ix0 < 0) {
+        } else if (ix0 < 0) {                       /* LCOV_EXCL_BR_LINE */
             return __raise_invalid();    /* sqrt(-ve) = sNaN */
         } else {
             /* No action required */
@@ -91,21 +91,21 @@ double sqrt(double x)
     /* normalize x */
     m = (ix0 >> 20);
 
-    if (m == 0) {             /* subnormal x */
-        while (ix0 == 0) {
-            m -= 21;
-            ix0 |= (ix1 >> 11);
-            ix1 <<= 21;
+    if (m == 0) {             /* subnormal x */     /* LCOV_EXCL_LINE */
+        while (ix0 == 0) {                          /* LCOV_EXCL_LINE */
+            m -= 21;                                /* LCOV_EXCL_LINE */
+            ix0 |= (ix1 >> 11);                     /* LCOV_EXCL_LINE */
+            ix1 <<= 21;                             /* LCOV_EXCL_LINE */
         }
 
-        for (i = 0; (ix0 & 0x00100000) == 0; i++) {
-            ix0 <<= 1;
+        for (i = 0; (ix0 & 0x00100000) == 0; i++) { /* LCOV_EXCL_LINE */
+            ix0 <<= 1;                              /* LCOV_EXCL_LINE */
         }
 
-        m -= i - 1;
-        if (i != 0) {
-            ix0 |= (ix1 >> (32 - i));
-            ix1 <<= i;
+        m -= i - 1;                                 /* LCOV_EXCL_LINE */
+        if (i != 0) {                               /* LCOV_EXCL_BR_LINE */
+            ix0 |= (ix1 >> (32 - i));               /* LCOV_EXCL_LINE */
+            ix1 <<= i;                              /* LCOV_EXCL_LINE */
         }
     }
 

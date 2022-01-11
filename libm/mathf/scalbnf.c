@@ -61,13 +61,13 @@ float scalbnf(float x, int n)
         return x;
     }
 
-    if (k < FLT_SMALLEST_EXP) {
+    if (k < FLT_SMALLEST_EXP) {                         /* LCOV_EXCL_BR_LINE */
         return __raise_underflowf(x);        /*underflow*/
     }
 
-    k += 25;                /* subnormal result */
-    SET_FLOAT_WORD(x, (ix & 0x807fffffU) | (k << 23U));
-    return x * twom25;
+    k += 25;                /* subnormal result */      /* LCOV_EXCL_LINE */
+    SET_FLOAT_WORD(x, (ix & 0x807fffffU) | (k << 23U)); /* LCOV_EXCL_LINE */
+    return x * twom25;                                  /* LCOV_EXCL_LINE */
 }
 
 #ifdef __LIBMCS_DOUBLE_IS_32BITS

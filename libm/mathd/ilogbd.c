@@ -89,22 +89,22 @@ int ilogb(double x)
     hx &= 0x7fffffff;
 
     if (hx < 0x00100000) {
-        if ((hx | lx) == 0) {
+        if ((hx | lx) == 0) {                                   /* LCOV_EXCL_BR_LINE */
             (void) __raise_invalid();
             return FP_ILOGB0;    /* ilogb(0) = special case error */
-        } else {         /* subnormal x */
-            if (hx == 0) {
-                for (ix = -1043; lx > 0; lx <<= 1) {
-                    ix -= 1;
+        } else {         /* subnormal x */                      /* LCOV_EXCL_LINE */
+            if (hx == 0) {                                      /* LCOV_EXCL_LINE */
+                for (ix = -1043; lx > 0; lx <<= 1) {            /* LCOV_EXCL_LINE */
+                    ix -= 1;                                    /* LCOV_EXCL_LINE */
                 }
-            } else {
-                for (ix = -1022, hx <<= 11; hx > 0; hx <<= 1) {
-                    ix -= 1;
+            } else {                                            /* LCOV_EXCL_LINE */
+                for (ix = -1022, hx <<= 11; hx > 0; hx <<= 1) { /* LCOV_EXCL_LINE */
+                    ix -= 1;                                    /* LCOV_EXCL_LINE */
                 }
             }
         }
 
-        return ix;
+        return ix;                                              /* LCOV_EXCL_LINE */
     } else if (hx < 0x7ff00000) {
         return (hx >> 20) - 1023;
     } else if (hx > 0x7ff00000) {

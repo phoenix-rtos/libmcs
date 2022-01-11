@@ -69,21 +69,21 @@ double logb(double x)
     hx &= 0x7fffffff;        /* high |x| */
 
     if (hx < 0x00100000) {     /* 0 or subnormal */
-        if ((hx | lx) == 0)  {
+        if ((hx | lx) == 0)  {                                  /* LCOV_EXCL_BR_LINE */
             return __raise_div_by_zero(-1.0);  /* logb(0) = -inf */
         } else {         /* subnormal x */
-            if (hx == 0) {
-                for (ix = -1043; lx > 0; lx <<= 1) {
-                    ix -= 1;
+            if (hx == 0) {                                      /* LCOV_EXCL_LINE */
+                for (ix = -1043; lx > 0; lx <<= 1) {            /* LCOV_EXCL_LINE */
+                    ix -= 1;                                    /* LCOV_EXCL_LINE */
                 }
-            } else {
-                for (ix = -1022, hx <<= 11; hx > 0; hx <<= 1) {
-                    ix -= 1;
+            } else {                                            /* LCOV_EXCL_LINE */
+                for (ix = -1022, hx <<= 11; hx > 0; hx <<= 1) { /* LCOV_EXCL_LINE */
+                    ix -= 1;                                    /* LCOV_EXCL_LINE */
                 }
             }
         }
 
-        return (double) ix;
+        return (double) ix;                                     /* LCOV_EXCL_LINE */
     } else if (hx < 0x7ff00000) {
         return (hx >> 20) - 1023;    /* normal # */
     } else {

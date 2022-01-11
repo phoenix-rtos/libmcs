@@ -20,13 +20,13 @@ float scalblnf(float x, long int n)
     k = (ix & 0x7f800000) >> 23;    /* extract exponent */
 
     if (k == 0) {              /* 0 or subnormal x */
-        if ((ix & 0x7fffffff) == 0) {
+        if ((ix & 0x7fffffff) == 0) {       /* LCOV_EXCL_BR_LINE */
             return x;    /* +-0 */
         }
 
-        x *= two25;
-        GET_FLOAT_WORD(ix, x);
-        k = ((ix & 0x7f800000) >> 23) - 25;
+        x *= two25;                         /* LCOV_EXCL_LINE */
+        GET_FLOAT_WORD(ix, x);              /* LCOV_EXCL_LINE */
+        k = ((ix & 0x7f800000) >> 23) - 25; /* LCOV_EXCL_LINE */
     }
 
     if (k == 0xff) {

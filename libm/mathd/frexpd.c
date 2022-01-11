@@ -94,11 +94,11 @@ double frexp(double x, int *eptr)
         return x + x;           /* 0,inf,nan */
     }
 
-    if (ix < 0x00100000) {      /* subnormal */
-        x *= two54;
-        GET_HIGH_WORD(hx, x);
-        ix = hx & 0x7fffffff;
-        *eptr = -54;
+    if (ix < 0x00100000) {      /* subnormal */ /* LCOV_EXCL_BR_LINE */
+        x *= two54;                             /* LCOV_EXCL_LINE */
+        GET_HIGH_WORD(hx, x);                   /* LCOV_EXCL_LINE */
+        ix = hx & 0x7fffffff;                   /* LCOV_EXCL_LINE */
+        *eptr = -54;                            /* LCOV_EXCL_LINE */
     }
 
     *eptr += (ix >> 20) - 1022;

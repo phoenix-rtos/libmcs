@@ -303,10 +303,10 @@ double pow(double x, double y)
         n = 0;
 
         /* take care subnormal number */
-        if (ix < 0x00100000) {
-            ax *= two53;
-            n -= 53;
-            GET_HIGH_WORD(ix, ax);
+        if (ix < 0x00100000) {      /* LCOV_EXCL_BR_LINE */
+            ax *= two53;            /* LCOV_EXCL_LINE */
+            n -= 53;                /* LCOV_EXCL_LINE */
+            GET_HIGH_WORD(ix, ax);  /* LCOV_EXCL_LINE */
         }
 
         n  += ((ix) >> 20) - 0x3ff;
@@ -381,7 +381,7 @@ double pow(double x, double y)
         if (((j - 0xc090cc00U) | i) != 0) {      /* z < -1075 */
             return __raise_underflow(sign);
         } else {
-            if (p_l <= z - p_h) {
+            if (p_l <= z - p_h) {   /* LCOV_EXCL_BR_LINE */
                 return __raise_underflow(sign);
             }
         }

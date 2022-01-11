@@ -94,16 +94,16 @@ double scalbn(double x, int n)
     k = (hx & 0x7ff00000) >> 20;  /* extract exponent */
 
     if (k == 0) {                 /* 0 or subnormal x */
-        if ((lx | (hx & 0x7fffffff)) == 0) {
+        if ((lx | (hx & 0x7fffffff)) == 0) {                /* LCOV_EXCL_BR_LINE */
             return x;             /* +-0 */
         }
 
-        x *= two54;
-        GET_HIGH_WORD(hx, x);
-        k = ((hx & 0x7ff00000) >> 20) - 54;
+        x *= two54;                                         /* LCOV_EXCL_LINE */
+        GET_HIGH_WORD(hx, x);                               /* LCOV_EXCL_LINE */
+        k = ((hx & 0x7ff00000) >> 20) - 54;                 /* LCOV_EXCL_LINE */
 
-        if (n < -50000) {
-            return __raise_underflow(x);    /*underflow*/
+        if (n < -50000) {                                   /* LCOV_EXCL_LINE */
+            return __raise_underflow(x);    /*underflow*/   /* LCOV_EXCL_LINE */
         }
     }
 

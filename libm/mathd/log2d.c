@@ -82,7 +82,7 @@ double log2(double x)
             return __raise_div_by_zero(-1.0);     /* log(+-0)=-inf */
         }
 
-        if (hx < 0) {
+        if (hx < 0) {   /* LCOV_EXCL_BR_LINE */
             if (isnan(x)) {
                 return x + x;
             } else {
@@ -90,9 +90,9 @@ double log2(double x)
             }
         }
 
-        k -= 54;
-        x *= two54;                     /* subnormal number, scale up x */
-        GET_HIGH_WORD(hx, x);
+        k -= 54;                                                            /* LCOV_EXCL_LINE */
+        x *= two54;                     /* subnormal number, scale up x */  /* LCOV_EXCL_LINE */
+        GET_HIGH_WORD(hx, x);                                               /* LCOV_EXCL_LINE */
     }
 
     if (hx >= 0x7ff00000) {             /* x = NaN/+-Inf */

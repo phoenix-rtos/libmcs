@@ -72,18 +72,18 @@ float fmodf(float x, float y)
     }
 
     /* set up {hx,lx}, {hy,ly} and align y to x */
-    if (ix >= -126) {
+    if (ix >= -126) {       /* LCOV_EXCL_BR_LINE */
         hx = 0x00800000 | (0x007fffff & hx);
     } else {      /* subnormal x, shift x to normal */
-        n = -126 - ix;
-        hx = hx << n;
+        n = -126 - ix;      /* LCOV_EXCL_LINE */
+        hx = hx << n;       /* LCOV_EXCL_LINE */
     }
 
-    if (iy >= -126) {
+    if (iy >= -126) {       /* LCOV_EXCL_BR_LINE */
         hy = 0x00800000 | (0x007fffff & hy);
     } else {      /* subnormal y, shift y to normal */
-        n = -126 - iy;
-        hy = hy << n;
+        n = -126 - iy;      /* LCOV_EXCL_LINE */
+        hy = hy << n;       /* LCOV_EXCL_LINE */
     }
 
     /* fix point fmod */

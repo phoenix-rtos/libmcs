@@ -136,15 +136,15 @@ double hypot(double x, double y)
             uint32_t low;
             GET_LOW_WORD(low, b);
 
-            if ((hb | low) == 0) {
+            if ((hb | low) == 0) {                              /* LCOV_EXCL_BR_LINE */
                 return a;
             }
 
-            t1 = 0;
-            SET_HIGH_WORD(t1, 0x7fd00000);   /* t1=2^1022 */
-            b *= t1;
-            a *= t1;
-            k -= 1022;
+            t1 = 0;                                             /* LCOV_EXCL_LINE */
+            SET_HIGH_WORD(t1, 0x7fd00000);   /* t1=2^1022 */    /* LCOV_EXCL_LINE */
+            b *= t1;                                            /* LCOV_EXCL_LINE */
+            a *= t1;                                            /* LCOV_EXCL_LINE */
+            k -= 1022;                                          /* LCOV_EXCL_LINE */
         } else {        /* scale a and b by 2^600 */
             ha += 0x25800000;     /* a *= 2^600 */
             hb += 0x25800000;     /* b *= 2^600 */

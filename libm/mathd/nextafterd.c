@@ -92,7 +92,7 @@ double nextafter(double x, double y)
     } else if (hx == hy && lx == ly) {
         return y;                       /* x == y, return y */
     } else if ((ix | lx) == 0) {        /* x == 0 */
-        if (ix == (hy & 0x7fffffff) && ly == 0U) {
+        if (ix == (hy & 0x7fffffff) && ly == 0U) {  /* LCOV_EXCL_BR_LINE */
             return y;                   /* x == y, return y */
         }
 #ifdef __LIBMCS_FPU_DAZ

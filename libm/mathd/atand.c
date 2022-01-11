@@ -102,7 +102,7 @@ double atan(double x)
         GET_LOW_WORD(low, x);
 
         if (ix > 0x7ff00000 ||
-            (ix == 0x7ff00000 && (low != 0))) {
+            (ix == 0x7ff00000 && (low != 0))) {     /* LCOV_EXCL_BR_LINE */
             return x + x;              /* NaN                  */
         }
 

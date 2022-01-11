@@ -320,8 +320,8 @@ float powf(float x, float y)
     GET_FLOAT_WORD(j, z);
     j += (n << 23);
 
-    if ((j >> 23) <= 0) {
-        z = scalbnf(z, (int32_t)n);    /* subnormal output */
+    if ((j >> 23) <= 0) {                                           /* LCOV_EXCL_BR_LINE */
+        z = scalbnf(z, (int32_t)n);    /* subnormal output */       /* LCOV_EXCL_LINE */
     } else {
         SET_FLOAT_WORD(z, j);
     }

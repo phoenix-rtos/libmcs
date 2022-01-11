@@ -92,11 +92,11 @@ double cbrt(double x)
     SET_HIGH_WORD(x, hx);   /* x <- |x| */
 
     /* rough cbrt to 5 bits */
-    if (hx < 0x00100000) {    /* subnormal number */
-        SET_HIGH_WORD(t, 0x43500000);   /* set t= 2**54 */
-        t *= x;
-        GET_HIGH_WORD(high, t);
-        SET_HIGH_WORD(t, high / 3 + B2);
+    if (hx < 0x00100000) {    /* subnormal number */        /* LCOV_EXCL_BR_LINE */
+        SET_HIGH_WORD(t, 0x43500000);   /* set t= 2**54 */  /* LCOV_EXCL_LINE */
+        t *= x;                                             /* LCOV_EXCL_LINE */
+        GET_HIGH_WORD(high, t);                             /* LCOV_EXCL_LINE */
+        SET_HIGH_WORD(t, high / 3 + B2);                    /* LCOV_EXCL_LINE */
     } else {
         SET_HIGH_WORD(t, hx / 3 + B1);
     }

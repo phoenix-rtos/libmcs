@@ -115,7 +115,7 @@ double fmod(double x, double y)
 
     /* purge off exception values */
     if (hx >= 0x7ff00000 || hy >= 0x7ff00000) { /* x or y is +-Inf/NaN */
-        if (hx == 0x7ff00000 && lx == 0) {      /* x is +-Inf */
+        if (hx == 0x7ff00000 && lx == 0) {      /* x is +-Inf */ /* LCOV_EXCL_BR_LINE */
             return __raise_invalid();
         } else if (isnan(x) || isnan(y)) {      /* x or y is NaN */
             return x + y;
@@ -139,14 +139,14 @@ double fmod(double x, double y)
     }
 
     /* determine ix = ilogb(x) */
-    if (hx < 0x00100000) { /* subnormal x */
-        if (hx == 0) {
-            for (ix = -1043, i = lx; i > 0; i <<= 1) {
-                ix -= 1;
+    if (hx < 0x00100000) { /* subnormal x */                    /* LCOV_EXCL_BR_LINE */
+        if (hx == 0) {                                          /* LCOV_EXCL_LINE */
+            for (ix = -1043, i = lx; i > 0; i <<= 1) {          /* LCOV_EXCL_LINE */
+                ix -= 1;                                        /* LCOV_EXCL_LINE */
             }
-        } else {
-            for (ix = -1022, i = (hx << 11); i > 0; i <<= 1) {
-                ix -= 1;
+        } else {                                                /* LCOV_EXCL_LINE */
+            for (ix = -1022, i = (hx << 11); i > 0; i <<= 1) {  /* LCOV_EXCL_LINE */
+                ix -= 1;                                        /* LCOV_EXCL_LINE */
             }
         }
     } else {
@@ -154,14 +154,14 @@ double fmod(double x, double y)
     }
 
     /* determine iy = ilogb(y) */
-    if (hy < 0x00100000) { /* subnormal y */
-        if (hy == 0) {
-            for (iy = -1043, i = ly; i > 0; i <<= 1) {
-                iy -= 1;
+    if (hy < 0x00100000) { /* subnormal y */                    /* LCOV_EXCL_BR_LINE */
+        if (hy == 0) {                                          /* LCOV_EXCL_LINE */
+            for (iy = -1043, i = ly; i > 0; i <<= 1) {          /* LCOV_EXCL_LINE */
+                iy -= 1;                                        /* LCOV_EXCL_LINE */
             }
-        } else {
-            for (iy = -1022, i = (hy << 11); i > 0; i <<= 1) {
-                iy -= 1;
+        } else {                                                /* LCOV_EXCL_LINE */
+            for (iy = -1022, i = (hy << 11); i > 0; i <<= 1) {  /* LCOV_EXCL_LINE */
+                iy -= 1;                                        /* LCOV_EXCL_LINE */
             }
         }
     } else {
@@ -169,31 +169,31 @@ double fmod(double x, double y)
     }
 
     /* set up {hx,lx}, {hy,ly} and align y to x */
-    if (ix >= -1022) {
-        hx = 0x00100000 | (0x000fffff & hx);
-    } else {      /* subnormal x, shift x to normal */
-        n = -1022 - ix;
+    if (ix >= -1022) {                                  /* LCOV_EXCL_BR_LINE */
+        hx = 0x00100000 | (0x000fffff & hx);            /* LCOV_EXCL_LINE */
+    } else {      /* subnormal x, shift x to normal */  /* LCOV_EXCL_LINE */
+        n = -1022 - ix;                                 /* LCOV_EXCL_LINE */
 
-        if (n <= 31) {
-            hx = (hx << n) | (lx >> (32 - n));
-            lx <<= n;
-        } else {
-            hx = lx << (n - 32);
-            lx = 0;
+        if (n <= 31) {                                  /* LCOV_EXCL_LINE */
+            hx = (hx << n) | (lx >> (32 - n));          /* LCOV_EXCL_LINE */
+            lx <<= n;                                   /* LCOV_EXCL_LINE */
+        } else {                                        /* LCOV_EXCL_LINE */
+            hx = lx << (n - 32);                        /* LCOV_EXCL_LINE */
+            lx = 0;                                     /* LCOV_EXCL_LINE */
         }
     }
 
-    if (iy >= -1022) {
-        hy = 0x00100000 | (0x000fffff & hy);
-    } else {      /* subnormal y, shift y to normal */
-        n = -1022 - iy;
+    if (iy >= -1022) {                                  /* LCOV_EXCL_BR_LINE */
+        hy = 0x00100000 | (0x000fffff & hy);            /* LCOV_EXCL_LINE */
+    } else {      /* subnormal y, shift y to normal */  /* LCOV_EXCL_LINE */
+        n = -1022 - iy;                                 /* LCOV_EXCL_LINE */
 
-        if (n <= 31) {
-            hy = (hy << n) | (ly >> (32 - n));
-            ly <<= n;
-        } else {
-            hy = ly << (n - 32);
-            ly = 0;
+        if (n <= 31) {                                  /* LCOV_EXCL_LINE */
+            hy = (hy << n) | (ly >> (32 - n));          /* LCOV_EXCL_LINE */
+            ly <<= n;                                   /* LCOV_EXCL_LINE */
+        } else {                                        /* LCOV_EXCL_LINE */
+            hy = ly << (n - 32);                        /* LCOV_EXCL_LINE */
+            ly = 0;                                     /* LCOV_EXCL_LINE */
         }
     }
 
