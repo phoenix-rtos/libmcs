@@ -90,11 +90,11 @@ double log10(double x)
             } else {
                 return __raise_invalid();   /* log(-#) = NaN */
             }
+        } else {
+            k -= 54;
+            x *= two54;                 /* subnormal number, scale up x */
+            GET_HIGH_WORD(hx, x);
         }
-
-        k -= 54;
-        x *= two54;                     /* subnormal number, scale up x */
-        GET_HIGH_WORD(hx, x);
     }
 
     if (hx >= 0x7ff00000) {             /* x = NaN/+-Inf */
