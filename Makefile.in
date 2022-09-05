@@ -141,7 +141,7 @@ SRC =   libm/common/signgam.c \
         libm/mathd/scalbnd.c \
         libm/mathd/sind.c \
         libm/mathd/sinhd.c \
-        libm/mathd/sqrtd.c \
+        libm/machine/sparc_v8/mathd/sqrtd.c \
         libm/mathd/tand.c \
         libm/mathd/tanhd.c \
         libm/mathd/tgammad.c \
@@ -205,7 +205,7 @@ SRC =   libm/common/signgam.c \
         libm/mathf/scalbnf.c \
         libm/mathf/sinf.c \
         libm/mathf/sinhf.c \
-        libm/mathf/sqrtf.c \
+        libm/machine/sparc_v8/mathf/sqrtf.c \
         libm/mathf/tanf.c \
         libm/mathf/tanhf.c \
         libm/mathf/tgammaf.c \
