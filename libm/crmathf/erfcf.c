@@ -211,7 +211,7 @@ erfcf_asympt (float x0)
 float
 erfcf (float x)
 {
-  /* deal with NaN here */
+  if (isnan(x)) return __builtin_nanf("1");
 
   double xx = (x >= 0) ? x : -x, y;
 
