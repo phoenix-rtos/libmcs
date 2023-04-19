@@ -82,22 +82,22 @@ CSRC =  libm/complexd/cabsd.c \
 
 SRC =   libm/common/signgam.c \
         libm/common/tools.c \
-        libm/mathd/acosd.c \
+        libm/crmathd/acos.c \
         libm/mathd/acoshd.c \
-        libm/mathd/asind.c \
+        libm/crmathd/asin.c \
         libm/mathd/asinhd.c \
         libm/mathd/atan2d.c \
-        libm/mathd/atand.c \
+        libm/crmathd/atan.c \
         libm/mathd/atanhd.c \
-        libm/mathd/cbrtd.c \
+        libm/crmathd/cbrt.c \
         libm/mathd/ceild.c \
         libm/mathd/copysignd.c \
         libm/mathd/cosd.c \
-        libm/mathd/coshd.c \
+        libm/crmathd/cosh.c \
         libm/mathd/erfcd.c \
         libm/mathd/erfd.c \
-        libm/mathd/exp2d.c \
-        libm/mathd/expd.c \
+        libm/crmathd/exp2.c \
+        libm/crmathd/exp.c \
         libm/mathd/expm1d.c \
         libm/mathd/fabsd.c \
         libm/mathd/fdimd.c \
@@ -107,7 +107,7 @@ SRC =   libm/common/signgam.c \
         libm/mathd/fmind.c \
         libm/mathd/fmodd.c \
         libm/mathd/frexpd.c \
-        libm/mathd/hypotd.c \
+        libm/crmathd/hypot.c \
         libm/mathd/ilogbd.c \
         libm/mathd/internal/fpclassifyd.c \
         libm/mathd/internal/gammad.c \
@@ -120,11 +120,11 @@ SRC =   libm/common/signgam.c \
         libm/mathd/lgammad.c \
         libm/mathd/llrintd.c \
         libm/mathd/llroundd.c \
-        libm/mathd/log10d.c \
-        libm/mathd/log1pd.c \
-        libm/mathd/log2d.c \
+        libm/crmathd/log10.c \
+        libm/crmathd/log1p.c \
+        libm/crmathd/log2.c \
         libm/mathd/logbd.c \
-        libm/mathd/logd.c \
+        libm/crmathd/log.c \
         libm/mathd/lrintd.c \
         libm/mathd/lroundd.c \
         libm/mathd/modfd.c \
@@ -140,32 +140,32 @@ SRC =   libm/common/signgam.c \
         libm/mathd/scalblnd.c \
         libm/mathd/scalbnd.c \
         libm/mathd/sind.c \
-        libm/mathd/sinhd.c \
+        libm/crmathd/sinh.c \
         libm/mathd/sqrtd.c \
         libm/mathd/tand.c \
-        libm/mathd/tanhd.c \
+        libm/crmathd/tanh.c \
         libm/mathd/tgammad.c \
         libm/mathd/truncd.c \
         libm/mathd/y0d.c \
         libm/mathd/y1d.c \
         libm/mathd/ynd.c \
-        libm/mathf/acosf.c \
-        libm/mathf/acoshf.c \
-        libm/mathf/asinf.c \
-        libm/mathf/asinhf.c \
-        libm/mathf/atan2f.c \
-        libm/mathf/atanf.c \
-        libm/mathf/atanhf.c \
-        libm/mathf/cbrtf.c \
+        libm/crmathf/acosf.c \
+        libm/crmathf/acoshf.c \
+        libm/crmathf/asinf.c \
+        libm/crmathf/asinhf.c \
+        libm/crmathf/atan2f.c \
+        libm/crmathf/atanf.c \
+        libm/crmathf/atanhf.c \
+        libm/crmathf/cbrtf.c \
         libm/mathf/ceilf.c \
         libm/mathf/copysignf.c \
-        libm/mathf/cosf.c \
-        libm/mathf/coshf.c \
-        libm/mathf/erfcf.c \
-        libm/mathf/erff.c \
-        libm/mathf/exp2f.c \
-        libm/mathf/expf.c \
-        libm/mathf/expm1f.c \
+        libm/crmathf/cosf.c \
+        libm/crmathf/coshf.c \
+        libm/crmathf/erfcf.c \
+        libm/crmathf/erff.c \
+        libm/crmathf/exp2f.c \
+        libm/crmathf/expf.c \
+        libm/crmathf/expm1f.c \
         libm/mathf/fabsf.c \
         libm/mathf/fdimf.c \
         libm/mathf/floorf.c \
@@ -174,7 +174,7 @@ SRC =   libm/common/signgam.c \
         libm/mathf/fminf.c \
         libm/mathf/fmodf.c \
         libm/mathf/frexpf.c \
-        libm/mathf/hypotf.c \
+        libm/crmathf/hypotf.c \
         libm/mathf/ilogbf.c \
         libm/mathf/internal/fpclassifyf.c \
         libm/mathf/internal/gammaf.c \
@@ -184,11 +184,11 @@ SRC =   libm/common/signgam.c \
         libm/mathf/lgammaf.c \
         libm/mathf/llrintf.c \
         libm/mathf/llroundf.c \
-        libm/mathf/log10f.c \
-        libm/mathf/log1pf.c \
-        libm/mathf/log2f.c \
+        libm/crmathf/log10f.c \
+        libm/crmathf/log1pf.c \
+        libm/crmathf/log2f.c \
         libm/mathf/logbf.c \
-        libm/mathf/logf.c \
+        libm/crmathf/logf.c \
         libm/mathf/lrintf.c \
         libm/mathf/lroundf.c \
         libm/mathf/modff.c \
@@ -196,18 +196,18 @@ SRC =   libm/common/signgam.c \
         libm/mathf/nearbyintf.c \
         libm/mathf/nextafterf.c \
         libm/mathf/nexttowardf.c \
-        libm/mathf/powf.c \
+        libm/crmathf/powf.c \
         libm/mathf/remainderf.c \
         libm/mathf/remquof.c \
         libm/mathf/rintf.c \
         libm/mathf/roundf.c \
         libm/mathf/scalblnf.c \
         libm/mathf/scalbnf.c \
-        libm/mathf/sinf.c \
-        libm/mathf/sinhf.c \
+        libm/crmathf/sinf.c \
+        libm/crmathf/sinhf.c \
         libm/mathf/sqrtf.c \
-        libm/mathf/tanf.c \
-        libm/mathf/tanhf.c \
+        libm/crmathf/tanf.c \
+        libm/crmathf/tanhf.c \
         libm/mathf/tgammaf.c \
         libm/mathf/truncf.c
 
