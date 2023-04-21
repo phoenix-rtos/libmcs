@@ -102,7 +102,6 @@ SRC =   libm/common/signgam.c \
         libm/mathd/fabsd.c \
         libm/mathd/fdimd.c \
         libm/mathd/floord.c \
-        libm/mathd/fmad.c \
         libm/mathd/fmaxd.c \
         libm/mathd/fmind.c \
         libm/mathd/fmodd.c \
@@ -169,7 +168,6 @@ SRC =   libm/common/signgam.c \
         libm/mathf/fabsf.c \
         libm/mathf/fdimf.c \
         libm/mathf/floorf.c \
-        libm/mathf/fmaf.c \
         libm/mathf/fmaxf.c \
         libm/mathf/fminf.c \
         libm/mathf/fmodf.c \
