@@ -377,7 +377,7 @@ static inline double __raise_inexact(double x) {
 }
 
 static inline float __raise_invalidf(void) {
-    double r = __forced_calculationf(0.0f / 0.0f);
+    float r = __forced_calculationf(0.0f / 0.0f);
     return r;
 }
 static inline float __raise_div_by_zerof(float x) {

@@ -47,16 +47,16 @@ float atan2f(float y, float x)
             return y;                       /* atan(+-0,+anything)=+-0 */
 
         case 2:
-            return  __raise_inexact(pi);    /* atan(+0,-anything) = pi */
+            return  __raise_inexactf(pi);    /* atan(+0,-anything) = pi */
 
         case 3:
-            return -__raise_inexact(pi);    /* atan(-0,-anything) =-pi */
+            return -__raise_inexactf(pi);    /* atan(-0,-anything) =-pi */
         }
     }
 
     /* when x = 0 */
     if (FLT_UWORD_IS_ZERO(ix)) {
-        return (hy < 0) ? -__raise_inexact(pi_o_2) : __raise_inexact(pi_o_2);
+        return (hy < 0) ? -__raise_inexactf(pi_o_2) : __raise_inexactf(pi_o_2);
     }
 
     /* when x is INF */
@@ -65,16 +65,16 @@ float atan2f(float y, float x)
             switch (m) {
             default:    /* FALLTHRU */
             case 0:
-                return  __raise_inexact(pi_o_4);        /* atan(+INF,+INF) */
+                return  __raise_inexactf(pi_o_4);        /* atan(+INF,+INF) */
 
             case 1:
-                return -__raise_inexact(pi_o_4);        /* atan(-INF,+INF) */
+                return -__raise_inexactf(pi_o_4);        /* atan(-INF,+INF) */
 
             case 2:
-                return  __raise_inexact(3.0f * pi_o_4); /*atan(+INF,-INF)*/
+                return  __raise_inexactf(3.0f * pi_o_4); /*atan(+INF,-INF)*/
 
             case 3:
-                return -__raise_inexact(3.0f * pi_o_4); /*atan(-INF,-INF)*/
+                return -__raise_inexactf(3.0f * pi_o_4); /*atan(-INF,-INF)*/
             }
         } else {
             switch (m) {
@@ -86,24 +86,24 @@ float atan2f(float y, float x)
                 return -zero;                           /* atan(-...,+INF) */
 
             case 2:
-                return  __raise_inexact(pi);            /* atan(+...,-INF) */
+                return  __raise_inexactf(pi);            /* atan(+...,-INF) */
 
             case 3:
-                return -__raise_inexact(pi);            /* atan(-...,-INF) */
+                return -__raise_inexactf(pi);            /* atan(-...,-INF) */
             }
         }
     }
 
     /* when y is INF */
     if (FLT_UWORD_IS_INFINITE(iy)) {
-        return (hy < 0) ? -__raise_inexact(pi_o_2) : __raise_inexact(pi_o_2);
+        return (hy < 0) ? -__raise_inexactf(pi_o_2) : __raise_inexactf(pi_o_2);
     }
 
     /* compute y/x */
     k = (iy - ix) >> 23;
 
     if (k > 26) {
-        z = __raise_inexact(pi_o_2);    /* |y/x| >  2**26 */
+        z = __raise_inexactf(pi_o_2);    /* |y/x| >  2**26 */
         m &= 1;
     } else if (hx < 0 && k < -26) {
         z = 0.0f;    /* 0 > |y|/x > -2**26 */
