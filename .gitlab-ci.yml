@@ -1,5 +1,6 @@
 stages:
     - setup
+    - check
     - doc
     - pdf
     - pages
@@ -17,6 +18,19 @@ setup:
     script:
         - docker build -t $CI_REGISTRY_IMAGE -f Dockerfile .
         - docker push $CI_REGISTRY_IMAGE
+
+mcdc-check:
+  stage: check
+  image:
+    name: registry.gitlab.com/gtd-gmbh/mcdc-checker/mcdc-checker
+    entrypoint: [""]
+  script:
+    - echo "#define __LIBMCS_WANT_COMPLEX" > ./libm/include/config.h
+    - find -regex ".*\.[ch]" | grep -v "lint\|tgmath.h\|fenv.h" | mcdc_checker -j report.json -
+  artifacts:
+    reports:
+      codequality: report.json
+  needs: []
 
 doc:
     stage: doc
