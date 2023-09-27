@@ -22,20 +22,27 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-Tested on x86_64-linux with and without FMA (-march=native).
 */
 
 #include <stdint.h>
 #include <fenv.h>
 #include <errno.h>
 
-/* __builtin_roundeven was introduced in gcc 10 */
-#if defined(__GNUC__) && __GNUC__ >= 10
+// Warning: clang also defines __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
+
+#pragma STDC FENV_ACCESS ON
+
+/* __builtin_roundeven was introduced in gcc 10:
+   https://gcc.gnu.org/gcc-10/changes.html,
+   and in clang 17 */
+#if (defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)
 #define HAS_BUILTIN_ROUNDEVEN
 #endif
 
-#if (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__))
+#if !defined(HAS_BUILTIN_ROUNDEVEN) && (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__))
 inline double __builtin_roundeven(double x){
    double ix;
 #if defined __AVX__
@@ -91,23 +98,17 @@ static double __attribute__((noinline)) rbig(uint32_t u, int *q){
   u64 p3h = p3>>64, p3l = p3, p2l = p2, p1l = p1;
   long a;
   int k = e-127, s = k-23;
-  if(s<0){
-    /* Negative shifts are undefined behaviour: p3l>>-s seems to work
-       with gcc, but does not with clang. */
-    i =        p3h>>(64-s);
-    a = p3h<<s|p3l>>(64-s);
-  } else if(s==0) {
-    i = p3h;
-    a = p3l;
-  } else if(s<64) {
+  /* in tanf(), rbig() is called in the case 127+28 <= e < 0xff
+     thus 155 <= e <= 254, which yields 28 <= k <= 127 and 5 <= s <= 104 */
+  if (s<64) {
     i = p3h<<s|p3l>>(64-s);
     a = p3l<<s|p2l>>(64-s);
   } else if(s==64) {
     i = p3l;
     a = p2l;
   } else { /* s > 64 */
-    i = p3l<<s|p2l>>(128-s);
-    a = p2l<<s|p1l>>(128-s);
+    i = p3l<<(s-64)|p2l>>(128-s);
+    a = p2l<<(s-64)|p1l>>(128-s);
   }
   int sgn = u; sgn >>= 31;
   long sm = a>>63;

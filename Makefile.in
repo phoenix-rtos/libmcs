@@ -83,19 +83,19 @@ CSRC =  libm/complexd/cabsd.c \
 SRC =   libm/common/signgam.c \
         libm/common/tools.c \
         libm/crmathd/acos.c \
-        libm/mathd/acoshd.c \
+        libm/crmathd/acosh.c \
         libm/crmathd/asin.c \
-        libm/mathd/asinhd.c \
+        libm/crmathd/asinh.c \
         libm/mathd/atan2d.c \
         libm/crmathd/atan.c \
-        libm/mathd/atanhd.c \
+        libm/crmathd/atanh.c \
         libm/crmathd/cbrt.c \
         libm/mathd/ceild.c \
         libm/mathd/copysignd.c \
-        libm/mathd/cosd.c \
+        libm/crmathd/cos.c \
         libm/crmathd/cosh.c \
-        libm/mathd/erfcd.c \
-        libm/mathd/erfd.c \
+        libm/crmathd/erfc.c \
+        libm/crmathd/erf.c \
         libm/crmathd/exp2.c \
         libm/crmathd/exp.c \
         libm/mathd/expm1d.c \
@@ -131,17 +131,17 @@ SRC =   libm/common/signgam.c \
         libm/mathd/nearbyintd.c \
         libm/mathd/nextafterd.c \
         libm/mathd/nexttowardd.c \
-        libm/mathd/powd.c \
+        libm/crmathd/pow.c \
         libm/mathd/remainderd.c \
         libm/mathd/remquod.c \
         libm/mathd/rintd.c \
         libm/mathd/roundd.c \
         libm/mathd/scalblnd.c \
         libm/mathd/scalbnd.c \
-        libm/mathd/sind.c \
+        libm/crmathd/sin.c \
         libm/crmathd/sinh.c \
         libm/mathd/sqrtd.c \
-        libm/mathd/tand.c \
+        libm/crmathd/tan.c \
         libm/crmathd/tanh.c \
         libm/mathd/tgammad.c \
         libm/mathd/truncd.c \

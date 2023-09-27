@@ -28,7 +28,14 @@ SOFTWARE.
 #include <stdint.h>
 #include <errno.h>
 #include <fenv.h>
-#include <math.h>
+#include <math.h> // needed to provide sinpi() since glibc does not have it
+
+// Warning: clang also defines __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
+
+#pragma STDC FENV_ACCESS ON
 
 typedef union {double f; uint64_t u;} b64u64_u;
 
@@ -372,7 +379,9 @@ void sincosn2(int s, double *sh, double *sl, double *ch, double *cl){
   *sl = __builtin_copysign(1.0, sgn[ss])*tsl;
 }
 
-/* just to compile since glibc does not have it*/
+#ifndef __INTEL_CLANG_COMPILER // icx provides this function
+/* just to compile since glibc does not provide this function */
 double sinpi(double x){
-  return sin(x);
+  return sin(M_PI*x);
 }
+#endif

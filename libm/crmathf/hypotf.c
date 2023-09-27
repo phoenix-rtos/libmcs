@@ -24,13 +24,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-  Compile by the command
-  gcc -O3 -march=native -ffinite-math-only -frounding-math -fno-math-errno -W -Wall -c hypotf.c
-*/
-
 #include <stdint.h>
 #include <errno.h>
+
+// Warning: clang also defines __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
+
+#pragma STDC FENV_ACCESS ON
 
 typedef union {float f; uint32_t u;} b32u32_u;
 typedef union {double f; uint64_t u;} b64u64_u;
@@ -51,7 +53,7 @@ float hypotf(float x, float y){
   b64u64_u t = {.f = r};
   float c = r;
   if(t.u>0x47efffffe0000000ul){
-    errno = ERANGE;
+    if(c>0x1.fffffep127f) errno = ERANGE;
     return c;
   }
   if(__builtin_expect(((t.u + 1)&0xfffffff) > 2, 1)) return c;
