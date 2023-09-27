@@ -10,6 +10,7 @@ extern "C"{
 
 #define FE_TONEAREST  0
 #define FE_INVALID    1
+#define FE_DIVBYZERO  4
 #define FE_DOWNWARD   1024
 #define FE_UPWARD     2048
 #define FE_TOWARDZERO 3072
