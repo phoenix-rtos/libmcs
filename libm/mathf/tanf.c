@@ -28,13 +28,13 @@ T[]    =  {
 static inline float __tanf(float x, float y, int iy)
 {
     float z, r, v, w, s;
-    int32_t ix, hx;
+    uint32_t ix, hx;
 
     GET_FLOAT_WORD(hx, x);
-    ix = hx & 0x7fffffff;  /* high word of |x| */
+    ix = hx & 0x7fffffffU;  /* high word of |x| */
 
-    if (ix >= 0x3f2ca140) {          /* |x|>=0.6744 */
-        if (hx < 0) {
+    if (ix >= 0x3f2ca140U) {          /* |x|>=0.6744 */
+      if ((int32_t)hx < 0) {
             x = -x;
             y = -y;
         }
@@ -58,9 +58,9 @@ static inline float __tanf(float x, float y, int iy)
     r += T[0] * s;
     w = x + r;
 
-    if (ix >= 0x3f2ca140) {
+    if (ix >= 0x3f2ca140U) {
         v = (float)iy;
-        return (float)(1 - ((hx >> 30) & 2)) * (v - 2.0f * (x - (w * w / (w + v) - r)));
+        return (float)(1 - (int32_t)((hx >> 30U) & 2U)) * (v - 2.0f * (x - (w * w / (w + v) - r)));
     }
 
     if (iy == 1) {
@@ -69,7 +69,7 @@ static inline float __tanf(float x, float y, int iy)
         /* if allow error up to 2 ulp, simply return -1.0/(x+r) here */
         /*  compute -1.0/(x+r) accurately */
         float a, t;
-        int32_t i;
+        uint32_t i;
         z  = w;
         GET_FLOAT_WORD(i, z);
         SET_FLOAT_WORD(z, i & 0xfffff000U);
@@ -89,15 +89,15 @@ float tanf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float y[2], z = 0.0f;
-    int32_t n, ix;
+    uint32_t n, ix;
 
     GET_FLOAT_WORD(ix, x);
 
     /* |x| ~< pi/4 */
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix <= 0x3f490fda) {
-        if(ix < 0x39800000) {        /* |x| < 2**-12 */
+    if (ix <= 0x3f490fdaU) {
+        if (ix < 0x39800000U) {             /* |x| < 2**-12 */
             if (FLT_UWORD_IS_ZERO(ix)) {    /* return x inexact except 0 */
                 return x;
             } else {
@@ -118,8 +118,8 @@ float tanf(float x)
 
     /* argument reduction needed */
     else {
-        n = __rem_pio2f(x, y);
-        return __tanf(y[0], y[1], 1 - ((n & 1) << 1)); /*   1 -- n even, -1 -- n odd */
+        n = (uint32_t)__rem_pio2f(x, y);
+        return __tanf(y[0], y[1], 1 - (int32_t)((n & 1U) << 1U)); /*   1 -- n even, -1 -- n odd */
     }
 }
 

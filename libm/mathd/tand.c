@@ -91,12 +91,13 @@ T[] =  {
 static inline double __tan(double x, double y, int iy)
 {
     double z, r, v, w, s;
-    int32_t ix, hx;
+    //int32_t hx;
+    uint32_t ix, hx;
     GET_HIGH_WORD(hx, x);
-    ix = hx & 0x7fffffff;  /* high word of |x| */
+    ix = hx & 0x7fffffffU;  /* high word of |x| */
 
-    if (ix >= 0x3FE59428) {          /* |x|>=0.6744 */
-        if (hx < 0) {
+    if (ix >= 0x3fe59428U) {          /* |x|>=0.6744 */
+      if ((int32_t)hx < 0) {
             x = -x;
             y = -y;
         }
@@ -108,7 +109,7 @@ static inline double __tan(double x, double y, int iy)
     }
 
     z    =  x * x;
-    w     =  z * z;
+    w    =  z * z;
     /* Break x^5*(T[1]+x^2*T[2]+...) into
      *      x^5(T[1]+x^4*T[3]+...+x^20*T[11]) +
      *      x^5(x^2*(T[2]+x^4*T[4]+...+x^22*[T12]))
@@ -120,9 +121,9 @@ static inline double __tan(double x, double y, int iy)
     r += T[0] * s;
     w = x + r;
 
-    if (ix >= 0x3FE59428) {
+    if (ix >= 0x3fe59428U) {
         v = (double)iy;
-        return (double)(1 - ((hx >> 30) & 2)) * (v - 2.0 * (x - (w * w / (w + v) - r)));
+        return (double)(1 - (int32_t)((hx >> 30U) & 2U)) * (v - 2.0 * (x - (w * w / (w + v) - r)));
     }
 
     if (iy == 1) {
@@ -132,10 +133,10 @@ static inline double __tan(double x, double y, int iy)
         /*  compute -1.0/(x+r) accurately */
         double a, t;
         z  = w;
-        SET_LOW_WORD(z, 0);
+        SET_LOW_WORD(z, 0U);
         v  = r - (z - x);   /* z+v = r+x */
         t = a  = -1.0 / w;  /* a = -1.0/w */
-        SET_LOW_WORD(t, 0);
+        SET_LOW_WORD(t, 0U);
         s  = 1.0 + t * z;
         return t + a * (s + t * v);
     }
@@ -148,16 +149,16 @@ double tan(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double y[2], z = 0.0;
-    int32_t n, ix;
+    uint32_t n, ix;
 
     /* High word of x. */
     GET_HIGH_WORD(ix, x);
 
     /* |x| ~< pi/4 */
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix <= 0x3fe921fb) {
-        if(ix < 0x3e400000) {      /* x < 2**-27 */
+    if (ix <= 0x3fe921fbU) {
+        if (ix < 0x3e400000U) {    /* x < 2**-27 */
             if (x == 0.0) {        /* return x inexact except 0 */
                 return x;
             } else {
@@ -169,7 +170,7 @@ double tan(double x)
     }
 
     /* tan(Inf or NaN) is NaN */
-    else if (ix >= 0x7ff00000) {
+    else if (ix >= 0x7ff00000U) {
         if (isnan(x)) {
             return x + x;
         } else {
@@ -179,8 +180,8 @@ double tan(double x)
 
     /* argument reduction needed */
     else {
-        n = __rem_pio2(x, y);
-        return __tan(y[0], y[1], 1 - ((n & 1) << 1)); /*   1 -- n even, -1 -- n odd */
+        n = (uint32_t)__rem_pio2(x, y);
+        return __tan(y[0], y[1], 1 - (int32_t)((n & 1U) << 1U)); /*   1 -- n even, -1 -- n odd */
     }
 }
 
