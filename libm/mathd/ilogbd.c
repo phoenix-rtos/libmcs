@@ -83,31 +83,32 @@ int ilogb(double x)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t hx, lx, ix;
+    int32_t i;
+    uint32_t hx, lx;
 
     EXTRACT_WORDS(hx, lx, x);
-    hx &= 0x7fffffff;
+    hx &= 0x7fffffffU;
 
-    if (hx < 0x00100000) {
-        if ((hx | lx) == 0) {
+    if (hx < 0x00100000U) {
+        if ((hx | lx) == 0U) {
             (void) __raise_invalid();
-            return FP_ILOGB0;    /* ilogb(0) = special case error */
-        } else {         /* subnormal x */
-            if (hx == 0) {
-                for (ix = -1043; lx > 0; lx <<= 1) {
-                    ix -= 1;
+            return FP_ILOGB0;              /* ilogb(0) = special case error */
+        } else {                           /* subnormal x */
+            if (hx == 0U) {
+                for (i = -1043; (int32_t)lx > 0; lx <<= 1U) {
+                    i -= 1;
                 }
             } else {
-                for (ix = -1022, hx <<= 11; hx > 0; hx <<= 1) {
-                    ix -= 1;
+                for (i = -1022, hx <<= 11U; (int32_t)hx > 0; hx <<= 1U) {
+                    i -= 1;
                 }
             }
         }
 
-        return ix;
-    } else if (hx < 0x7ff00000) {
-        return (hx >> 20) - 1023;
-    } else if (hx > 0x7ff00000) {
+        return i;
+    } else if (hx < 0x7ff00000U) {
+      return (int32_t)(hx >> 20U) - 1023;
+    } else if (hx > 0x7ff00000U) {
         (void) __raise_invalid();
         return FP_ILOGBNAN;     /* NAN */
     } else {
