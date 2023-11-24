@@ -61,17 +61,17 @@ double cos(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double y[2], z = 0.0;
-    int32_t n, ix;
+    uint32_t ix, n;
 
     /* High word of x. */
     GET_HIGH_WORD(ix, x);
 
     /* |x| ~< pi/4 */
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if(ix <= 0x3fe921fb) {
-        if(ix < 0x3e46a09e) {        /* if x < 2**-27 * sqrt(2) */
-            if (x == 0.0) {          /* return 1 inexact except 0 */
+    if (ix <= 0x3fe921fbU) {
+        if (ix < 0x3e46a09eU) {       /* if x < 2**-27 * sqrt(2) */
+            if (x == 0.0) {           /* return 1 inexact except 0 */
                 return 1.0;
             } else {
                 return __raise_inexactf(1.0);
@@ -82,7 +82,7 @@ double cos(double x)
     }
 
     /* cos(Inf or NaN) is NaN */
-    else if (ix >= 0x7ff00000) {
+    else if (ix >= 0x7ff00000U) {
         if (isnan(x)) {
             return x + x;
         } else {
@@ -92,9 +92,9 @@ double cos(double x)
 
     /* argument reduction needed */
     else {
-        n = __rem_pio2(x, y);
+        n = (uint32_t)__rem_pio2(x, y);
 
-        switch (n & 3) {
+        switch (n & 3U) {
         case 0:
             return  __cos(y[0], y[1]);
 
