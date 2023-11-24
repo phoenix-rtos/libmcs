@@ -13,15 +13,15 @@ float sinf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float y[2], z = 0.0f;
-    int32_t n, ix;
+    uint32_t n, ix;
 
     GET_FLOAT_WORD(ix, x);
 
     /* |x| ~< pi/4 */
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix <= 0x3f490fd8) {
-        if(ix < 0x39800000) {        /* if x < 2**-12 */
+    if (ix <= 0x3f490fd8U) {
+        if (ix < 0x39800000U) {             /* if x < 2**-12 */
             if (FLT_UWORD_IS_ZERO(ix)) {    /* return x inexact except 0 */
                 return x;
             } else {
@@ -42,9 +42,9 @@ float sinf(float x)
 
     /* argument reduction needed */
     else {
-        n = __rem_pio2f(x, y);
+        n = (uint32_t)__rem_pio2f(x, y);
 
-        switch (n & 3) {
+        switch (n & 3U) {
         case 0:
             return  __sinf(y[0], y[1], 1);
 
