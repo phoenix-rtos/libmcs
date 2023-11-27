@@ -26,42 +26,44 @@ float logf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float hfsq, f, s, z, R, w, t1, t2, dk;
-    int32_t k, ix, i, j;
+    int32_t k;
+    uint32_t hx, ix, i, j;
 
-    GET_FLOAT_WORD(ix, x);
+    GET_FLOAT_WORD(hx, x);
+    ix = hx & 0x7fffffffU;
 
     k = 0;
 
-    if (FLT_UWORD_IS_ZERO(ix & 0x7fffffff)) {
-        return __raise_div_by_zerof(-1.0f);     /* log(+-0)=-inf */
+    if (FLT_UWORD_IS_ZERO(ix)) {
+        return __raise_div_by_zerof(-1.0f);         /* log(+-0)=-inf */
     }
 
-    if (FLT_UWORD_IS_NAN(ix & 0x7fffffff)) {    /* x = NaN */
+    if (FLT_UWORD_IS_NAN(ix)) {                     /* x = NaN */
         return x + x;
     }
 
-    if (ix < 0) {
-        return __raise_invalidf();              /* log(-#) = NaN */
+    if ((int32_t)hx < 0) {
+        return __raise_invalidf();                  /* log(-#) = NaN */
     }
 
-    if (FLT_UWORD_IS_INFINITE(ix)) {            /* x = +Inf */
+    if (FLT_UWORD_IS_INFINITE(ix)) {                /* x = +Inf */
         return x + x;
     }
 
     if (FLT_UWORD_IS_SUBNORMAL(ix)) {
         k -= 25;
-        x *= two25;                 /* subnormal number, scale up x */
-        GET_FLOAT_WORD(ix, x);
+        x *= two25;                                  /* subnormal number, scale up x */
+        GET_FLOAT_WORD(hx, x);
     }
 
-    k += (ix >> 23) - 127;
-    ix &= 0x007fffff;
-    i = (ix + (0x95f64 << 3)) & 0x800000;
-    SET_FLOAT_WORD(x, ix | (i ^ 0x3f800000)); /* normalize x or x/2 */
-    k += (i >> 23);
+    k += (int32_t)(hx >> 23U) - 127;
+    hx &= 0x007fffffU;
+    i = (hx + (0x00095f64U << 3U)) & 0x00800000U;
+    SET_FLOAT_WORD(x, hx | (i ^ 0x3f800000U));       /* normalize x or x/2 */
+    k += (int32_t)(i >> 23U);
     f = x - 1.0f;
 
-    if ((0x007fffff & (15 + ix)) < 16) { /* |f| < 2**-20 */
+    if ((0x007fffffU & (15U + hx)) < 16U) {            /* |f| < 2**-20 */
         if (f == zero) {
             if (k == 0) {
                 return zero;
@@ -84,15 +86,15 @@ float logf(float x)
     s = f / (2.0f + f);
     dk = (float)k;
     z = s * s;
-    i = ix - (0x6147a << 3);
+    i = hx - (0x0006147aU << 3U);
     w = z * z;
-    j = (0x6b851 << 3) - ix;
+    j = (0x0006b851U << 3U) - hx;
     t1 = w * (Lg2 + w * (Lg4 + w * Lg6));
     t2 = z * (Lg1 + w * (Lg3 + w * (Lg5 + w * Lg7)));
     i |= j;
     R = t2 + t1;
 
-    if (i > 0) {
+    if ((int32_t)i > 0) {
         hfsq = 0.5f * f * f;
 
         if (k == 0) {
