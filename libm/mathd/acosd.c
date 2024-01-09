@@ -79,16 +79,16 @@ double acos(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double z, p, q, r, w, s, c, df;
-    int32_t hx, ix;
+    uint32_t hx, ix, lx;
+    
     GET_HIGH_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x3ff00000) { /* |x| >= 1 */
-        uint32_t lx;
+    if (ix >= 0x3ff00000U) { /* |x| >= 1 */
         GET_LOW_WORD(lx, x);
 
-        if (((ix - 0x3ff00000) | lx) == 0) { /* |x|==1 */
-            if (hx > 0) {
+        if (((ix - 0x3ff00000U) | lx) == 0U) { /* |x|==1 */
+            if ((int32_t)hx > 0) {
                 return 0.0;    /* acos(1) = 0  */
             } else {
                 return __raise_inexact(pi);    /* acos(-1)= pi */
@@ -102,8 +102,8 @@ double acos(double x)
         return __raise_invalid();  /* acos(|x|>1) is NaN */
     }
 
-    if (ix < 0x3fe00000) { /* |x| < 0.5 */
-        if (ix <= 0x3c600000) {
+    if (ix < 0x3fe00000U) { /* |x| < 0.5 */
+        if (ix <= 0x3c600000U) {
             return __raise_inexact(pio2_hi);    /*if|x|<2**-57*/
         }
 
@@ -112,7 +112,7 @@ double acos(double x)
         q = one + z * (qS1 + z * (qS2 + z * (qS3 + z * qS4)));
         r = p / q;
         return pio2_hi - (x - (pio2_lo - x * r));
-    } else  if (hx < 0) {      /* x < -0.5 */
+    } else  if ((int32_t)hx < 0) {      /* x < -0.5 */
         z = (one + x) * 0.5;
         p = z * (pS0 + z * (pS1 + z * (pS2 + z * (pS3 + z * (pS4 + z * pS5)))));
         q = one + z * (qS1 + z * (qS2 + z * (qS3 + z * qS4)));
@@ -124,7 +124,7 @@ double acos(double x)
         z = (one - x) * 0.5;
         s = sqrt(z);
         df = s;
-        SET_LOW_WORD(df, 0);
+        SET_LOW_WORD(df, 0U);
         c  = (z - df * df) / (s + df);
         p = z * (pS0 + z * (pS1 + z * (pS2 + z * (pS3 + z * (pS4 + z * pS5)))));
         q = one + z * (qS1 + z * (qS2 + z * (qS3 + z * qS4)));
