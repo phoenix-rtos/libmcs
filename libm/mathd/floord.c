@@ -60,64 +60,64 @@ double floor(double x)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t _i0, _i1, _j0;
-    uint32_t i, j;
-    EXTRACT_WORDS(_i0, _i1, x);
-    _j0 = ((_i0 >> 20) & 0x7ff) - 0x3ff;
+    uint32_t _i0, _i1, _j0, i, j;
 
-    if (_j0 < 20) {
-        if (_j0 < 0) {  /* raise inexact if x != 0 */
-            if (((_i0 & 0x7fffffff) | _i1) == 0) {
+    EXTRACT_WORDS(_i0, _i1, x);
+    _j0 = ((_i0 >> 20U) & 0x000007ffU) - 0x000003ffU;
+
+    if ((int32_t)_j0 < 20) {
+        if ((int32_t)_j0 < 0) {  /* raise inexact if x != 0 */
+            if (((_i0 & 0x7fffffffU) | _i1) == 0U) {
                 return x;
             }
 
             (void) __raise_inexact(x);
 
-            if (_i0 >= 0) {
-                _i0 = _i1 = 0;
+            if ((int32_t)_i0 >= 0) {
+                _i0 = _i1 = 0U;
             } else {
-                _i0 = (int32_t)0xbff00000U;
-                _i1 = 0;
+                _i0 = 0xbff00000U;
+                _i1 = 0U;
             }
         } else {
-            i = (0x000fffff) >> _j0;
+            i = (0x000fffffU) >> _j0;
 
-            if (((_i0 & i) | _i1) == 0) {
+            if (((_i0 & i) | _i1) == 0U) {
                 return x;    /* x is integral */
             }
 
             (void) __raise_inexact(x);
 
-            if (_i0 < 0) {
-                _i0 += (0x00100000) >> _j0;
+            if ((int32_t)_i0 < 0) {
+                _i0 += (0x00100000U) >> _j0;
             }
 
             _i0 &= (~i);
-            _i1 = 0;
+            _i1 = 0U;
         }
-    } else if (_j0 > 51) {
-        if (_j0 == 0x400) {
+    } else if ((int32_t)_j0 > 51) {
+        if (_j0 == 0x00000400U) {
             return x + x;    /* inf or NaN */
         } else {
             return x;    /* x is integral */
         }
     } else {
-        i = ((uint32_t)0xffffffffU) >> (_j0 - 20);
+        i = 0xffffffffU >> (_j0 - 20U);
 
-        if ((_i1 & i) == 0) {
+        if ((_i1 & i) == 0U) {
             return x;    /* x is integral */
         }
 
         (void) __raise_inexact(x);
 
-        if (_i0 < 0) {
-            if (_j0 == 20) {
-                _i0 += 1;
+        if ((int32_t)_i0 < 0) {
+            if (_j0 == 20U) {
+                _i0 += 1U;
             } else {
-                j = _i1 + (1 << (52 - _j0));
+                j = _i1 + ((uint32_t)1U << (52U - _j0));
 
-                if (j < (uint32_t)_i1) {
-                    _i0 += 1 ;    /* got a carry */
+                if (j < _i1) {
+                    _i0 += 1U ;    /* got a carry */
                 }
 
                 _i1 = j;
