@@ -62,31 +62,31 @@ double round(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     /* Most significant word, least significant word. */
-    int32_t msw, exponent_less_1023;
-    uint32_t lsw;
+    uint32_t msw, lsw;
+    int32_t exponent_less_1023;
 
     EXTRACT_WORDS(msw, lsw, x);
 
     /* Extract exponent field. */
-    exponent_less_1023 = ((msw & 0x7ff00000) >> 20) - 1023;
+    exponent_less_1023 = (int32_t)((msw & 0x7ff00000U) >> 20U) - 1023;
 
     if (exponent_less_1023 < 20) {
         if (exponent_less_1023 < 0) {
             msw &= 0x80000000U;
 
             if (exponent_less_1023 == -1) {                 /* Result is +1.0 or -1.0. */
-                msw |= ((int32_t)1023 << 20);
+                msw |= ((uint32_t)1023U << 20U);
             }
 
-            lsw = 0;
+            lsw = 0U;
         } else {
-            uint32_t exponent_mask = 0x000fffff >> exponent_less_1023;
+            uint32_t exponent_mask = 0x000fffffU >> (uint32_t)exponent_less_1023;
 
-            if ((msw & exponent_mask) == 0 && lsw == 0) {   /* x in an integral value. */
+            if ((msw & exponent_mask) == 0U && lsw == 0U) {   /* x in an integral value. */
                 return x;
             }
 
-            msw += 0x00080000 >> exponent_less_1023;
+            msw += 0x00080000U >> (uint32_t)exponent_less_1023;
             msw &= ~exponent_mask;
             lsw = 0;
         }
@@ -97,17 +97,17 @@ double round(double x)
             return x;
         }
     } else {
-        uint32_t exponent_mask = 0xffffffffU >> (exponent_less_1023 - 20);
+        uint32_t exponent_mask = 0xffffffffU >> (uint32_t)(exponent_less_1023 - 20);
         uint32_t tmp;
 
-        if ((lsw & exponent_mask) == 0) {                   /* x is an integral value. */
+        if ((lsw & exponent_mask) == 0U) {                   /* x is an integral value. */
             return x;
         }
 
-        tmp = lsw + (1 << (51 - exponent_less_1023));
+        tmp = lsw + ((uint32_t)1U << (51U - (uint32_t)exponent_less_1023));
 
         if (tmp < lsw) {
-            msw += 1;
+            msw += 1U;
         }
 
         lsw = tmp;
