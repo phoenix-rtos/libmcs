@@ -74,3 +74,12 @@ html_favicon = "../logo/libmcs-favicon.ico"
 html_static_path = ["../_static"]
 
 html_css_files = ["css/custom.css"]
+
+html_context = {
+    "display_gitlab": True,  # Integrate Gitlab
+    "gitlab_host": "gitlab.com",
+    "gitlab_user": "gtd-gmbh",  # Organization or User
+    "gitlab_repo": "libmcs",  # Repo name
+    "gitlab_version": "development",  # Version
+    "conf_py_path": "/doc/sum/",  # Path in the checkout to the docs root
+}

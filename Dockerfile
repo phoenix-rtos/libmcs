@@ -16,3 +16,5 @@ RUN useradd -m -G sudo developer \
 # Install dependencies
 ADD requirements.txt /
 RUN pip3 install -r /requirements.txt
+# Open Links to GitLab in a new tab
+RUN sed -i 's/fa-gitlab">/fa-gitlab" target="_blank">/' /usr/local/lib/python3.11/site-packages/sphinx_rtd_theme/breadcrumbs.html
