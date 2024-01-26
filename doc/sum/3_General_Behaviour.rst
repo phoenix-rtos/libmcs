@@ -4,7 +4,7 @@ General Behaviour
 All procedures can handle all input values of its respective types, including special values such as ``NaNs`` or infinities. Pointers used to output additional return values are under the user’s control, using misplaced or ``NULL`` pointers may cause unwanted behaviour or even a crash of the system. The ``NULL`` pointers are handled appropriately by the library, but no action can be taken against using misplaced pointers.
 
 NaN Values
-~~~~~~~~~
+~~~~~~~~~~
 
 As can be seen in :ref:`Conventions` there exist different types of ``NaNs``.
 
@@ -12,7 +12,7 @@ What are they? ``NaN`` is the result of a procedure that does not generate a val
 
 What's the difference between ``NaN``, ``qNaN`` and ``sNaN``? Both ``qNaNs`` and ``sNaNs`` are a subgroup of all ``NaNs``, they differ in a specific bit that is either set (``qNaN``) or not set (``sNaN``). All procedures will only return ``qNaNs`` and never ``sNaNs``. The difference is on the other side: when an ``sNaN`` is put as an argument to a procedure, the :ref:`FPU <ABBR>` shall signal an ``invalid operation`` exception, while a ``qNaN`` is quietly accepted, hence the names. As ``sNaNs`` are never produced by the :ref:`FPU <ABBR>` they can be regarded as a testing feature.
 
-In :ref:`Conventions`` we also differentiate between ``-NaN`` (``NaN`` where the signbit is set) and ``+NaN`` (``NaN`` where the signbit is not set). This separation does not exist anywhere within the :ref:`IEEE-754 <ABBR>` or C18 standards, ``NaNs`` are simply ``NaNs`` regardless of their sign. We however need this differentiation for the procedures :ref:`signbit` and :ref:`copysign`, as both only check the sign of a value and ignore the rest.
+In :ref:`Conventions` we also differentiate between ``-NaN`` (``NaN`` where the signbit is set) and ``+NaN`` (``NaN`` where the signbit is not set). This separation does not exist anywhere within the :ref:`IEEE-754 <ABBR>` or C18 standards, ``NaNs`` are simply ``NaNs`` regardless of their sign. We however need this differentiation for the procedures :ref:`signbit` and :ref:`copysign`, as both only check the sign of a value and ignore the rest.
 
 The ``nan (const char *payload)``, ``nanf (const char *payload)``, and ``nanl (const char *payload)`` functions of the library are not fully ISO C compliant as they return a fix defined ``NaN`` regardless of the function parameter. The rationale for this is to keep the LibmCS standalone, without any dependency to other standard C library functions. A workaround is proposed in the section describing these functions.
 
@@ -104,7 +104,7 @@ Limitations of the Libm
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Qualification Status
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
 This software release is qualified to :ref:`ECSS <ABBR>` category B, but only for the following configurations:
 
@@ -120,7 +120,7 @@ The general configuration status of the library can be found in the :ref:`SCF <A
 If this release is intended to be used in a different configuration then the one given above, then the qualification status needs to be reassessed in a :ref:`SRF <ABBR>` and a delta-qualification carried out following the :ref:`QG <ABBR>` OP-QG.00-ML.
 
 Compliance
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
 
 This software is compliant to :ref:`ISO <ABBR>` C18 (ISO/IEC 9899:2018), :ref:`IEEE-754-2019 <ABBR>`, POSIX (IEEE Std 1003.1-2017), and MISRA C:2012.
 
@@ -129,28 +129,28 @@ The use of some library macros will issue justifiable MISRA C non-compliances. T
 Compliance to :ref:`ISO <ABBR>` TS 18661-1 is not yet met.
 
 Rounding Mode
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^
 
 The library is only qualified for the rounding mode *round to nearest, tie to even*.
 
 Platform Architecture
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 
 In case the :ref:`FPU <ABBR>` of the target platform is not implementing all :ref:`IEEE-754 <ABBR>` features, the :ref:`FPU <ABBR>` has to be configured appropriately otherwise the library may trap on those missing features. One such example is the GRFPU as seen in :ref:`GeneralBehaviourSubnormalValues`.
 
 Errno
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^
 
 The library does not set the ``errno`` variable to report errors nor does the library read it, ``errno`` is completely ignored.
 
 Compiler
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^
 
 In general the library is prepared to be used with a :ref:`GCC <ABBR>` toolchain. It might be necessary to change parts of the library when using a different toolchain.
 The compiler used on the library shall be able to understand the ``asm`` keyword. For example :ref:`GCC <ABBR>` has the flag ``-std=gnu99`` to enable the :ref:`GNU <ABBR>` C language extensions which contain ``asm``.
 
 Data Model
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^
 
 The library is compatibility with the following data model processor and compiler tool-chains combinations:
 
@@ -161,12 +161,12 @@ The library is compatibility with the following data model processor and compile
    The ``long long int`` type shall always be 64 bits.  
 
 Bessel functions
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 The procedures :ref:`jn` and :ref:`yn` have only been qualified until an ``n`` value of 15. If you for some reason need to use them with higher values for ``n``, just change the value in the unit- and validation-tests. The other Bessel procedures (:ref:`j0`, :ref:`j1`, :ref:`y0`, and :ref:`y1`) however are fully qualified.
 
 Complex procedures
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 The complex procedures have a lower number of requirements than the procedures defined in ``math.h`` and are less detailed. This mirrors what happens in the :ref:`ISO <ABBR>` C and :ref:`POSIX <ABBR>` standards where far less information and requirements are defined for these procedures. As such their requirements fall short of what one could usually expect for Cat. B software. However the fact that these procedures are seldom if ever used in flight and critical software justifies their subpar requirements, while their existence is justified by the need to be able to integrate the library with other :ref:`COTS <ABBR>` software without restrictions (be aware that having them for integration purposes does not necessarily mean that they are used by other software components but that they expect them to exist).
 
@@ -272,12 +272,12 @@ The library is thread safe and reentrant. For software that is using the library
 multiple threads at once, as each procedure call operates on the same variable. This is a limitation forced on the library by the :ref:`POSIX <ABBR>` standard that demands the availability of the ``signgam`` global variable.
 
 Other Header Files
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 The library does not contain any externally available header files other than those that should be part of a ``libm`` according to the ISO C and :ref:`POSIX <ABBR>` standards. It contains ``math.h``, ``complex.h``, ``fenv.h``, and ``tgmath.h``, although the limitations of the latter two have already been stated in this chapter. This means there will be no ``float.h`` or ``limits.h`` or any other header that does not belong into a ``libm``. All those headers need to be provided by the toolchain.
 
 Assert Usage
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~
 
 The library contains an ``assert`` in its source code. More specifically assertions are used in the :ref:`frexp`, :ref:`modf` and :ref:`remquo` procedures to ensure that the library does not cause a trap when the procedures are called with a NULL-pointer.
 
@@ -293,7 +293,7 @@ Modular Arithmetic Procedures
 As the modular arithmetic functions are often a source of confusion we want to use this section to show the differences between the modular arithmetic functions and give examples for each. This information is specific to the C programming language, and the C99 and :ref:`IEEE-754 <ABBR>` standards.
 
 Modulus Operator: ``%``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Although this operator is not part of the library but of the C language itself, we include it here to complete the overview of modular arithmetic. The ``%`` operator is specific to integers and shall only be used with integer types. The result of using the ``%`` operator is the remainder of using the ``/`` operator on the same operands. Given two variables ``a`` and ``b`` the following must be true: :math:`a \% b = a - (\frac{a}{b} \cdot b)` with integral truncation of :math:`\frac{a}{b}` towards zero.
 
@@ -314,7 +314,7 @@ Examples:
 +-----------+------------+-------------+--------------+
 
 The fmod procedure
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 The :ref:`fmod` procedure returns the remainder of :math:`x` divided by :math:`y`. Given two variables :math:`x` and :math:`y` the following must be true: :math:`fmod(x, y) = x - n \cdot y`, for an integer :math:`n` such that the result has the same sign as :math:`x` and magnitude less than the magnitude of :math:`y`. If :math:`y` is zero the result will be ``qNaN``.
 
@@ -341,7 +341,7 @@ Examples:
 +--------------+--------+---+---------------+--------+---+---------------+--------+---+----------------+--------+
 
 The remainder and remquo procedures
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :ref:`remainder` and :ref:`remquo` procedures returns the remainder of :math:`x` divided by :math:`y`. Given two variables :math:`x` and :math:`y` the following must be true: :math:`remainder(x, y) = x - n \cdot y`, where :math:`n` is the integer nearest to the exact result of :math:`\frac{x}{y}` (when the exact result is exactly in the middle of two integers, :math:`n` is even). If :math:`y` is zero the result will be ``qNaN``.
 
@@ -368,7 +368,7 @@ Examples:
 +--------------+--------+---+---------------+--------+---+---------------+--------+---+----------------+--------+
 
 The modf procedure
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 The :ref:`modf` procedure returns the fractional part of :math:`x` and puts the integral part of :math:`x` to the outward pointer :math:`iptr`. It's easier to think of :ref:`modf` as a procedure with one input and two outputs.
 

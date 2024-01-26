@@ -1,5 +1,5 @@
 Bindings for LibmCS
-========================
+===================
 
 .. raw:: html
 
@@ -10,20 +10,20 @@ Bindings for LibmCS
 To enable the usage of the library from Matlab and using the Ada programming language we wish to provide some best practices and examples. This will cover the usage of library functions, but not the macros and constants as those are not directly accessible, they can however be easily wrapped with C-functions that return the result/value of the macros and constants. These functions can then be placed into Matlab/Ada the same as all other functions.
 
 Matlab
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
 
 This section describes the best practice to use the library from within Matlab using the sine function as an example.
 
 .. _BindingsMatlabGCC:
 
 Wrapper for GCC
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 Verify that your system has a working :ref:`GCC <ABBR>` toolchain. Officially supported by Matlab is :ref:`GCC <ABBR>` 4.9, but newer versions seem to work as well (at least for this example). Next, create a file named ``gcc`` with the following content:
 
 .. code-block:: bash
 
-   \#!/bin/bash
+   #!/bin/bash
 
    /usr/bin/gcc $(echo $@ | sed 's/-lm //g')
 
@@ -51,7 +51,7 @@ Create a wrapper for the :ref:`sin` function available in the library's ``libm.a
       y = coder.ceval('sin', u);
 
 Using the C Function Wrapper from Matlab
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The wrapper cannot be called directly because ``ceval`` cannot be called from Matlab. Thus it is necessary to generate a MEX function from this wrapper with ``codegen``. Generate and compile the code with the following command:
 
@@ -72,7 +72,7 @@ Then calling the C function is possible from Matlab as one would expect. Matlab 
 After all MEX functions are generated, remove the :ref:`GCC <ABBR>` wrapper created in :ref:`BindingsMatlabGCC`. Otherwise you may not be able to build other software correctly.
 
 Using the Wrapper from Simulink
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Create a new Model. Go to ``Simulation -> Model Configuration Parameters -> Simulation Target``. Under ``Additional Build Information -> Libraries`` enter the path to the library's ``libm.a``. In the reserved name field enter the function which shall not be used from the default libm, in this example ``sin``. The options are shown in the figure:
 
@@ -109,17 +109,17 @@ Double-click the Matlab Function Block and type in your Matlab Code calling the 
 You can now run your model as usual or use code generation.
 
 Verify that the Correct Function is Called
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you want to check whether the correct function is called, go to the library source code and edit the file ``libm/mathd/sind.c``. Change the sin function to return an arbitrary, but fixed value by inserting a ``return 99;`` statement right at the beginning of the function. After recompiling the library, as well as the MEX and S-functions, using the libmcs_sin function in Matlab and Simulink should then return ``99`` for all input values. This proves that the library's :ref:`sin` function is called and not the one from standard libm.
 
 Ada
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
 
 This section describes the best practice to use the library as part of the Ada programming language using the sine function as an example.
 
 Create Bindings for Functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For function bindings first create a thin binding that uses C-type input and output objects, then create a thick binding to convert the C-types to Ada-types. The following two example files contain some more description in the form of comments.
 
