@@ -34,7 +34,7 @@ float remainderf(float x, float y)
     }
 
     if (hy <= FLT_UWORD_HALF_MAX) {
-        x = fmodf(x, 2 * y);    /* now x < 2y */
+        x = fmodf(x, 2.0f * y);    /* now x < 2y */
     }
 
     if ((hx - hy) == 0) {

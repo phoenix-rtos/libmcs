@@ -88,7 +88,7 @@ float tanf(float x)
     x *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    float y[2], z = 0.0;
+    float y[2], z = 0.0f;
     int32_t n, ix;
 
     GET_FLOAT_WORD(ix, x);

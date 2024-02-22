@@ -190,7 +190,7 @@ float __lgammaf(float x, int *signgamp)
 
     /* purge off 1 and 2 */
     if (ix == 0x3f800000 || ix == 0x40000000) {
-        r = 0;
+        r = zero;
     }
     /* for x < 2.0 */
     else if (ix < 0x40000000) {
