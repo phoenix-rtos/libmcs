@@ -304,20 +304,20 @@ typedef union {
 
 /* Get a 32 bit int from a float.  */
 
-#define GET_FLOAT_WORD(i,d)                             \
+#define GET_FLOAT_WORD(i,f)                             \
     do {                                                \
         ieee_float_shape_type gf_u;                     \
-        gf_u.value = (d);                               \
+        gf_u.value = (f);                               \
         (i) = gf_u.word;                                \
     } while (0 == 1)
 
 /* Set a float from a 32 bit int.  */
 
-#define SET_FLOAT_WORD(d,i)                             \
+#define SET_FLOAT_WORD(f,i)                             \
     do {                                                \
         ieee_float_shape_type sf_u;                     \
         sf_u.word = (i);                                \
-        (d) = sf_u.value;                               \
+        (f) = sf_u.value;                               \
     } while (0 == 1)
 
 /* Macros to avoid undefined behaviour that can arise if the amount
