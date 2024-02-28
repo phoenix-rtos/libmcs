@@ -11,11 +11,11 @@ float ceilf(float x)
     x *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t _i0, _j0;
-    uint32_t i, ix;
+    int32_t _j0;
+    uint32_t _i0, i, ix;
     GET_FLOAT_WORD(_i0, x);
-    ix = (_i0 & 0x7fffffff);
-    _j0 = (ix >> 23) - 0x7f;
+    ix = (_i0 & 0x7fffffffU);
+    _j0 = (int32_t)(ix >> 23U) - 0x7f;
 
     if (_j0 < 23) {
         if (_j0 < 0) {  /* raise inexact if x != 0 */
@@ -25,22 +25,22 @@ float ceilf(float x)
 
             (void) __raise_inexactf(x); /* raise inexact flag */
 
-            if (_i0 < 0) {
-                _i0 = (int32_t)0x80000000U;
+            if ((int32_t)_i0 < 0) {
+                _i0 = 0x80000000U;
             } else {
                 _i0 = 0x3f800000;
             }
         } else {
-            i = (0x007fffff) >> _j0;
+            i = 0x007fffffU >> (uint32_t)_j0;
 
-            if ((_i0 & i) == 0) {
+            if ((_i0 & i) == 0U) {
                 return x;    /* x is integral */
             }
 
             (void) __raise_inexactf(x); /* raise inexact flag */
 
-            if (_i0 > 0) {
-                _i0 += (0x00800000) >> _j0;
+            if ((int32_t)_i0 > 0) {
+                _i0 += 0x00800000U >> (uint32_t)_j0;
             }
 
             _i0 &= (~i);

@@ -60,41 +60,42 @@ double ceil(double x)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t _i0, _i1, _j0;
-    uint32_t i, j;
+    int32_t _j0;
+    uint32_t _i0, _i1, i, j;
+
     EXTRACT_WORDS(_i0, _i1, x);
-    _j0 = ((_i0 >> 20) & 0x7ff) - 0x3ff;
+    _j0 = (int32_t)((_i0 >> 20U) & 0x7ffU) - 0x3ff;
 
     if (_j0 < 20) {
         if (_j0 < 0) {  /* raise inexact if x != 0 */
-            if (((_i0 & 0x7fffffff) | _i1) == 0) {
+            if (((_i0 & 0x7fffffffU) | _i1) == 0U) {
                 return x;
             }
 
             (void) __raise_inexact(x);
 
-            if (_i0 < 0) { /* return 0*sign(x) if |x|<1 */
-                _i0 = (int32_t)0x80000000U;
-                _i1 = 0;
+            if ((int32_t)_i0 < 0) { /* return 0*sign(x) if |x|<1 */
+                _i0 = 0x80000000U;
+                _i1 = 0U;
             } else {
-                _i0 = 0x3ff00000;
-                _i1 = 0;
+                _i0 = 0x3ff00000U;
+                _i1 = 0U;
             }
         } else {
-            i = (0x000fffff) >> _j0;
+            i = 0x000fffffU >> (uint32_t)_j0;
 
-            if (((_i0 & i) | _i1) == 0) {
+            if (((_i0 & i) | _i1) == 0U) {
                 return x;    /* x is integral */
             }
 
             (void) __raise_inexact(x); /* raise inexact flag */
 
-            if (_i0 > 0) {
-                _i0 += (0x00100000) >> _j0;
+            if ((int32_t)_i0 > 0) {
+                _i0 = _i0 + ((0x00100000U) >> (uint32_t)_j0);
             }
 
             _i0 &= (~i);
-            _i1 = 0;
+            _i1 = 0U;
         }
     } else if (_j0 > 51) {
         if (_j0 == 0x400) {
@@ -103,21 +104,21 @@ double ceil(double x)
             return x;    /* x is integral */
         }
     } else {
-        i = ((uint32_t)0xffffffffU) >> (_j0 - 20);
+        i = 0xffffffffU >> (uint32_t)(_j0 - 20);
 
-        if ((_i1 & i) == 0) {
+        if ((_i1 & i) == 0U) {
             return x;    /* x is integral */
         }
 
         (void) __raise_inexact(x); /* raise inexact flag */
-        if (_i0 > 0) {
+        if ((int32_t)_i0 > 0) {
             if (_j0 == 20) {
-                _i0 += 1;
+                _i0 = _i0 + 1U;
             } else {
-                j = _i1 + (1 << (52 - _j0));
+                j = _i1 + ((uint32_t)1U << (52U - (uint32_t)_j0));
 
-                if (j < (uint32_t)_i1) {
-                    _i0 += 1;    /* got a carry */
+                if (j < _i1) {
+                    _i0 = _i0 + 1U;    /* got a carry */
                 }
 
                 _i1 = j;
