@@ -22,24 +22,24 @@ float erff(float x)
     x *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t hx, ix;
+    uint32_t hx, ix;
     float R, S, P, Q, s, z, r;
     GET_FLOAT_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
     if (!FLT_UWORD_IS_FINITE(ix)) {
         if (isnan(x)) {         /* erf(nan) = nan */
             return x + x;
-        } else if (hx > 0) {    /* erf(+inf) = +1 */
+        } else if ((int32_t)hx > 0) {    /* erf(+inf) = +1 */
             return 1.0f;
         } else {                /* erf(-inf) = -1 */
             return -1.0f;
         }
     }
 
-    if (ix < 0x3f580000) {       /* |x|<0.84375 */
-        if (ix < 0x38800000) {    /* |x|<2**-14 */
-            if (ix < 0x04000000)
+    if (ix < 0x3f580000U) {       /* |x|<0.84375 */
+        if (ix < 0x38800000U) {    /* |x|<2**-14 */
+            if (ix < 0x04000000U)
                 /*avoid underflow */
             {
                 return 0.125f * (8.0f * x + efx8 * x);
@@ -51,20 +51,20 @@ float erff(float x)
         return x + x * __erff_y(x);
     }
 
-    if (ix < 0x3fa00000) {       /* 0.84375 <= |x| < 1.25 */
+    if (ix < 0x3fa00000U) {       /* 0.84375 <= |x| < 1.25 */
         s = fabsf(x) - one;
         P = __erff_P(s);
         Q = __erff_Q(s);
 
-        if (hx >= 0) {
+        if ((int32_t)hx >= 0) {
             return erx + P / Q;
         } else {
             return -erx - P / Q;
         }
     }
 
-    if (ix >= 0x40800000) {        /* inf>|x|>=4 */
-        if (hx >= 0) {
+    if (ix >= 0x40800000U) {        /* inf>|x|>=4 */
+        if ((int32_t)hx >= 0) {
             return __raise_inexactf(one);
         } else {
             return -__raise_inexactf(one);
@@ -74,7 +74,7 @@ float erff(float x)
     x = fabsf(x);
     s = one / (x * x);
 
-    if (ix < 0x4036DB8C) {  /* |x| < 1/0.35 */
+    if (ix < 0x4036DB8CU) {  /* |x| < 1/0.35 */
         R = __erff_Ra(s);
         S = __erff_Sa(s);
     } else {    /* |x| >= 1/0.35 */
@@ -86,7 +86,7 @@ float erff(float x)
     SET_FLOAT_WORD(z, ix & 0xffffc000U);
     r  =  expf(-z * z - 0.5625f) * expf((z - x) * (z + x) + R / S);
 
-    if (hx >= 0) {
+    if ((int32_t)hx >= 0) {
         return one - r / x;
     } else {
         return  r / x - one;
