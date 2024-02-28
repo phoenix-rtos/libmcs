@@ -81,24 +81,24 @@ double j1(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double z, s, c, ss, cc, r, u, v, y;
-    int32_t hx, ix;
+    uint32_t hx, ix;
 
     GET_HIGH_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x7ff00000) {
+    if (ix >= 0x7ff00000U) {
         return one / x;
     }
 
     y = fabs(x);
 
-    if (ix >= 0x40000000) {   /* |x| >= 2.0 */
+    if (ix >= 0x40000000U) {   /* |x| >= 2.0 */
         s = sin(y);
         c = cos(y);
         ss = -s - c;
         cc = s - c;
 
-        if (ix < 0x7fe00000) { /* make sure y+y not overflow */
+        if (ix < 0x7fe00000U) { /* make sure y+y not overflow */
             z = cos(y + y);
 
             if ((s * c) > zero) {
@@ -112,7 +112,7 @@ double j1(double x)
          * j1(x) = 1/sqrt(pi) * (P(1,x)*cc - Q(1,x)*ss) / sqrt(x)
          * y1(x) = 1/sqrt(pi) * (P(1,x)*ss + Q(1,x)*cc) / sqrt(x)
          */
-        if (ix > 0x48000000) {
+        if (ix > 0x48000000U) {
             z = (invsqrtpi * cc) / sqrt(y);
         } else {
             u = __j1_p(y);
@@ -120,14 +120,14 @@ double j1(double x)
             z = invsqrtpi * (u * cc - v * ss) / sqrt(y);
         }
 
-        if (hx < 0) {
+        if ((int32_t)hx < 0) {
             return -z;
         } else {
             return  z;
         }
     }
 
-    if (ix < 0x3e400000) { /* |x|<2**-27 */
+    if (ix < 0x3e400000U) { /* |x|<2**-27 */
         if (x != 0.0) {
             (void)__raise_inexact(x); /* raise inexact if x != 0 */
         }
