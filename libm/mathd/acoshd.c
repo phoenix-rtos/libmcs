@@ -66,25 +66,25 @@ double acosh(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double t;
-    int32_t hx;
-    uint32_t lx;
+    uint32_t hx, lx;
+
     EXTRACT_WORDS(hx, lx, x);
 
-    if (hx < 0x3ff00000) {     /* x < 1 */
+    if ((int32_t)hx < 0x3ff00000) {     /* x < 1 */
         if (isnan(x)) {
             return x + x;
         } else {
             return __raise_invalid();
         }
-    } else if (hx >= 0x41b00000) {  /* x > 2**28 */
-        if (hx >= 0x7ff00000) {  /* x is +inf or NaN */
+    } else if (hx >= 0x41b00000U) {  /* x > 2**28 */
+        if (hx >= 0x7ff00000U) {  /* x is +inf or NaN */
             return x + x;
         } else {
             return log(x) + ln2;    /* acosh(huge)=log(2x) */
         }
-    } else if (((hx - 0x3ff00000) | lx) == 0) {
+    } else if (((hx - 0x3ff00000U) | lx) == 0U) {
         return 0.0;            /* acosh(1) = 0 */
-    } else if (hx > 0x40000000) {    /* 2**28 > x > 2 */
+    } else if (hx > 0x40000000U) {    /* 2**28 > x > 2 */
         t = x * x;
         return log(2.0 * x - one / (x + sqrt(t - one)));
     } else {            /* 1<x<2 */

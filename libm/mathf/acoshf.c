@@ -16,24 +16,25 @@ float acoshf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float t;
-    int32_t hx;
+    uint32_t hx, ix;
     GET_FLOAT_WORD(hx, x);
+    ix = hx & 0x7fffffffU;
 
-    if (hx < 0x3f800000) {     /* x < 1 */
+    if ((int32_t)hx < 0x3f800000) {     /* x < 1 */
         if (isnan(x)) {
             return x + x;
         } else {
             return __raise_invalidf();
         }
-    } else if (hx >= 0x4d800000) {  /* x > 2**28 */
-        if (!FLT_UWORD_IS_FINITE(hx)) {   /* x is +inf or NaN */
+    } else if ((int32_t)hx >= 0x4d800000) {  /* x > 2**28 */
+        if (!FLT_UWORD_IS_FINITE(ix)) {   /* x is +inf or NaN */
             return x + x;
         } else {
             return logf(x) + ln2;    /* acosh(huge)=log(2x) */
         }
-    } else if (hx == 0x3f800000) {
+    } else if (hx == 0x3f800000U) {
         return 0.0f;            /* acosh(1) = 0 */
-    } else if (hx > 0x40000000) {    /* 2**28 > x > 2 */
+    } else if ((int32_t)hx > 0x40000000) {    /* 2**28 > x > 2 */
         t = x * x;
         return logf(2.0f * x - one / (x + sqrtf(t - one)));
     } else {            /* 1<x<2 */
