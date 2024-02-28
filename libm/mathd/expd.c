@@ -90,23 +90,21 @@ double exp(double x)    /* default IEEE double exp */
     double hi = 0.0;
     double lo = 0.0;
     int32_t k = 0;
-    int32_t xsb;
-    uint32_t hx;
+    uint32_t hx, lx, xsb;
 
     GET_HIGH_WORD(hx, x);
-    xsb = (hx >> 31) & 1;    /* sign bit of x */
-    hx &= 0x7fffffff;        /* high word of |x| */
+    xsb = (hx >> 31U) & 1U;    /* sign bit of x */
+    hx &= 0x7fffffffU;        /* high word of |x| */
 
     /* filter out non-finite argument */
-    if (hx >= 0x40862E42) {           /* if |x|>=709.78... */
-        if (hx >= 0x7ff00000) {
-            uint32_t lx;
+    if (hx >= 0x40862E42U) {           /* if |x|>=709.78... */
+        if (hx >= 0x7ff00000U) {
             GET_LOW_WORD(lx, x);
 
-            if (((hx & 0xfffff) | lx) != 0) {
+            if (((hx & 0xfffffU) | lx) != 0U) {
                 return x + x;    /* NaN */
             } else { /* exp(+-inf)={inf,0} */
-                return (xsb == 0) ? x : zero;
+                return (xsb == 0U) ? x : zero;
             }
         }
 
@@ -120,11 +118,11 @@ double exp(double x)    /* default IEEE double exp */
     }
 
     /* argument reduction */
-    if (hx > 0x3fd62e42) {       /* if  |x| > 0.5 ln2 */
-        if (hx < 0x3FF0A2B2) {   /* and |x| < 1.5 ln2 */
+    if (hx > 0x3fd62e42U) {       /* if  |x| > 0.5 ln2 */
+        if (hx < 0x3FF0A2B2U) {   /* and |x| < 1.5 ln2 */
             hi = x - ln2HI[xsb];
             lo = ln2LO[xsb];
-            k = 1 - xsb - xsb;
+            k = 1 - (int32_t)xsb - (int32_t)xsb;
         } else {
             k  = invln2 * x + halF[xsb];
             t  = k;
@@ -133,7 +131,7 @@ double exp(double x)    /* default IEEE double exp */
         }
 
         x  = hi - lo;
-    } else if (hx < 0x3df00000)  { /* when |x|<2**-32 */
+    } else if (hx < 0x3df00000U)  { /* when |x|<2**-32 */
         if (x == 0.0) {         /* return 1 inexact except 0 */
             return one;
         } else {

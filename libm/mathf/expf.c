@@ -30,36 +30,36 @@ float expf(float x)    /* default IEEE float exp */
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float y, hi, lo, c, t;
-    int32_t k = 0, xsb, sx;
-    uint32_t hx;
+    int32_t k = 0;
+    uint32_t hx, ix, xsb;
 
-    GET_FLOAT_WORD(sx, x);
-    xsb = (sx >> 31) & 1;    /* sign bit of x */
-    hx = sx & 0x7fffffff;    /* high word of |x| */
+    GET_FLOAT_WORD(hx, x);
+    xsb = (hx >> 31U) & 1U;    /* sign bit of x */
+    ix = hx & 0x7fffffffU;    /* high word of |x| */
 
     /* filter out non-finite argument */
-    if (FLT_UWORD_IS_NAN(hx)) {
+    if (FLT_UWORD_IS_NAN(ix)) {
         return x + x;    /* NaN */
     }
 
-    if (FLT_UWORD_IS_INFINITE(hx)) {
-        return (xsb == 0) ? x : zero;
+    if (FLT_UWORD_IS_INFINITE(ix)) {
+        return (xsb == 0U) ? x : zero;
     }        /* exp(+-inf)={inf,0} */
 
-    if (sx > FLT_UWORD_LOG_MAX) {
+    if ((int32_t)hx > (int32_t)FLT_UWORD_LOG_MAX) {
         return __raise_overflowf(one);    /* overflow */
     }
 
-    if (sx < 0 && hx > FLT_UWORD_LOG_MIN) {
+    if ((int32_t)hx < 0 && ix > FLT_UWORD_LOG_MIN) {
         return __raise_underflowf(zero);    /* underflow */
     }
 
     /* argument reduction */
-    if (hx > 0x3eb17218) {       /* if  |x| > 0.5 ln2 */
-        if (hx < 0x3F851592) {   /* and |x| < 1.5 ln2 */
+    if (ix > 0x3eb17218U) {       /* if  |x| > 0.5 ln2 */
+        if (ix < 0x3F851592U) {   /* and |x| < 1.5 ln2 */
             hi = x - ln2HI[xsb];
             lo = ln2LO[xsb];
-            k = 1 - xsb - xsb;
+            k = 1 - (int32_t)xsb - (int32_t)xsb;
         } else {
             k  = invln2 * x + halF[xsb];
             t  = k;
@@ -68,8 +68,8 @@ float expf(float x)    /* default IEEE float exp */
         }
 
         x  = hi - lo;
-    } else if (hx < 0x34000000)  { /* when |x|<2**-23 */
-        if (x == 0.0f) {         /* return 1 inexact except 0 */
+    } else if (ix < 0x34000000U)  { /* when |x|<2**-23 */
+        if (x == 0.0f) {            /* return 1 inexact except 0 */
             return one;
         } else {
             return __raise_inexactf(one + x);
@@ -91,12 +91,12 @@ float expf(float x)    /* default IEEE float exp */
     if (k >= -125) {
         uint32_t hy;
         GET_FLOAT_WORD(hy, y);
-        SET_FLOAT_WORD(y, hy + (((uint32_t)k) << 23)); /* add k to y's exponent */
+        SET_FLOAT_WORD(y, hy + (((uint32_t)k) << 23U)); /* add k to y's exponent */
         return y;
     } else {
         uint32_t hy;
         GET_FLOAT_WORD(hy, y);
-        SET_FLOAT_WORD(y, hy + (((uint32_t)k + 100U) << 23)); /* add k to y's exponent */
+        SET_FLOAT_WORD(y, hy + (((uint32_t)k + 100U) << 23U)); /* add k to y's exponent */
         return y * twom100;
     }
 }
