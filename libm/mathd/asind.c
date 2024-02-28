@@ -81,15 +81,15 @@ double asin(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double t, w, p, q, c, r, s;
-    int32_t hx, ix;
+    uint32_t hx, lx, ix;
+    
     GET_HIGH_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x3ff00000) {      /* |x|>= 1 */
-        uint32_t lx;
+    if (ix >= 0x3ff00000U) {      /* |x|>= 1 */
         GET_LOW_WORD(lx, x);
 
-        if (((ix - 0x3ff00000) | lx) == 0) {
+        if (((ix - 0x3ff00000U) | lx) == 0U) {
             /* asin(1)=+-pi/2 with inexact */
 
             return x * pio2_hi + x * pio2_lo;
@@ -100,8 +100,8 @@ double asin(double x)
         }
 
         return __raise_invalid();  /* asin(|x|>1) is NaN */
-    } else if (ix < 0x3fe00000) {  /* |x|<0.5 */
-        if (ix < 0x3e500000) {     /* if |x| < 2**-26 */
+    } else if (ix < 0x3fe00000U) {  /* |x|<0.5 */
+        if (ix < 0x3e500000U) {     /* if |x| < 2**-26 */
             if (x == 0.0) {        /* return x inexact except 0 */
                 return x;
             } else {
@@ -125,12 +125,12 @@ double asin(double x)
     q = one + t * (qS1 + t * (qS2 + t * (qS3 + t * qS4)));
     s = sqrt(t);
 
-    if (ix >= 0x3FEF3333) {  /* if |x| > 0.975 */
+    if (ix >= 0x3FEF3333U) {  /* if |x| > 0.975 */
         w = p / q;
         t = pio2_hi - (2.0 * (s + s * w) - pio2_lo);
     } else {
         w  = s;
-        SET_LOW_WORD(w, 0);
+        SET_LOW_WORD(w, 0U);
         c  = (t - w * w) / (s + w);
         r  = p / q;
         p  = 2.0 * s * r - (pio2_lo - 2.0 * c);
@@ -138,7 +138,7 @@ double asin(double x)
         t  = pio4_hi - (p - q);
     }
 
-    if (hx > 0) {
+    if ((int32_t)hx > 0) {
         return t;
     } else {
         return -t;
