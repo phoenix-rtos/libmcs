@@ -164,6 +164,7 @@ double erf(double x)
 
     uint32_t hx, ix;
     double R, S, P, Q, s, z, r;
+    
     GET_HIGH_WORD(hx, x);
     ix = hx & 0x7fffffffU;
 
@@ -221,7 +222,7 @@ double erf(double x)
     }
 
     z  = x;
-    SET_LOW_WORD(z, 0);
+    SET_LOW_WORD(z, 0U);
     r  =  exp(-z * z - 0.5625) * exp((z - x) * (z + x) + R / S);
 
     if ((int32_t)hx >= 0) {
