@@ -77,12 +77,13 @@ double hypot(double x, double y)
     double t1, t2;
     double _y1, _y2;
     double w;
-    int32_t j, k, ha, hb;
+    int32_t k;
+    uint32_t ha, hb, j, low;
 
     GET_HIGH_WORD(ha, x);
-    ha &= 0x7fffffff;
+    ha &= 0x7fffffffU;
     GET_HIGH_WORD(hb, y);
-    hb &= 0x7fffffff;
+    hb &= 0x7fffffffU;
 
     if (hb > ha) {
         a = y;
@@ -98,25 +99,24 @@ double hypot(double x, double y)
     SET_HIGH_WORD(a, ha);         /* a <- |a| */
     SET_HIGH_WORD(b, hb);         /* b <- |b| */
 
-    if ((ha - hb) > 0x3c00000) {
+    if ((ha - hb) > 0x3c00000U) {
         return a + b;             /* x/y > 2**60 */
     }
 
     k = 0;
 
-    if (ha > 0x5f300000) {        /* a>2**500 */
-        if (ha >= 0x7ff00000) {   /* Inf or NaN */
-            uint32_t low;
-            w = a + b;            /* for sNaN */
+    if (ha > 0x5f300000U) {        /* a>2**500 */
+        if (ha >= 0x7ff00000U) {   /* Inf or NaN */
+            w = a + b;             /* for sNaN */
             GET_LOW_WORD(low, a);
 
-            if (((ha & 0xfffff) | low) == 0) {
+            if (((ha & 0xfffffU) | low) == 0U) {
                 w = a;
             }
 
             GET_LOW_WORD(low, b);
 
-            if (((hb ^ 0x7ff00000) | low) == 0) {
+            if (((hb ^ 0x7ff00000U) | low) == 0U) {
                 w = b;
             }
 
@@ -124,30 +124,29 @@ double hypot(double x, double y)
         }
 
         /* scale a and b by 2**-600 */
-        ha -= 0x25800000;
-        hb -= 0x25800000;
+        ha -= 0x25800000U;
+        hb -= 0x25800000U;
         k += 600;
         SET_HIGH_WORD(a, ha);
         SET_HIGH_WORD(b, hb);
     }
 
-    if (hb < 0x20b00000) {        /* b < 2**-500 */
-        if (hb <= 0x000fffff) {   /* subnormal b or 0 */
-            uint32_t low;
+    if (hb < 0x20b00000U) {        /* b < 2**-500 */
+        if (hb <= 0x000fffffU) {   /* subnormal b or 0 */
             GET_LOW_WORD(low, b);
 
-            if ((hb | low) == 0) {
+            if ((hb | low) == 0U) {
                 return a;
             }
 
             t1 = 0;
-            SET_HIGH_WORD(t1, 0x7fd00000);   /* t1=2^1022 */
+            SET_HIGH_WORD(t1, 0x7fd00000U);   /* t1=2^1022 */
             b *= t1;
             a *= t1;
             k -= 1022;
         } else {        /* scale a and b by 2^600 */
-            ha += 0x25800000;     /* a *= 2^600 */
-            hb += 0x25800000;     /* b *= 2^600 */
+            ha += 0x25800000U;     /* a *= 2^600 */
+            hb += 0x25800000U;     /* b *= 2^600 */
             k -= 600;
             SET_HIGH_WORD(a, ha);
             SET_HIGH_WORD(b, hb);
@@ -168,14 +167,14 @@ double hypot(double x, double y)
         SET_HIGH_WORD(_y1, hb);
         _y2 = b - _y1;
         t1 = 0;
-        SET_HIGH_WORD(t1, ha + 0x00100000);
+        SET_HIGH_WORD(t1, ha + 0x00100000U);
         t2 = a - t1;
         w  = sqrt(t1 * _y1 - (w * (-w) - (t1 * _y2 + t2 * b)));
     }
 
     if (k != 0) {
         t1 = 0.0;
-        SET_HIGH_WORD(t1, (0x3FF + k) << 20);
+        SET_HIGH_WORD(t1, ((uint32_t)(0x3FF + k) << 20U));
         return t1 * w;
     } else {
         return w;
