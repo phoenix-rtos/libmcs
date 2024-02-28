@@ -79,29 +79,29 @@ double frexp(double x, int *eptr)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     int _xexp = 0;
-    int32_t hx, ix, lx;
+    uint32_t hx, ix, lx;
 
-    assert(eptr != (void*)0);
-    if(eptr == (void*)0) {
+    assert(eptr != (void*)0U);
+    if (eptr == (void*)0U) {
         eptr = &_xexp;
     }
 
     EXTRACT_WORDS(hx, lx, x);
-    ix = 0x7fffffff & hx;
+    ix = 0x7fffffffU & hx;
     *eptr = 0;
 
-    if (ix >= 0x7ff00000 || ((ix | lx) == 0)) {
+    if (ix >= 0x7ff00000U || ((ix | lx) == 0U)) {
         return x + x;           /* 0,inf,nan */
     }
 
-    if (ix < 0x00100000) {      /* subnormal */
+    if (ix < 0x00100000U) {      /* subnormal */
         x *= two54;
         GET_HIGH_WORD(hx, x);
-        ix = hx & 0x7fffffff;
+        ix = hx & 0x7fffffffU;
         *eptr = -54;
     }
 
-    *eptr += (ix >> 20) - 1022;
+    *eptr += (int32_t)(ix >> 20U) - 1022;
     hx = (hx & 0x800fffffU) | 0x3fe00000U;
     SET_HIGH_WORD(x, hx);
     return x;
