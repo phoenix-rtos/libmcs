@@ -62,24 +62,23 @@ double cosh(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double t, w;
-    int32_t ix;
-    uint32_t lx;
+    uint32_t lx, ix;
 
     /* High word of |x|. */
     GET_HIGH_WORD(ix, x);
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
     /* x is INF or NaN */
-    if (ix >= 0x7ff00000) {
+    if (ix >= 0x7ff00000U) {
         return x * x;
     }
 
     /* |x| in [0,0.5*ln2], return 1+expm1(|x|)^2/(2*exp(|x|)) */
-    if (ix < 0x3fd62e43) {
+    if (ix < 0x3fd62e43U) {
         t = expm1(fabs(x));
         w = one + t;
 
-        if (ix < 0x3c800000) {
+        if (ix < 0x3c800000U) {
             return w;    /* cosh(tiny) = 1 */
         }
 
@@ -87,21 +86,21 @@ double cosh(double x)
     }
 
     /* |x| in [0.5*ln2,22], return (exp(|x|)+1/exp(|x|)/2; */
-    if (ix < 0x40360000) {
+    if (ix < 0x40360000U) {
         t = exp(fabs(x));
         return half * t + half / t;
     }
 
     /* |x| in [22, log(maxdouble)] return half*exp(|x|) */
-    if (ix < 0x40862E42) {
+    if (ix < 0x40862E42U) {
         return half * exp(fabs(x));
     }
 
     /* |x| in [log(maxdouble), overflowthresold] */
     GET_LOW_WORD(lx, x);
 
-    if (ix < 0x408633CE ||
-        (ix == 0x408633ce && lx <= (uint32_t)0x8fb9f87dU)) {
+    if (ix < 0x408633CEU ||
+        (ix == 0x408633ceU && lx <= 0x8fb9f87dU)) {
         w = exp(half * fabs(x));
         t = half * w;
         return t * w;

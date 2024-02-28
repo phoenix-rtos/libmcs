@@ -14,10 +14,10 @@ float coshf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float t, w;
-    int32_t ix;
+    uint32_t ix;
 
     GET_FLOAT_WORD(ix, x);
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
     /* x is INF or NaN */
     if (!FLT_UWORD_IS_FINITE(ix)) {
@@ -25,11 +25,11 @@ float coshf(float x)
     }
 
     /* |x| in [0,0.5*ln2], return 1+expm1(|x|)^2/(2*exp(|x|)) */
-    if (ix < 0x3eb17218) {
+    if (ix < 0x3eb17218U) {
         t = expm1f(fabsf(x));
         w = one + t;
 
-        if (ix < 0x24000000) {
+        if (ix < 0x24000000U) {
             return w;    /* cosh(tiny) = 1 */
         }
 
@@ -37,7 +37,7 @@ float coshf(float x)
     }
 
     /* |x| in [0.5*ln2,22], return (exp(|x|)+1/exp(|x|)/2; */
-    if (ix < 0x41b00000) {
+    if (ix < 0x41b00000U) {
         t = expf(fabsf(x));
         return half * t + half / t;
     }
