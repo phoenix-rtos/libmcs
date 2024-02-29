@@ -14,10 +14,10 @@ float sinhf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float t, w, h;
-    int32_t ix, jx;
+    uint32_t ix, jx;
 
     GET_FLOAT_WORD(jx, x);
-    ix = jx & 0x7fffffff;
+    ix = jx & 0x7fffffffU;
 
     /* x is INF or NaN */
     if (!FLT_UWORD_IS_FINITE(ix)) {
@@ -26,13 +26,13 @@ float sinhf(float x)
 
     h = 0.5f;
 
-    if (jx < 0) {
+    if ((int32_t)jx < 0) {
         h = -h;
     }
 
     /* |x| in [0,22], return sign(x)*0.5*(E+E/(E+1))) */
-    if (ix < 0x41b00000) {        /* |x|<22 */
-        if (ix < 0x31800000) {    /* |x|<2**-28 */
+    if (ix < 0x41b00000U) {        /* |x|<22 */
+        if (ix < 0x31800000U) {    /* |x|<2**-28 */
             if (FLT_UWORD_IS_ZERO(ix)) {    /* return x inexact except 0 */
                 return x;
             } else {
@@ -42,7 +42,7 @@ float sinhf(float x)
 
         t = expm1f(fabsf(x));
 
-        if (ix < 0x3f800000) {
+        if (ix < 0x3f800000U) {
             return h * (2.0f * t - t * t / (t + one));
         }
 
