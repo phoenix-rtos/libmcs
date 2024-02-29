@@ -86,36 +86,36 @@ double y1(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double z, s, c, ss, cc, u, v;
-    int32_t hx, ix, lx;
+    uint32_t hx, lx, ix;
 
     EXTRACT_WORDS(hx, lx, x);
-    ix = 0x7fffffff & hx;
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x7ff00000) {
+    if (ix >= 0x7ff00000U) {
         if (isnan(x)) {     /* y1(NaN) = NaN */
             return x + x;
-        } else if (hx > 0) {  /* y1(+Inf) = +0.0 */
+        } else if ((int32_t)hx > 0) {  /* y1(+Inf) = +0.0 */
             return zero;
         } else {
             /* No action required */
         }
     }
 
-    if ((ix | lx) == 0) {   /* y1(+-0) = -Inf */
+    if ((ix | lx) == 0U) {   /* y1(+-0) = -Inf */
         return __raise_div_by_zero(-1.0);
     }
 
-    if (hx < 0) {           /* y1(<0) = NaN, y1(-Inf) = NaN */
+    if ((int32_t)hx < 0) {           /* y1(<0) = NaN, y1(-Inf) = NaN */
         return __raise_invalid();
     }
 
-    if (ix >= 0x40000000) { /* |x| >= 2.0 */
+    if (ix >= 0x40000000U) { /* |x| >= 2.0 */
         s = sin(x);
         c = cos(x);
         ss = -s - c;
         cc = s - c;
 
-        if (ix < 0x7fe00000) { /* make sure x+x not overflow */
+        if (ix < 0x7fe00000U) { /* make sure x+x not overflow */
             z = cos(x + x);
 
             if ((s * c) > zero) {
@@ -136,7 +136,7 @@ double y1(double x)
          *              sin(x) +- cos(x) = -cos(2x)/(sin(x) -+ cos(x))
          * to compute the worse one.
          */
-        if (ix > 0x48000000) {
+        if (ix > 0x48000000U) {
             z = (invsqrtpi * ss) / sqrt(x);
         } else {
             u = __j1_p(x);
@@ -147,7 +147,7 @@ double y1(double x)
         return z;
     }
 
-    if (ix <= 0x3c900000) { /* x < 2**-54 */
+    if (ix <= 0x3c900000U) { /* x < 2**-54 */
         return (-tpi / x);
     }
 
