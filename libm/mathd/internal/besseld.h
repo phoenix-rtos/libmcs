@@ -92,19 +92,19 @@ static inline double __j0_p(double x)
 {
     const double *p, *q;
     double z, r, s;
-    int32_t ix;
+    uint32_t ix;
     GET_HIGH_WORD(ix, x);
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix >= 0x41b00000)    {
+    if (ix >= 0x41b00000U)    {
         return one;
-    } else if (ix >= 0x40200000) {
+    } else if (ix >= 0x40200000U) {
         p = __j0_pr8;
         q = __j0_ps8;
-    } else if (ix >= 0x40122E8B) {
+    } else if (ix >= 0x40122E8BU) {
         p = __j0_pr5;
         q = __j0_ps5;
-    } else if (ix >= 0x4006DB6D) {
+    } else if (ix >= 0x4006DB6DU) {
         p = __j0_pr3;
         q = __j0_ps3;
     } else {
@@ -200,19 +200,19 @@ static inline double __j0_q(double x)
 {
     const double *p, *q;
     double s, r, z;
-    int32_t ix;
+    uint32_t ix;
     GET_HIGH_WORD(ix, x);
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix >= 0x41b00000)    {
+    if (ix >= 0x41b00000U)    {
         return -.125 / x;
-    } else if (ix >= 0x40200000) {
+    } else if (ix >= 0x40200000U) {
         p = __j0_qr8;
         q = __j0_qs8;
-    } else if (ix >= 0x40122E8B) {
+    } else if (ix >= 0x40122E8BU) {
         p = __j0_qr5;
         q = __j0_qs5;
-    } else if (ix >= 0x4006DB6D) {
+    } else if (ix >= 0x4006DB6DU) {
         p = __j0_qr3;
         q = __j0_qs3;
     } else {
@@ -304,19 +304,19 @@ static inline double __j1_p(double x)
 {
     const double *p, *q;
     double z, r, s;
-    int32_t ix;
+    uint32_t ix;
     GET_HIGH_WORD(ix, x);
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix >= 0x41b00000)    {
+    if (ix >= 0x41b00000U)    {
         return one;
-    } else if (ix >= 0x40200000) {
+    } else if (ix >= 0x40200000U) {
         p = __j1_pr8;
         q = __j1_ps8;
-    } else if (ix >= 0x40122E8B) {
+    } else if (ix >= 0x40122E8BU) {
         p = __j1_pr5;
         q = __j1_ps5;
-    } else if (ix >= 0x4006DB6D) {
+    } else if (ix >= 0x4006DB6DU) {
         p = __j1_pr3;
         q = __j1_ps3;
     } else {
@@ -413,19 +413,19 @@ static inline double __j1_q(double x)
 {
     const double *p, *q;
     double  s, r, z;
-    int32_t ix;
+    uint32_t ix;
     GET_HIGH_WORD(ix, x);
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix >= 0x41b00000)    {
+    if (ix >= 0x41b00000U)    {
         return .375 / x;
-    } else if (ix >= 0x40200000) {
+    } else if (ix >= 0x40200000U) {
         p = __j1_qr8;
         q = __j1_qs8;
-    } else if (ix >= 0x40122E8B) {
+    } else if (ix >= 0x40122E8BU) {
         p = __j1_qr5;
         q = __j1_qs5;
-    } else if (ix >= 0x4006DB6D) {
+    } else if (ix >= 0x4006DB6DU) {
         p = __j1_qr3;
         q = __j1_qs3;
     } else {
