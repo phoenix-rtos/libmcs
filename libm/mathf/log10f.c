@@ -22,43 +22,45 @@ float log10f(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float f, hfsq, hi, lo, r, y;
-    int32_t i, k, hx;
+    int32_t k;
+    uint32_t hx, ix, i;
 
     GET_FLOAT_WORD(hx, x);
+    ix = hx & 0x7fffffffU;
 
     k = 0;
 
-    if (FLT_UWORD_IS_ZERO(hx & 0x7fffffff)) {
+    if (FLT_UWORD_IS_ZERO(ix)) {
         return __raise_div_by_zerof(-1.0f);     /* log(+-0)=-inf */
     }
 
-    if (FLT_UWORD_IS_NAN(hx & 0x7fffffff)) {    /* x = NaN */
+    if (FLT_UWORD_IS_NAN(ix)) {    /* x = NaN */
         return x + x;
     }
 
-    if (hx < 0) {
+    if ((int32_t)hx < 0) {
         return __raise_invalidf();              /* log(-#) = NaN */
     }
 
-    if (FLT_UWORD_IS_INFINITE(hx)) {            /* x = +Inf */
+    if (FLT_UWORD_IS_INFINITE(ix)) {            /* x = +Inf */
         return x + x;
     }
 
-    if (FLT_UWORD_IS_SUBNORMAL(hx)) {
+    if (FLT_UWORD_IS_SUBNORMAL(ix)) {
         k -= 25;
         x *= two25; /* subnormal number, scale up x */
         GET_FLOAT_WORD(hx, x);
     }
 
-    if (hx == 0x3f800000) {                     /* log(1) = +0 */
+    if (hx == 0x3f800000U) {                     /* log(1) = +0 */
         return zero;
     }
 
-    k += (hx >> 23) - 127;
-    hx &= 0x007fffff;
-    i = (hx + (0x4afb0d)) & 0x800000;
-    SET_FLOAT_WORD(x, hx | (i ^ 0x3f800000)); /* normalize x or x/2 */
-    k += (i >> 23);
+    k += (int32_t)(hx >> 23U) - 127;
+    hx &= 0x007fffffU;
+    i = (hx + (0x4afb0dU)) & 0x800000U;
+    SET_FLOAT_WORD(x, hx | (i ^ 0x3f800000U)); /* normalize x or x/2 */
+    k += (int32_t)(i >> 23U);
     y = (float)k;
     f = x - 1.0f;
     hfsq = 0.5f * f * f;

@@ -72,19 +72,19 @@ double log10(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double f, hfsq, hi, lo, r, val_hi, val_lo, w, y, y2;
-    int32_t i, k, hx;
-    uint32_t lx;
+    int32_t k;
+    uint32_t hx, lx, i;
 
     EXTRACT_WORDS(hx, lx, x);
 
     k = 0;
 
-    if (hx < 0x00100000) {              /* x < 2**-1022  */
-        if (((hx & 0x7fffffff) | lx) == 0) {
+    if ((int32_t)hx < 0x00100000) {              /* x < 2**-1022  */
+        if (((hx & 0x7fffffffU) | lx) == 0U) {
             return __raise_div_by_zero(-1.0);     /* log(+-0)=-inf */
         }
 
-        if (hx < 0) {
+        if ((int32_t)hx < 0) {
             if (isnan(x)) {
                 return x + x;
             } else {
@@ -97,26 +97,26 @@ double log10(double x)
         GET_HIGH_WORD(hx, x);
     }
 
-    if (hx >= 0x7ff00000) {             /* x = NaN/+-Inf */
+    if ((int32_t)hx >= 0x7ff00000) {             /* x = NaN/+-Inf */
         return x + x;
     }
 
-    if (hx == 0x3ff00000 && lx == 0) {  /* log(1) = +0 */
+    if (hx == 0x3ff00000U && lx == 0U) {  /* log(1) = +0 */
         return zero;
     }
 
-    k += (hx >> 20) - 1023;
-    hx &= 0x000fffff;
-    i = (hx + 0x95f64) & 0x100000;
-    SET_HIGH_WORD(x, hx | (i ^ 0x3ff00000)); /* normalize x or x/2 */
-    k += (i >> 20);
+    k += (int32_t)(hx >> 20U) - 1023;
+    hx &= 0x000fffffU;
+    i = (hx + 0x95f64U) & 0x100000U;
+    SET_HIGH_WORD(x, hx | (i ^ 0x3ff00000U)); /* normalize x or x/2 */
+    k += (int32_t)(i >> 20U);
     y = (double)k;
     f = x - 1.0;
     hfsq = 0.5 * f * f;
     r = __log1pmf(f);
 
     hi = f - hfsq;
-    SET_LOW_WORD(hi, 0);
+    SET_LOW_WORD(hi, 0U);
     lo = (f - hi) - hfsq + r;
     val_hi = hi * ivln10hi;
     y2 = y * log10_2hi;
