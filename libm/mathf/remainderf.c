@@ -14,15 +14,14 @@ float remainderf(float x, float y)
     y *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t hx, hy;
-    uint32_t sx;
+    uint32_t sx, hx, hy;
     float y_half;
 
     GET_FLOAT_WORD(hx, x);
     GET_FLOAT_WORD(hy, y);
     sx = hx & 0x80000000U;
-    hy &= 0x7fffffff;
-    hx &= 0x7fffffff;
+    hy &= 0x7fffffffU;
+    hx &= 0x7fffffffU;
 
     /* purge off exception values */
     if (FLT_UWORD_IS_NAN(hx) || FLT_UWORD_IS_NAN(hy)) {                 /* x or y is NaN */
@@ -37,14 +36,14 @@ float remainderf(float x, float y)
         x = fmodf(x, 2.0f * y);    /* now x < 2y */
     }
 
-    if ((hx - hy) == 0) {
+    if ((hx - hy) == 0U) {
         return zero * x;
     }
 
     x  = fabsf(x);
     y  = fabsf(y);
 
-    if (hy < 0x01000000) {
+    if (hy < 0x01000000U) {
         if (x + x > y) {
             x -= y;
 
