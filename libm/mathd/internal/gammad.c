@@ -210,12 +210,12 @@ static const double zero =  0.00000000000000000000e+00;
 static double __sin_pi(double x)
 {
     double y, z;
-    int32_t n, ix;
+    uint32_t ix, n;
 
     GET_HIGH_WORD(ix, x);
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix < 0x3fd00000) {
+    if (ix < 0x3fd00000U) {
         return __sin(pi * x, zero, 0);
     }
 
@@ -230,14 +230,14 @@ static double __sin_pi(double x)
     if (z != y) {                   /* inexact anyway */
         y  *= 0.5;
         y   = 2.0 * (y - floor(y)); /* y = |x| mod 2.0 */
-        n   = (int32_t)(y * 4.0);
+        n   = (uint32_t)(y * 4.0);
     } else {
         z = y + two52;              /* exact */
 
         GET_LOW_WORD(n, z);
-        n &= 1;
+        n &= 1U;
         y  = n;
-        n <<= 2;
+        n <<= 2U;
     }
 
     switch (n) {
@@ -271,27 +271,26 @@ static double __sin_pi(double x)
 double __lgamma(double x, int *signgamp)
 {
     double t, y, z, nadj = 0.0, p, p1, p2, p3, q, r, w;
-    int32_t i, hx, lx, ix;
-
+    uint32_t hx, lx, ix, i;
     EXTRACT_WORDS(hx, lx, x);
 
     /* purge off +-inf, NaN, +-0, and negative arguments */
     *signgamp = 1;
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x7ff00000) {
+    if (ix >= 0x7ff00000U) {
         return x * x;
     }
 
-    if ((ix | lx) == 0) {
-        if(hx < 0) {
+    if ((ix | lx) == 0U) {
+        if ((int32_t)hx < 0) {
             *signgamp = -1;
         }
         return __raise_div_by_zero(zero);
     }
 
-    if (ix < 0x3b900000) { /* |x|<2**-70, return -log(|x|) */
-        if (hx < 0) {
+    if (ix < 0x3b900000U) { /* |x|<2**-70, return -log(|x|) */
+        if ((int32_t)hx < 0) {
             *signgamp = -1;
             return -log(-x);
         } else {
@@ -299,8 +298,8 @@ double __lgamma(double x, int *signgamp)
         }
     }
 
-    if (hx < 0) {
-        if (ix >= 0x43300000) { /* |x|>=2**52, must be -integer */
+    if ((int32_t)hx < 0) {
+        if (ix >= 0x43300000U) { /* |x|>=2**52, must be -integer */
             return __raise_div_by_zero(zero);
         }
 
@@ -320,36 +319,36 @@ double __lgamma(double x, int *signgamp)
     }
 
     /* purge off 1 and 2 */
-    if ((((ix - 0x3ff00000) | lx) == 0) || (((ix - 0x40000000) | lx) == 0)) {
-        r = 0;
+    if ((((ix - 0x3ff00000U) | lx) == 0U) || (((ix - 0x40000000U) | lx) == 0U)) {
+        r = 0.0;
     }
     /* for x < 2.0 */
-    else if (ix < 0x40000000) {
-        if (ix <= 0x3feccccc) {  /* lgamma(x) = lgamma(x+1)-log(x) */
+    else if (ix < 0x40000000U) {
+        if (ix <= 0x3fecccccU) {  /* lgamma(x) = lgamma(x+1)-log(x) */
             r = -log(x);
 
-            if (ix >= 0x3FE76944) {
+            if (ix >= 0x3FE76944U) {
                 y = one - x;
-                i = 0;
-            } else if (ix >= 0x3FCDA661) {
+                i = 0U;
+            } else if (ix >= 0x3FCDA661U) {
                 y = x - (tc - one);
-                i = 1;
+                i = 1U;
             } else {
                 y = x;
-                i = 2;
+                i = 2U;
             }
         } else {
             r = zero;
 
-            if (ix >= 0x3FFBB4C3) {
+            if (ix >= 0x3FFBB4C3U) {
                 y = 2.0 - x;    /* [1.7316,2] */
-                i = 0;
-            } else if (ix >= 0x3FF3B4C4) {
+                i = 0U;
+            } else if (ix >= 0x3FF3B4C4U) {
                 y = x - tc;    /* [1.23,1.73] */
-                i = 1;
+                i = 1U;
             } else {
                 y = x - one;
-                i = 2;
+                i = 2U;
             }
         }
 
@@ -379,8 +378,8 @@ double __lgamma(double x, int *signgamp)
             r += (-0.5 * y + p1 / p2);
             break;
         }
-    } else if (ix < 0x40200000) {        /* x < 8.0 */
-        i = (int32_t)x;
+    } else if (ix < 0x40200000U) {        /* x < 8.0 */
+        i = (uint32_t)x;
         y = x - (double)i;
         p = y * (s0 + y * (s1 + y * (s2 + y * (s3 + y * (s4 + y * (s5 + y * s6))))));
         q = one + y * (r1 + y * (r2 + y * (r3 + y * (r4 + y * (r5 + y * r6)))));
@@ -408,7 +407,7 @@ double __lgamma(double x, int *signgamp)
             break;
         }
 
-    } else if (ix < 0x43900000) {    /* 8.0 <= x < 2**58 */
+    } else if (ix < 0x43900000U) {    /* 8.0 <= x < 2**58 */
         t = log(x);
         z = one / x;
         y = z * z;
@@ -418,7 +417,7 @@ double __lgamma(double x, int *signgamp)
         r =  x * (log(x) - one);
     }
 
-    if (hx < 0) {
+    if ((int32_t)hx < 0) {
         r = nadj - r;
     }
 

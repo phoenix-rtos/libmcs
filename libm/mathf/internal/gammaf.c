@@ -79,12 +79,12 @@ static const float zero =  0.0000000000e+00f;
 static float __sin_pif(float x)
 {
     float y, z;
-    int32_t n, ix;
+    uint32_t ix, n;
 
     GET_FLOAT_WORD(ix, x);
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix < 0x3e800000) {
+    if (ix < 0x3e800000U) {
         return __sinf(pi * x, zero, 0);
     }
 
@@ -99,14 +99,14 @@ static float __sin_pif(float x)
     if (z != y) {                       /* inexact anyway */
         y  *= 0.5f;
         y   = 2.0f * (y - floorf(y));   /* y = |x| mod 2.0 */
-        n   = (int32_t)(y * 4.0f);
+        n   = (uint32_t)(y * 4.0f);
     } else {
         z = y + two23;                  /* exact */
 
         GET_FLOAT_WORD(n, z);
-        n &= 1;
-        y  = n;
-        n <<= 2;
+        n &= 1U;
+        y  = (float)n;
+        n <<= 2U;
     }
 
     switch (n) {
@@ -140,27 +140,27 @@ static float __sin_pif(float x)
 float __lgammaf(float x, int *signgamp)
 {
     float t, y, z, nadj = 0.0f, p, p1, p2, p3, q, r, w;
-    int32_t i, hx, ix;
+    uint32_t hx, ix, i;
 
     GET_FLOAT_WORD(hx, x);
 
     /* purge off +-inf, NaN, +-0, and negative arguments */
     *signgamp = 1;
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x7f800000) {
+    if (ix >= 0x7f800000U) {
         return x * x;
     }
 
-    if (ix == 0) {
-        if(hx < 0) {
+    if (ix == 0U) {
+        if ((int32_t)hx < 0) {
             *signgamp = -1;
         }
         return __raise_div_by_zerof(zero);
     }
 
-    if (ix < 0x30800000) { /* |x|<2**-30, return -log(|x|) */
-        if (hx < 0) {
+    if (ix < 0x30800000U) { /* |x|<2**-30, return -log(|x|) */
+        if ((int32_t)hx < 0) {
             *signgamp = -1;
             return -logf(-x);
         } else {
@@ -168,8 +168,8 @@ float __lgammaf(float x, int *signgamp)
         }
     }
 
-    if (hx < 0) {
-        if (ix >= 0x4b000000) { /* |x|>=2**23, must be -integer */
+    if ((int32_t)hx < 0) {
+        if (ix >= 0x4b000000U) { /* |x|>=2**23, must be -integer */
             return __raise_div_by_zerof(zero);
         }
 
@@ -189,36 +189,36 @@ float __lgammaf(float x, int *signgamp)
     }
 
     /* purge off 1 and 2 */
-    if (ix == 0x3f800000 || ix == 0x40000000) {
+    if (ix == 0x3f800000U || ix == 0x40000000U) {
         r = zero;
     }
     /* for x < 2.0 */
-    else if (ix < 0x40000000) {
-        if (ix <= 0x3f666666) {  /* lgamma(x) = lgamma(x+1)-log(x) */
+    else if (ix < 0x40000000U) {
+        if (ix <= 0x3f666666U) {  /* lgamma(x) = lgamma(x+1)-log(x) */
             r = -logf(x);
 
-            if (ix >= 0x3f3b4a20) {
+            if (ix >= 0x3f3b4a20U) {
                 y = one - x;
-                i = 0;
-            } else if (ix >= 0x3e6d3308) {
+                i = 0U;
+            } else if (ix >= 0x3e6d3308U) {
                 y = x - (tc - one);
-                i = 1;
+                i = 1U;
             } else {
                 y = x;
-                i = 2;
+                i = 2U;
             }
         } else {
             r = zero;
 
-            if (ix >= 0x3fdda618) {
+            if (ix >= 0x3fdda618U) {
                 y = 2.0f - x;    /* [1.7316,2] */
-                i = 0;
-            } else if (ix >= 0x3F9da620) {
+                i = 0U;
+            } else if (ix >= 0x3F9da620U) {
                 y = x - tc;    /* [1.23,1.73] */
-                i = 1;
+                i = 1U;
             } else {
                 y = x - one;
-                i = 2;
+                i = 2U;
             }
         }
 
@@ -248,8 +248,8 @@ float __lgammaf(float x, int *signgamp)
             r += (-0.5f * y + p1 / p2);
             break;
         }
-    } else if (ix < 0x41000000) {        /* x < 8.0 */
-        i = (int32_t)x;
+    } else if (ix < 0x41000000U) {        /* x < 8.0 */
+        i = (uint32_t)x;
         y = x - (float)i;
         p = y * (s0 + y * (s1 + y * (s2 + y * (s3 + y * (s4 + y * (s5 + y * s6))))));
         q = one + y * (r1 + y * (r2 + y * (r3 + y * (r4 + y * (r5 + y * r6)))));
@@ -278,7 +278,7 @@ float __lgammaf(float x, int *signgamp)
         }
 
         /* 8.0 <= x < 2**58 */
-    } else if (ix < 0x5c800000) {
+    } else if (ix < 0x5c800000U) {
         t = logf(x);
         z = one / x;
         y = z * z;
@@ -290,7 +290,7 @@ float __lgammaf(float x, int *signgamp)
         r =  x * (logf(x) - one);
     }
 
-    if (hx < 0) {
+    if ((int32_t)hx < 0) {
         r = nadj - r;
     }
 
