@@ -6,25 +6,24 @@
 
 long int lroundf(float x)
 {
-    int32_t exponent_less_127;
+    int32_t exponent_less_127, sign;
     uint32_t w;
     long int result;
-    int32_t sign;
 
     GET_FLOAT_WORD(w, x);
-    exponent_less_127 = ((w & 0x7f800000) >> 23) - 127;
-    sign = (w & 0x80000000U) != 0 ? -1 : 1;
-    w &= 0x7fffff;
-    w |= 0x800000;
+    exponent_less_127 = (int32_t)((w & 0x7f800000U) >> 23U) - 127;
+    sign = (w & (uint32_t)0x80000000U) != 0U ? -1 : 1;
+    w &= 0x7fffffU;
+    w |= 0x800000U;
 
-    if (exponent_less_127 < (int32_t)((8 * sizeof(long int)) - 1)) {
+    if (exponent_less_127 < (int32_t)((8U * sizeof(long int)) - 1U)) {
         if (exponent_less_127 < 0) {
             return exponent_less_127 < -1 ? 0 : sign;
         } else if (exponent_less_127 >= 23) {
-            result = (long int) w << (exponent_less_127 - 23);
+            result = (long int) (w << (uint32_t)(exponent_less_127 - 23));
         } else {
-            w += 0x400000 >> exponent_less_127;
-            result = w >> (23 - exponent_less_127);
+            w += 0x400000U >> (uint32_t)exponent_less_127;
+            result = w >> (uint32_t)(23 - exponent_less_127);
         }
     } else {
         (void) __raise_invalidf();
