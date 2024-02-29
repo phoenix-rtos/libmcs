@@ -69,8 +69,8 @@ static const double TWO52[2] = {
 
 long int lrint(double x)
 {
-    int32_t _i0, _j0, sx;
-    uint32_t i1;
+    int32_t _j0;
+    uint32_t _i0, i1, sx;
     double t;
     volatile double w;
     long int result;
@@ -78,10 +78,10 @@ long int lrint(double x)
     EXTRACT_WORDS(_i0, i1, x);
 
     /* Extract sign bit. */
-    sx = (_i0 >> 31) & 1;
+    sx = (_i0 >> 31U) & 1U;
 
     /* Extract exponent field. */
-    _j0 = ((_i0 & 0x7ff00000) >> 20) - 1023;
+    _j0 = (int32_t)((_i0 & 0x7ff00000U) >> 20U) - 1023;
     /* _j0 in [-1023,1024] */
 
     if (_j0 < 20) {
@@ -97,35 +97,35 @@ long int lrint(double x)
 
             /* Detect the all-zeros representation of plus and
                minus zero, which fails the calculation below. */
-            if ((_i0 & ~(1U << 31)) == 0) {
+            if ((_i0 & ~((uint32_t)1U << 31U)) == 0U) {
                 return 0;
             }
 
             /* After round:  _j0 in [0,20] */
-            _j0 = ((_i0 & 0x7ff00000) >> 20) - 1023;
-            _i0 &= 0x000fffff;
-            _i0 |= 0x00100000;
+            _j0 = (int32_t)((_i0 & 0x7ff00000U) >> 20U) - 1023;
+            _i0 &= 0x000fffffU;
+            _i0 |= 0x00100000U;
             /* shift amt in [20,0] */
-            result = _i0 >> (20 - _j0);
+            result = _i0 >> (uint32_t)(20 - _j0);
         }
-    } else if ((uint32_t)_j0 < (8 * sizeof(long int)) - 1) {
+    } else if (_j0 < (8 * (int32_t)sizeof(long int)) - 1) {
         /* 32bit return: _j0 in [20,30] */
         /* 64bit return: _j0 in [20,62] */
         if (_j0 >= 52) {
             /* 64bit return: _j0 in [52,62] */
             /* 64bit return: left shift amt in [32,42] */
-            result = ((long int)((_i0 & 0x000fffff) | 0x00100000) << (_j0 - 20)) |
+            result = (long int)(((unsigned long int)((_i0 & 0x000fffffU) | 0x00100000U) << (unsigned long int)(_j0 - 20)) |
                      /* 64bit return: right shift amt in [0,10] */
-                     ((long int) i1 << (_j0 - 52));
+                     ((unsigned long int) i1 << (unsigned long int)(_j0 - 52)));
         } else {
             /* 32bit return: _j0 in [20,30] */
             /* 64bit return: _j0 in [20,51] */
             w = TWO52[sx] + x;
             t = w - TWO52[sx];
             EXTRACT_WORDS(_i0, i1, t);
-            _j0 = ((_i0 & 0x7ff00000) >> 20) - 1023;
-            _i0 &= 0x000fffff;
-            _i0 |= 0x00100000;
+            _j0 = (int32_t)((_i0 & 0x7ff00000U) >> 20U) - 1023;
+            _i0 &= 0x000fffffU;
+            _i0 |= 0x00100000U;
             /* After round:
             * 32bit return: _j0 in [20,31];
             * 64bit return: _j0 in [20,52] */
@@ -133,11 +133,12 @@ long int lrint(double x)
             /* 64bit return: left shift amt in [0,32] */
             /* ***32bit return: right shift amt in [32,21] */
             /* ***64bit return: right shift amt in [32,0] */
-            result = ((long int) _i0 << (_j0 - 20)) | SAFE_RIGHT_SHIFT(i1, (uint32_t)(52 - _j0));
+            result = (long int)(((unsigned long int) _i0 << (uint32_t)(_j0 - 20)) | 
+                                (unsigned long int) SAFE_RIGHT_SHIFT(i1, (uint32_t)(52 - _j0)));
         }
     } else {
         (void) __raise_invalid();
-        if (sx != 0) {
+        if (sx != 0U) {
             return __MIN_LONG;
         }
         else {
@@ -145,7 +146,7 @@ long int lrint(double x)
         }
     }
 
-    return (sx != 0) ? -result : result;
+    return (sx != 0U) ? -result : result;
 }
 
 #ifdef __LIBMCS_LONG_DOUBLE_IS_64BITS

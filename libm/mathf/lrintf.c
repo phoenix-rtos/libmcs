@@ -26,8 +26,8 @@ TWO23[2] = {
 
 long int lrintf(float x)
 {
-    int32_t _j0, sx;
-    uint32_t _i0;
+    int32_t _j0;
+    uint32_t _i0, sx;
     float t;
     volatile float w;
     long int result;
@@ -35,16 +35,16 @@ long int lrintf(float x)
     GET_FLOAT_WORD(_i0, x);
 
     /* Extract sign bit. */
-    sx = (_i0 >> 31);
+    sx = (_i0 >> 31U);
 
     /* Extract exponent field. */
-    _j0 = ((_i0 & 0x7f800000) >> 23) - 127;
+    _j0 = (int32_t)((_i0 & 0x7f800000U) >> 23U) - 127;
 
-    if (_j0 < (int32_t)(sizeof(long int) * 8) - 1) {
+    if (_j0 < (int32_t)(sizeof(long int) * 8U) - 1) {
         if (_j0 < -1) {
             return 0;
         } else if (_j0 >= 23) {
-            result = (long int)((_i0 & 0x7fffff) | 0x800000) << (_j0 - 23);
+            result = (long int)(((_i0 & 0x7fffffU) | 0x800000U) << (uint32_t)(_j0 - 23));
         } else {
             w = TWO23[sx] + x;
             t = w - TWO23[sx];
@@ -52,18 +52,18 @@ long int lrintf(float x)
 
             /* Detect the all-zeros representation of plus and
                minus zero, which fails the calculation below. */
-            if ((_i0 & ~(1U << 31)) == 0) {
+            if ((_i0 & ~((uint32_t)1U << 31U)) == 0U) {
                 return 0;
             }
 
-            _j0 = ((_i0 >> 23) & 0xff) - 0x7f;
-            _i0 &= 0x7fffff;
-            _i0 |= 0x800000;
-            result = _i0 >> (23 - _j0);
+            _j0 = (int32_t)((_i0 >> 23U) & 0xffU) - 0x7f;
+            _i0 &= 0x7fffffU;
+            _i0 |= 0x800000U;
+            result = _i0 >> (uint32_t)(23 - _j0);
         }
     } else {
         (void) __raise_invalidf();
-        if (sx != 0) {
+        if (sx != 0U) {
             return __MIN_LONG;
         }
         else {
@@ -71,7 +71,7 @@ long int lrintf(float x)
         }
     }
 
-    return (sx != 0) ? -result : result;
+    return (sx != 0U) ? -result : result;
 }
 
 #ifdef __LIBMCS_DOUBLE_IS_32BITS
