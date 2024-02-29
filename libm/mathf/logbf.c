@@ -19,17 +19,18 @@ float logbf(float x)
     x *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t hx, ix;
+    uint32_t hx;
+    int32_t ix;
 
     GET_FLOAT_WORD(hx, x);
-    hx &= 0x7fffffff;
+    hx &= 0x7fffffffU;
 
     if (FLT_UWORD_IS_ZERO(hx))  {
         return __raise_div_by_zerof(-1.0f);  /* logbf(0) = -inf */
     }
 
     if (FLT_UWORD_IS_SUBNORMAL(hx)) {
-        for (ix = -126, hx <<= 8; hx > 0; hx <<= 1) {
+        for (ix = -126, hx <<= 8U; (int32_t)hx > 0; hx <<= 1U) {
             ix -= 1;
         }
 
@@ -37,7 +38,7 @@ float logbf(float x)
     } else if (!FLT_UWORD_IS_FINITE(hx)) {   /* x = NaN/+-Inf */
         return x * x;
     } else {
-        return (float)((hx >> 23) - 127);
+        return (float)((int32_t)(hx >> 23U) - 127);
     }
 }
 

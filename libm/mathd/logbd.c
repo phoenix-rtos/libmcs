@@ -62,30 +62,30 @@ double logb(double x)
 #ifdef __LIBMCS_FPU_DAZ
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
-
-    int32_t hx, lx, ix;
+    uint32_t hx, lx;
+    int32_t i;
 
     EXTRACT_WORDS(hx, lx, x);
-    hx &= 0x7fffffff;        /* high |x| */
+    hx &= 0x7fffffffU;        /* high |x| */
 
-    if (hx < 0x00100000) {     /* 0 or subnormal */
-        if ((hx | lx) == 0)  {
+    if (hx < 0x00100000U) {     /* 0 or subnormal */
+        if ((hx | lx) == 0U)  {
             return __raise_div_by_zero(-1.0);  /* logb(0) = -inf */
         } else {         /* subnormal x */
-            if (hx == 0) {
-                for (ix = -1043; lx > 0; lx <<= 1) {
-                    ix -= 1;
+            if (hx == 0U) {
+                for (i = -1043; (int32_t)lx > 0; lx <<= 1U) {
+                    i -= 1;
                 }
             } else {
-                for (ix = -1022, hx <<= 11; hx > 0; hx <<= 1) {
-                    ix -= 1;
+                for (i = -1022, hx <<= 11; (int32_t)hx > 0; hx <<= 1U) {
+                    i -= 1;
                 }
             }
         }
 
-        return (double) ix;
-    } else if (hx < 0x7ff00000) {
-        return (hx >> 20) - 1023;    /* normal # */
+        return (double) i;
+    } else if (hx < 0x7ff00000U) {
+        return (double)((int32_t)(hx >> 20U) - 1023);    /* normal # */
     } else {
         return x * x;    /* x = NaN/+-Inf */
     }
