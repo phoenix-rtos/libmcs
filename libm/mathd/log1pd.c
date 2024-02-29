@@ -136,23 +136,24 @@ double log1p(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double hfsq, f, c, R, u;
-    int32_t k, hx, hu, ax;
+    int32_t k; 
+    uint32_t hx, hu, ax;
 
     c = NAN; /* initial value of c is never actually used */
     f = NAN; /* initial value of f is never actually used */
     hu = INT_MAX; /* initial value of hu is never actually used */
 
     GET_HIGH_WORD(hx, x);
-    ax = hx & 0x7fffffff;
+    ax = hx & 0x7fffffffU;
 
     k = 1;
 
-    if (hx >= 0x7ff00000) {                /* x = NaN/+-Inf */
+    if ((int32_t)hx >= 0x7ff00000) {                /* x = NaN/+-Inf */
         return x + x;
     }
 
-    if (hx < 0x3FDA827A) {                 /* x < 0.41422  */
-        if (ax >= 0x3ff00000) {            /* x <= -1.0 */
+    if ((int32_t)hx < 0x3FDA827A) {                 /* x < 0.41422  */
+        if (ax >= 0x3ff00000U) {            /* x <= -1.0 */
             if (isnan(x)) {
                 return x + x;
             } else if (x == -1.0) {
@@ -162,15 +163,15 @@ double log1p(double x)
             }
         }
 
-        if (ax < 0x3e200000) {             /* |x| < 2**-29 */
-            if (ax < 0x3c900000) {         /* |x| < 2**-54 */
+        if (ax < 0x3e200000U) {             /* |x| < 2**-29 */
+            if (ax < 0x3c900000U) {         /* |x| < 2**-54 */
                 return __raise_inexact(x);
             } else {
                 return __raise_inexact(x - x * x * 0.5);
             }
         }
 
-        if (hx > 0 || hx <= ((int32_t)0xbfd2bec3U)) {
+        if ((int32_t)hx > 0 || (int32_t)hx <= ((int32_t)0xbfd2bec3U)) {
             k = 0;
             f = x;
             hu = 1;
@@ -178,27 +179,27 @@ double log1p(double x)
     }
 
     if (k != 0) {
-        if (hx < 0x43400000) {
+        if ((int32_t)hx < 0x43400000) {
             u  = 1.0 + x;
             GET_HIGH_WORD(hu, u);
-            k  = (hu >> 20) - 1023;
+            k  = (int32_t)(hu >> 20U) - 1023;
             c  = (k > 0) ? 1.0 - (u - x) : x - (u - 1.0); /* correction term */
             c /= u;
         } else {
             u  = x;
             GET_HIGH_WORD(hu, u);
-            k  = (hu >> 20) - 1023;
+            k  = (int32_t)(hu >> 20U) - 1023;
             c  = 0;
         }
 
-        hu &= 0x000fffff;
+        hu &= 0x000fffffU;
 
-        if (hu < 0x6a09e) {
-            SET_HIGH_WORD(u, hu | 0x3ff00000); /* normalize u */
+        if ((int32_t)hu < 0x6a09e) {
+            SET_HIGH_WORD(u, hu | 0x3ff00000U); /* normalize u */
         } else {
             k += 1;
-            SET_HIGH_WORD(u, hu | 0x3fe00000); /* normalize u/2 */
-            hu = (0x00100000 - hu) >> 2;
+            SET_HIGH_WORD(u, hu | 0x3fe00000U); /* normalize u/2 */
+            hu = (uint32_t)(0x00100000 - (int32_t)hu) >> 2U;
         }
 
         f = u - 1.0;
@@ -206,21 +207,21 @@ double log1p(double x)
 
     hfsq = 0.5 * f * f;
 
-    if (hu == 0) { /* |f| < 2**-20 */
+    if (hu == 0U) { /* |f| < 2**-20 */
         if (f == zero) {
-            c += k * ln2_lo;
-            return k * ln2_hi + c;
+            c += (double)k * ln2_lo;
+            return (double)k * ln2_hi + c;
         }
 
         R = hfsq * (1.0 - 0.66666666666666666 * f);
 
-        return k * ln2_hi - ((R - (k * ln2_lo + c)) - f);
+        return (double)k * ln2_hi - ((R - ((double)k * ln2_lo + c)) - f);
     }
 
     if (k == 0) {
         return f - (hfsq - __log1pmf(f));
     } else {
-        return k * ln2_hi - ((hfsq - (__log1pmf(f) + (k * ln2_lo + c))) - f);
+        return (double)k * ln2_hi - ((hfsq - (__log1pmf(f) + ((double)k * ln2_lo + c))) - f);
     }
 }
 
