@@ -84,30 +84,30 @@ double y0(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double z, s, c, ss, cc, u, v;
-    int32_t hx, ix, lx;
+    uint32_t hx, lx, ix;
 
     EXTRACT_WORDS(hx, lx, x);
-    ix = 0x7fffffff & hx;
+    ix = 0x7fffffffU & hx;
 
-    if (ix >= 0x7ff00000) {
+    if (ix >= 0x7ff00000U) {
         if (isnan(x)) {     /* y0(NaN) = NaN */
             return x + x;
-        } else if (hx > 0) {  /* y0(+Inf) = +0.0 */
+        } else if ((int32_t)hx > 0) {  /* y0(+Inf) = +0.0 */
             return zero;
         } else {
             /* No action required */
         }
     }
 
-    if ((ix | lx) == 0) {   /* y0(+-0) = +Inf */
+    if ((ix | lx) == 0U) {   /* y0(+-0) = +Inf */
         return __raise_div_by_zero(-1.0);
     }
 
-    if (hx < 0) {           /* y0(<0) = NaN, y0(-Inf) = NaN */
+    if ((int32_t)hx < 0) {           /* y0(<0) = NaN, y0(-Inf) = NaN */
         return __raise_invalid();
     }
 
-    if (ix >= 0x40000000) { /* |x| >= 2.0 */
+    if (ix >= 0x40000000U) { /* |x| >= 2.0 */
         /* y0(x) = sqrt(2/(pi*x))*(p0(x)*sin(x0)+q0(x)*cos(x0))
          * where x0 = x-pi/4
          *      Better formula:
@@ -128,7 +128,7 @@ double y0(double x)
          * j0(x) = 1/sqrt(pi) * (P(0,x)*cc - Q(0,x)*ss) / sqrt(x)
          * y0(x) = 1/sqrt(pi) * (P(0,x)*ss + Q(0,x)*cc) / sqrt(x)
          */
-        if (ix < 0x7fe00000) { /* make sure x+x not overflow */
+        if (ix < 0x7fe00000U) { /* make sure x+x not overflow */
             z = -cos(x + x);
 
             if ((s * c) < zero) {
@@ -138,7 +138,7 @@ double y0(double x)
             }
         }
 
-        if (ix > 0x48000000) {
+        if (ix > 0x48000000U) {
             z = (invsqrtpi * ss) / sqrt(x);
         } else {
             u = __j0_p(x);
@@ -149,7 +149,7 @@ double y0(double x)
         return z;
     }
 
-    if (ix <= 0x3e400000) { /* x < 2**-27 */
+    if (ix <= 0x3e400000U) { /* x < 2**-27 */
         return (u00 + tpi * log(x));
     }
 
