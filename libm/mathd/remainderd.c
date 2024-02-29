@@ -104,43 +104,42 @@ double remainder(double x, double y)
     y *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t hx, hy;
-    uint32_t sx, lx, ly;
+    uint32_t sx, lx, ly, hx, hy;
     double y_half;
 
     EXTRACT_WORDS(hx, lx, x);
     EXTRACT_WORDS(hy, ly, y);
     sx = hx & 0x80000000U;
-    hy &= 0x7fffffff;
-    hx &= 0x7fffffff;
+    hy &= 0x7fffffffU;
+    hx &= 0x7fffffffU;
 
     /* purge off exception values */
-    if ((hx >= 0x7ff00000) || (hy >= 0x7ff00000)) { /* x or y not finite */
+    if ((hx >= 0x7ff00000U) || (hy >= 0x7ff00000U)) { /* x or y not finite */
         if (isnan(x) || isnan(y)) {                 /* x or y is NaN */
             return x + y;
-        } else if (hx == 0x7ff00000) {              /* x is infinite */
+        } else if (hx == 0x7ff00000U) {              /* x is infinite */
             return __raise_invalid();
         } else {
             /* No action required */
         }
-    } else if ((hy | ly) == 0) {                    /* y = 0 */
+    } else if ((hy | ly) == 0U) {                    /* y = 0 */
         return __raise_invalid();
     } else {
         /* No action required */
     }
 
-    if (hy <= 0x7fdfffff) {
-        x = fmod(x, 2 * y);                         /* now x < 2y */
+    if (hy <= 0x7fdfffffU) {
+        x = fmod(x, 2.0 * y);                         /* now x < 2y */
     }
 
-    if (((hx - hy) | (lx - ly)) == 0) {             /* x equals y */
+    if (((hx - hy) | (lx - ly)) == 0U) {             /* x equals y */
         return zero * x;
     }
 
     x  = fabs(x);
     y  = fabs(y);
 
-    if (hy < 0x00200000) {
+    if (hy < 0x00200000U) {
         if (x + x > y) {
             x -= y;
 
