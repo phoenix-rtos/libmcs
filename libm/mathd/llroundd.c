@@ -69,11 +69,11 @@ long long int llround(double x)
     EXTRACT_WORDS(msw, lsw, x);
 
     /* Extract sign. */
-    sign = ((msw & 0x80000000U) ? -1 : 1);
+    sign = ((bool)(msw & 0x80000000U) ? -1 : 1);
     /* Extract exponent field. */
-    exponent_less_1023 = ((msw & 0x7ff00000) >> 20) - 1023;
-    msw &= 0x000fffff;
-    msw |= 0x00100000;
+    exponent_less_1023 = (int32_t)((msw & 0x7ff00000U) >> 20U) - 1023;
+    msw &= 0x000fffffU;
+    msw |= 0x00100000U;
 
     /* exponent_less_1023 in [-1023,1024] */
     if (exponent_less_1023 < 20) {
@@ -87,31 +87,31 @@ long long int llround(double x)
         } else {
             /* exponent_less_1023 in [0,19] */
             /* shift amt in [0,19] */
-            msw += 0x80000 >> exponent_less_1023;
+            msw += 0x80000U >> (uint32_t)exponent_less_1023;
             /* shift amt in [20,1] */
-            result = msw >> (20 - exponent_less_1023);
+            result = msw >> (20U - (uint32_t)exponent_less_1023);
         }
-    } else if ((uint32_t)exponent_less_1023 < (8 * sizeof(long long int)) - 1) {
+    } else if ((uint32_t)exponent_less_1023 < (8U * sizeof(long long int)) - 1U) {
         /* 64bit longlong: exponent_less_1023 in [20,62] */
         if (exponent_less_1023 >= 52) {
             /* 64bit longlong: exponent_less_1023 in [52,62] */
             /* 64bit longlong: shift amt in [32,42] */
-            result = ((long long int) msw << (exponent_less_1023 - 20))
+            result = (long long int)(((unsigned long long int)msw << (unsigned long long int)(exponent_less_1023 - 20)) |
                      /* 64bit longlong: shift amt in [0,10] */
-                     | ((long long int) lsw << (exponent_less_1023 - 52));
+                                   ((unsigned long long int)lsw << ((unsigned long long int)exponent_less_1023 - 52U)));
         } else {
             /* 64bit longlong: exponent_less_1023 in [20,51] */
             /* 64bit longlong: shift amt in [0,31] */
-            uint32_t tmp = lsw + (0x80000000U >> (exponent_less_1023 - 20));
+            uint32_t tmp = lsw + (0x80000000U >> ((uint32_t)exponent_less_1023 - 20U));
 
             if (tmp < lsw) {
                 ++msw;
             }
 
             /* 64bit longlong: shift amt in [0,31] */
-            result = ((long long int) msw << (exponent_less_1023 - 20))
+            result = (long long int)(((unsigned long long int)msw << (unsigned long long int)(exponent_less_1023 - 20)) |
                      /* ***64bit longlong: shift amt in [32,1] */
-                     | SAFE_RIGHT_SHIFT(tmp, (uint32_t)(52 - exponent_less_1023));
+                                      (unsigned long long int)SAFE_RIGHT_SHIFT(tmp, (uint32_t)(52 - exponent_less_1023)));
         }
     } else {   /* Result is too large to be represented by a long long int. */
         (void) __raise_invalid();
