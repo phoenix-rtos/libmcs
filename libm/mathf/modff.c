@@ -13,8 +13,8 @@ float modff(float x, float *iptr)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float _xi = 0.0f;
-    int32_t _i0, _j0;
-    uint32_t i;
+    int32_t _j0;
+    uint32_t i, _i0;
 
     assert(iptr != (void*)0U);
     if (iptr == (void*)0U) {
