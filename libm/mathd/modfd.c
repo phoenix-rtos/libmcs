@@ -83,7 +83,7 @@ double modf(double x, double *iptr)
             INSERT_WORDS(*iptr, _i0 & 0x80000000U, 0U); /* *iptr = +-0 */
             return x;
         } else {
-            i = (0x000fffff) >> _j0;
+            i = 0x000fffffU >> (uint32_t)_j0;
 
             if (((_i0 & i) | _i1) == 0U) {              /* x is integral */
                 *iptr = x;
