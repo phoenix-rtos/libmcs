@@ -21,7 +21,7 @@
  *     SET_LOW_WORD(d,v);                       // this macro has no return value, the inputs are expected to be (double, int)
  *     GET_FLOAT_WORD(i,d);                     // this macro has no return value, the inputs are expected to be (int, float)
  *     SET_FLOAT_WORD(d,i);                     // this macro has no return value, the inputs are expected to be (float, int)
- *     SAFE_RIGHT_SHIFT(op,amt);                // this macros return value has the same type as input `op`, the inputs are expected to be integer types
+ *     SAFE_RIGHT_SHIFT(op,amt);                // this macros return value has the same type as input `op`, the inputs are expected to be unsigned integer types
  *     double __forced_calculation(double x);
  *     float __forced_calculationf(float x);
  *     double __raise_invalid(void);
@@ -324,7 +324,7 @@ typedef union {
    of a shift is exactly equal to the size of the shifted operand.  */
 
 #define SAFE_RIGHT_SHIFT(op,amt)                        \
-    (((amt) < 8 * sizeof(op)) ? ((op) >> (amt)) : 0)
+    (((amt) < 8U * sizeof(op)) ? ((op) >> (amt)) : 0U)
 
 /* Exception raising and signaling check functions */
 
@@ -399,7 +399,7 @@ static inline float __raise_inexactf(float x) {
 static inline int __issignaling(double x) {
     uint32_t hx;
     GET_HIGH_WORD(hx, x);
-    if (isnan(x) && (hx & 0x00080000U) == 0) {
+    if (isnan(x) && (hx & 0x00080000U) == 0U) {
         return 1;
     }
     else {
@@ -409,7 +409,7 @@ static inline int __issignaling(double x) {
 static inline int __issignalingf(float x) {
     uint32_t ix;
     GET_FLOAT_WORD(ix, x);
-    if (FLT_UWORD_IS_NAN(ix & 0x7fffffffU) && (ix & 0x00400000U) == 0) {
+    if (FLT_UWORD_IS_NAN(ix & 0x7fffffffU) && (ix & 0x00400000U) == 0U) {
         return 1;
     }
     else {
