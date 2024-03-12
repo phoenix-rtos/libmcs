@@ -39,15 +39,15 @@
 #endif /* LIBMCS_LONG_DOUBLE_IS_64BITS */
 
 /* Define to tell the libm to be built for 32bit long int. */
-#define __MAX_LONG_LONG 0x7FFFFFFFFFFFFFFFLL
-#define __MIN_LONG_LONG 0x8000000000000000LL
+#define __MAX_LONG_LONG 0x7FFFFFFFFFFFFFFFULL
+#define __MIN_LONG_LONG (long long int)0x8000000000000000ULL
 #ifdef LIBMCS_LONG_IS_32BITS
     #define __LIBMCS_LONG_IS_32BITS
-    #define __MAX_LONG 0x7FFFFFFFL
-    #define __MIN_LONG 0x80000000L
+    #define __MAX_LONG 0x7FFFFFFFUL
+    #define __MIN_LONG (long int)0x80000000UL
 #else
     #define __MAX_LONG 0x7FFFFFFFFFFFFFFFL
-    #define __MIN_LONG 0x8000000000000000L
+    #define __MIN_LONG (long int)0x8000000000000000UL
 #endif /* LIBMCS_LONG_IS_32BITS */
 
 /* Most routines need to check whether a float is finite, infinite, or not a
@@ -87,16 +87,16 @@
     (255 if the largest exponent is used for finite numbers, 254
     otherwise) */
 
-#define FLT_UWORD_IS_FINITE(x) ((x)<0x7f800000L)
-#define FLT_UWORD_IS_NAN(x) ((x)>0x7f800000L)
-#define FLT_UWORD_IS_INFINITE(x) ((x)==0x7f800000L)
-#define FLT_UWORD_MAX 0x7f7fffffL
-#define FLT_UWORD_EXP_MAX 0x43000000
-#define FLT_UWORD_LOG_MAX 0x42b17217
-#define FLT_UWORD_LOG_2MAX 0x42b2d4fc
+#define FLT_UWORD_IS_FINITE(x) ((x)<0x7f800000U)
+#define FLT_UWORD_IS_NAN(x) ((x)>0x7f800000U)
+#define FLT_UWORD_IS_INFINITE(x) ((x)==0x7f800000U)
+#define FLT_UWORD_MAX 0x7f7fffffU
+#define FLT_UWORD_EXP_MAX 0x43000000U
+#define FLT_UWORD_LOG_MAX 0x42b17217U
+#define FLT_UWORD_LOG_2MAX 0x42b2d4fcU
 #define HUGE ((float)3.40282346638528860e+38)
-#define FLT_UWORD_HALF_MAX (FLT_UWORD_MAX-(1L<<23))
-#define FLT_LARGEST_EXP (FLT_UWORD_MAX>>23)
+#define FLT_UWORD_HALF_MAX (FLT_UWORD_MAX-((uint32_t)1U<<23U))
+#define FLT_LARGEST_EXP (FLT_UWORD_MAX>>23U)
 
 /* Many routines check for zero and subnormal numbers.  Such things depend
    on whether the target supports denormals or not:
@@ -126,18 +126,18 @@
 */
 
 #ifdef __LIBMCS_FPU_DAZ
-    #define FLT_UWORD_IS_ZERO(x) ((x)<0x00800000L)
+    #define FLT_UWORD_IS_ZERO(x) ((x)<0x00800000U)
     #define FLT_UWORD_IS_SUBNORMAL(x) 0
-    #define FLT_UWORD_MIN 0x00800000
-    #define FLT_UWORD_EXP_MIN 0x42fc0000
-    #define FLT_UWORD_LOG_MIN 0x42aeac50
+    #define FLT_UWORD_MIN 0x00800000U
+    #define FLT_UWORD_EXP_MIN 0x42fc0000U
+    #define FLT_UWORD_LOG_MIN 0x42aeac50U
     #define FLT_SMALLEST_EXP 1
 #else
-    #define FLT_UWORD_IS_ZERO(x) ((x)==0)
-    #define FLT_UWORD_IS_SUBNORMAL(x) ((x)<0x00800000L)
-    #define FLT_UWORD_MIN 0x00000001
-    #define FLT_UWORD_EXP_MIN 0x43160000
-    #define FLT_UWORD_LOG_MIN 0x42cff1b5
+    #define FLT_UWORD_IS_ZERO(x) ((x)==0U)
+    #define FLT_UWORD_IS_SUBNORMAL(x) ((x)<0x00800000U)
+    #define FLT_UWORD_MIN 0x00000001U
+    #define FLT_UWORD_EXP_MIN 0x43160000U
+    #define FLT_UWORD_LOG_MIN 0x42cff1b5U
     #define FLT_SMALLEST_EXP -22
 #endif
 
