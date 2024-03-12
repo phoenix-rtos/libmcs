@@ -148,9 +148,9 @@ static inline int __rem_pio2f_internal(float *x, float *y, int e0, int nx)
         }
 
         /* compute n */
-        z  = scalbnf(z, (int32_t)q0);   /* actual value of z */
+        z  = scalbnf(z, q0);   /* actual value of z */
         z -= 8.0f * floorf(z * 0.125f); /* trim off integer >= 8 */
-        n  = (int32_t) z;
+        n  = (int32_t)z;
         z -= (float)n;
         ih = 0;
 
@@ -204,7 +204,7 @@ static inline int __rem_pio2f_internal(float *x, float *y, int e0, int nx)
                 /* in case that iq[] does have a contribution, subtract the order of magnitude
                    of this contribution from the complement of z so that z + iq can be computed. */
                 if (carry != 0) {
-                    z -= scalbnf(one, (int32_t)q0);
+                    z -= scalbnf(one, q0);
                     /* Given the following decimal example of: z = 0.7 and iq = 0.01 for the angle z + iq = 0.71
                        the complements would be z = 1 - z = 0.3 and iq = 0.1 - iq = 0.09
                        now, z needs to be decremented by 0.1; z = z - 0.1 so that z + iq = 0.2 + 0.09 = 0.29
@@ -263,13 +263,13 @@ static inline int __rem_pio2f_internal(float *x, float *y, int e0, int nx)
             q0 -= 8;
         }
     } else { /* break z into 8-bit if necessary */
-        z = scalbnf(z, -(int32_t)q0);
+        z = scalbnf(z, -q0);
 
         iq[jz] = (int32_t) z ;
     }
 
     /* convert integer "bit" chunk to floating-point value */
-    fw = scalbnf(one, (int32_t)q0);
+    fw = scalbnf(one, q0);
 
     for (i = jz; i >= 0; i--) {
         q[i] = fw * (float)iq[i];
@@ -334,24 +334,24 @@ int32_t __rem_pio2f(float x, float *y)
 {
     float z, w, t, r, fn;
     float tx[3];
-    int32_t i, j, n, ix, hx;
-    int32_t e0, nx;
+    int32_t n;
+    uint32_t ix, hx, nx, i, j, e0;
 
     GET_FLOAT_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix <= 0x3f490fd8) { /* |x| ~<= pi/4 , no need for reduction */
+    if (ix <= 0x3f490fd8U) { /* |x| ~<= pi/4 , no need for reduction */
         y[0] = x;
         y[1] = 0;
         return 0;
     }
 
-    if (ix < 0x4016cbe4) { /* |x| < 3pi/4, special case with n=+-1 */
+    if (ix < 0x4016cbe4U) { /* |x| < 3pi/4, special case with n=+-1 */
         /* 17+17+24 bit pi has sufficient precision and best efficiency */
-        if (hx > 0) {
+      if ((int32_t)hx > 0) {
             z = x - pio2_1;
 
-            if ((ix & 0xfffe0000U) != 0x3fc80000) { /* 17+24 bit pi OK */
+            if ((ix & 0xfffe0000U) != 0x3fc80000U) { /* 17+24 bit pi OK */
                 y[0] = z - pio2_1t;
                 y[1] = (z - y[0]) - pio2_1t;
             } else {        /* near pi/2, use 17+17+24 bit pi */
@@ -364,7 +364,7 @@ int32_t __rem_pio2f(float x, float *y)
         } else {    /* negative x */
             z = x + pio2_1;
 
-            if ((ix & 0xfffe0000U) != 0x3fc80000) { /* 17+24 bit pi OK */
+            if ((ix & 0xfffe0000U) != 0x3fc80000U) { /* 17+24 bit pi OK */
                 y[0] = z + pio2_1t;
                 y[1] = (z - y[0]) + pio2_1t;
             } else {        /* near pi/2, use 17+17+24 bit pi */
@@ -377,7 +377,7 @@ int32_t __rem_pio2f(float x, float *y)
         }
     }
 
-    if (ix <= 0x43490f80) { /* |x| ~<= 2^7*(pi/2), medium size */
+    if (ix <= 0x43490f80U) { /* |x| ~<= 2^7*(pi/2), medium size */
         t  = fabsf(x);
         n  = (int32_t)(t * invpio2 + half);
         fn = (float)n;
@@ -386,21 +386,21 @@ int32_t __rem_pio2f(float x, float *y)
 
         {
             uint32_t high;
-            j  = ix >> 23;
+            j  = ix >> 23U;
             y[0] = r - w;
             GET_FLOAT_WORD(high, y[0]);
-            i = j - ((high >> 23) & 0xff);
+            i = j - ((high >> 23U) & 0xffU);
 
-            if (i > 8) { /* 2nd iteration needed, good to 57 */
+            if (i > 8U) { /* 2nd iteration needed, good to 57 */
                 t  = r;
                 w  = fn * pio2_2;
                 r  = t - w;
                 w  = fn * pio2_2t - ((t - r) - w);
                 y[0] = r - w;
                 GET_FLOAT_WORD(high, y[0]);
-                i = j - ((high >> 23) & 0xff);
+                i = j - ((high >> 23U) & 0xffU);
 
-                if (i > 25) {  /* 3rd iteration need, 74 bits acc */
+                if (i > 25U) {  /* 3rd iteration need, 74 bits acc */
                     t  = r;    /* will cover all possible cases */
                     w  = fn * pio2_3;
                     r  = t - w;
@@ -412,12 +412,12 @@ int32_t __rem_pio2f(float x, float *y)
 
         y[1] = (r - y[0]) - w;
 
-        if (hx < 0) {
+        if ((int32_t)hx < 0) {
             y[0] = -y[0];
             y[1] = -y[1];
-            return -n;
+            return -(int32_t)n;
         } else {
-            return n;
+          return (int32_t)n;
         }
     }
 
@@ -436,8 +436,8 @@ int32_t __rem_pio2f(float x, float *y)
     }
 
     /* set z = scalbn(|x|,ilogb(x)-7) */
-    e0     = (int32_t)((ix >> 23) - 134); /* e0 = ilogb(z)-7; */
-    SET_FLOAT_WORD(z, ix - ((int32_t)e0 << 23));
+    e0 = ((ix >> 23U) - 134U); /* e0 = ilogb(z)-7; */
+    SET_FLOAT_WORD(z, ix - (e0 << 23));
 
     for (i = 0; i < 2; i++) {
         tx[i] = (float)((int32_t)(z));
@@ -452,15 +452,15 @@ int32_t __rem_pio2f(float x, float *y)
         }
     }
 
-    n  =  __rem_pio2f_internal(tx, y, e0, nx);
+    n  =  __rem_pio2f_internal(tx, y, (int32_t)e0, (int32_t)nx);
 
-    if (hx < 0) {
+    if ((int32_t)hx < 0) {
         y[0] = -y[0];
         y[1] = -y[1];
-        return -n;
+        return -(int32_t)n;
     }
 
-    return n;
+    return (int32_t)n;
 }
 
 static const float
