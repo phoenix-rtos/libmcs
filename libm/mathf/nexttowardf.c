@@ -31,7 +31,7 @@ float nexttowardf(float x, long double y)
 
     ux.value = x;
 
-    if (x == 0) {
+    if (x == 0.0f) {
 #ifdef __LIBMCS_FPU_DAZ
         ux.bits = 0x00800000U;  /* return +-minnormal */
 #else
@@ -55,15 +55,15 @@ float nexttowardf(float x, long double y)
         }
     }
 
-    e = ux.bits & 0x7f800000;
+    e = ux.bits & 0x7f800000U;
 
     /* raise overflow if ux.value is infinite and x is finite */
-    if (e == 0x7f800000) {
+    if (e == 0x7f800000U) {
         return __raise_overflowf(x);
     }
 
     /* raise underflow if ux.value is subnormal or zero */
-    if (e == 0) {
+    if (e == 0U) {
 #ifdef __LIBMCS_FPU_DAZ
         ux.bits = 0U;           /* return +-0.0 */
 
