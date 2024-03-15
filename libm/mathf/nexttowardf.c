@@ -19,9 +19,12 @@ float nexttowardf(float x, long double y)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     union fshape ux;
-    uint32_t e;
+    uint32_t e, ix, iy;
 
-    if (isnan(x) || isnan(y)) {
+    GET_FLOAT_WORD(ix, x);
+    GET_FLOAT_WORD(iy, y);
+
+    if (FLT_UWORD_IS_NAN(ix & 0x7fffffffU) || FLT_UWORD_IS_NAN(iy & 0x7fffffffU)) {
         return x + y;
     }
 
