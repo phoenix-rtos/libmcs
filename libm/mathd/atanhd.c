@@ -74,12 +74,12 @@ double atanh(double x)
     EXTRACT_WORDS(hx, lx, x);
     ix = hx & 0x7fffffffU;
 
-    if ((ix | ((lx | (-lx)) >> 31U)) > 0x3ff00000U) { /* |x|>1 */
-        if (isnan(x)) {
-            return x + x;
-        } else {
-            return __raise_invalid();
-        }
+    if (DBL_WORDS_IS_NAN(hx, lx)) {
+        return x + x;
+    } 
+    
+    if (ix > 0x3ff00000U){      /* |x|>1 */
+        return __raise_invalid();
     }
 
     if (ix == 0x3ff00000U) {

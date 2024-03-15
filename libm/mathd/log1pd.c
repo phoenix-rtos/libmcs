@@ -150,7 +150,7 @@ double log1p(double x)
 
     if ((int32_t)hx < 0x3FDA827A) {                 /* x < 0.41422  */
         if (ax >= 0x3ff00000U) {            /* x <= -1.0 */
-            if (isnan(x)) {
+            if (DBL_WORDS_IS_NAN(hx, lx)) {
                 return x + x;
             } else if (x == -1.0) {
                 return __raise_div_by_zero(-1.0); /* log1p(-1)=-inf */

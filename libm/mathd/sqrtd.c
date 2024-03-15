@@ -67,7 +67,7 @@ double sqrt(double x)
 
     /* take care of Inf and NaN */
     if ((ix0 & 0x7ff00000U) == 0x7ff00000U) {
-        if (isnan(x)) {         /* sqrt(NaN)=NaN */
+        if (DBL_WORDS_IS_NAN(ix0, ix1)) {   /* sqrt(NaN)=NaN */
             return x + x;
         } else if ((int32_t)ix0 > 0) {   /* sqrt(+inf)=+inf */
             return x;

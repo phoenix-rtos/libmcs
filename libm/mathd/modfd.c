@@ -97,7 +97,7 @@ double modf(double x, double *iptr)
     } else if (_j0 > 51) {                              /* no fraction part */
         *iptr = x;
 
-        if (isnan(x)) {
+        if (DBL_WORDS_IS_NAN(_i0, _i1)) {
             return *iptr = x + x;                      /* x is NaN, return NaN */
         }
 

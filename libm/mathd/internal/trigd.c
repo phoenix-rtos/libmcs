@@ -453,7 +453,7 @@ int32_t __rem_pio2(double x, double *y)
     double tx[3];
     uint32_t low, ix, hx, nx, i, j, n, e0;
 
-    GET_HIGH_WORD(hx, x);       /* high word of x */
+    EXTRACT_WORDS(hx, low, x);       /* high word of x */
     ix = hx & 0x7fffffffU;
 
     if (ix <= 0x3fe921fbU) { /* |x| ~<= pi/4 , no need for reduction */
@@ -540,7 +540,7 @@ int32_t __rem_pio2(double x, double *y)
      * all other (large) arguments
      */
     if (ix >= 0x7ff00000U) {     /* x is inf or NaN */
-        if (isnan(x)) {
+        if (DBL_WORDS_IS_NAN(hx, low)) {
             y[1] = x - x;
             y[0] = y[1];
         } else {
@@ -551,7 +551,6 @@ int32_t __rem_pio2(double x, double *y)
     }
 
     /* set z = scalbn(|x|,ilogb(x)-23) */
-    GET_LOW_WORD(low, x);
     SET_LOW_WORD(z, low);
     e0 = (ix >> 20U) - 1046; /* e0 = ilogb(z)-23; */
     SET_HIGH_WORD(z, ix - (e0 << 20U));

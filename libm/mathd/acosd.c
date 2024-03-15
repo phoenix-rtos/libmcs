@@ -95,7 +95,7 @@ double acos(double x)
             }
         }
 
-        if (isnan(x)) {
+        if (DBL_WORDS_IS_NAN(hx, lx)) {
             return x + x;
         }
 

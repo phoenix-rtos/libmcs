@@ -112,7 +112,7 @@ double remquo(double x, double y, int *quo)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     int _quo = 0;
-    uint32_t sx, sq, lx, ly, hx, hy;
+    uint32_t hx, lx, hy, ly, sx, sq;
     double y_half;
 
     assert(quo != (void*)0U);
@@ -130,7 +130,7 @@ double remquo(double x, double y, int *quo)
 
     /* purge off exception values */
     if ((hx >= 0x7ff00000U) || (hy >= 0x7ff00000U)) { /* x or y not finite */
-        if (isnan(x) || isnan(y)) {                 /* x or y is NaN */
+        if (DBL_WORDS_IS_NAN(hx, lx) || DBL_WORDS_IS_NAN(hy, ly)) {  /* x or y is NaN */
             return x + y;
         } else if (hx == 0x7ff00000U) {              /* x is infinite */
             return __raise_invalid();

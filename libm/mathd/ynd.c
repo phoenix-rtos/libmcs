@@ -92,7 +92,7 @@ double yn(int n, double x)
     ix = hx & 0x7fffffffU;
 
     /* if Y(n,NaN) is NaN */
-    if (isnan(x)) {         /* yn(n,NaN) = NaN */
+    if (DBL_WORDS_IS_NAN(hx, lx)) {   /* yn(n,NaN) = NaN */
         return x + x;
     }
 

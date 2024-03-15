@@ -101,8 +101,7 @@ double atan(double x)
     if (ix >= 0x44100000U) {           /* if |x| >= 2^66       */
         GET_LOW_WORD(low, x);
 
-        if (ix > 0x7ff00000U ||
-            ((ix == 0x7ff00000U) && (low != 0U))) {
+        if (DBL_WORDS_IS_NAN(ix, low)) {
             return x + x;              /* NaN                  */
         }
 

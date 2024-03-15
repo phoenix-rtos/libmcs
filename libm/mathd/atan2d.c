@@ -99,8 +99,7 @@ double atan2(double y, double x)
     EXTRACT_WORDS(hy, ly, y);
     iy = hy & 0x7fffffffU;
     
-    if (((ix | ((lx | -lx) >> 31U)) > 0x7ff00000U) ||
-        ((iy | ((ly | -ly) >> 31U)) > 0x7ff00000U)) {    /* x or y is NaN */
+    if (DBL_WORDS_IS_NAN(hx, lx) || DBL_WORDS_IS_NAN(hy, ly)) {    /* x or y is NaN */
         return x + y;
     }
 

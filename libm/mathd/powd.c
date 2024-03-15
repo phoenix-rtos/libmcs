@@ -145,9 +145,8 @@ double pow(double x, double y)
         return one;
     }
 
-    /* x|y==NaN return NaN unless x==1 then return 1 */ /* For performance: don't use isnan */
-    if (ix > 0x7ff00000U || ((ix == 0x7ff00000U) && (lx != 0U)) ||
-        iy > 0x7ff00000U || ((iy == 0x7ff00000U) && (ly != 0U))) {
+    /* x|y==NaN return NaN unless x==1 then return 1 */
+    if (DBL_WORDS_IS_NAN(hx, lx) || DBL_WORDS_IS_NAN(hy, ly)) {
         if (((hx - 0x3ff00000U) | lx) == 0U && __issignaling(y) == 0) {
             return one;
         } else {

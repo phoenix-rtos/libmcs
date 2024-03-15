@@ -92,7 +92,7 @@ double y1(double x)
     ix = hx & 0x7fffffffU;
 
     if (ix >= 0x7ff00000U) {
-        if (isnan(x)) {     /* y1(NaN) = NaN */
+        if (DBL_WORDS_IS_NAN(hx, lx)) {   /* y1(NaN) = NaN */
             return x + x;
         } else if ((int32_t)hx > 0) {  /* y1(+Inf) = +0.0 */
             return zero;

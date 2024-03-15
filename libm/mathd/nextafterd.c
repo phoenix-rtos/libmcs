@@ -80,13 +80,13 @@ double nextafter(double x, double y)
     y *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    uint32_t lx, ly, hx, hy, ix;
+    uint32_t hx, lx, hy, ly, ix;
 
     EXTRACT_WORDS(hx, lx, x);
     EXTRACT_WORDS(hy, ly, y);
     ix = hx & 0x7fffffffU;               /* |x| */
 
-    if (isnan(x) || isnan(y)) {         /* x or y is nan */
+    if (DBL_WORDS_IS_NAN(hx, lx) || DBL_WORDS_IS_NAN(hy, ly)) {  /* x or y is nan */
         return x + y;
     } else if (hx == hy && lx == ly) {
         return x;                       /* x=y, return x */
