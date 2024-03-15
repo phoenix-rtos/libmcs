@@ -11,7 +11,11 @@ float fmaxf(float x, float y)
     y *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    if (isnan(x) || isnan(y)) {
+    uint32_t hx, hy;
+    GET_FLOAT_WORD(hx, x);
+    GET_FLOAT_WORD(hy, y);
+
+    if (FLT_UWORD_IS_NAN(hx & 0x7fffffffU) || FLT_UWORD_IS_NAN(hy & 0x7fffffffU)) {
         return x * y;
     }
 
