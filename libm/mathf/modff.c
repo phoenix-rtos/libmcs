@@ -43,7 +43,7 @@ float modff(float x, float *iptr)
     } else {            /* no fraction part */
         *iptr = x;
 
-        if (isnan(x)) {
+        if (FLT_UWORD_IS_NAN(_i0 & 0x7fffffffU)) {
             return *iptr = x + x;    /* x is NaN, return NaN */
         }
 

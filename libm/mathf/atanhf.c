@@ -20,7 +20,7 @@ float atanhf(float x)
     ix = hx & 0x7fffffffU;
 
     if (ix > 0x3f800000U) {     /* |x|>1 */
-        if (isnan(x)) {
+        if (FLT_UWORD_IS_NAN(ix)) {
             return x + x;
         } else {
             return __raise_invalidf();

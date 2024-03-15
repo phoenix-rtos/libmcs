@@ -39,7 +39,7 @@ float acosf(float x)
             return pi + 2.0f * pio2_lo;    /* acos(-1)= pi */
         }
     } else if (ix > 0x3f800000U) { /* |x| >= 1 */
-        if (isnan(x)) {
+        if (FLT_UWORD_IS_NAN(ix)) {
             return x + x;
         }
 

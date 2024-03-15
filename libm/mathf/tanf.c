@@ -109,7 +109,7 @@ float tanf(float x)
 
     /* tan(Inf or NaN) is NaN */
     else if (!FLT_UWORD_IS_FINITE(ix)) {
-        if (isnan(x)) {
+        if (FLT_UWORD_IS_NAN(ix)) {
             return x + x;
         } else {
             return __raise_invalidf();

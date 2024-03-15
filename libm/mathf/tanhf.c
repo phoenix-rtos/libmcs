@@ -21,7 +21,7 @@ float tanhf(float x)
 
     /* x is INF or NaN */
     if (!FLT_UWORD_IS_FINITE(ix)) {
-        if (isnan(x)) {                     /* tanh(NaN) = NaN */
+        if (FLT_UWORD_IS_NAN(ix)) {         /* tanh(NaN) = NaN */
             return x + x;
         } else if ((int32_t)jx >= 0) {
             return one;                     /* tanh(+inf)=+1 */
