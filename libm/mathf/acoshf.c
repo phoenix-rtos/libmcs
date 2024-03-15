@@ -21,7 +21,7 @@ float acoshf(float x)
     ix = hx & 0x7fffffffU;
 
     if ((int32_t)hx < 0x3f800000) {     /* x < 1 */
-        if (isnan(x)) {
+        if (FLT_UWORD_IS_NAN(ix)) {
             return x + x;
         } else {
             return __raise_invalidf();

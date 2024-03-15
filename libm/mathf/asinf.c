@@ -36,7 +36,7 @@ float asinf(float x)
     if (ix == 0x3f800000U) { /* asin(1)=+-pi/2 with inexact */
         return x * pio2_hi + x * pio2_lo;
     } else if (ix > 0x3f800000U) {  /* |x|>= 1 */
-        if (isnan(x)) {
+        if (FLT_UWORD_IS_NAN(ix)) {
             return x + x;
         }
 

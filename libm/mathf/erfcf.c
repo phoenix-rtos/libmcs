@@ -23,7 +23,7 @@ float erfcf(float x)
     ix = hx & 0x7fffffffU;
 
     if (!FLT_UWORD_IS_FINITE(ix)) {
-        if (isnan(x)) {         /* erfc(nan) = nan */
+        if (FLT_UWORD_IS_NAN(ix)) {      /* erfc(nan) = nan */
             return x + x;
         } else if ((int32_t)hx > 0) {    /* erfc(+inf) = 0 */
             return 0.0f;

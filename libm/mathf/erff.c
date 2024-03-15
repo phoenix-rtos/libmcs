@@ -28,7 +28,7 @@ float erff(float x)
     ix = hx & 0x7fffffffU;
 
     if (!FLT_UWORD_IS_FINITE(ix)) {
-        if (isnan(x)) {         /* erf(nan) = nan */
+        if (FLT_UWORD_IS_NAN(ix)) {      /* erf(nan) = nan */
             return x + x;
         } else if ((int32_t)hx > 0) {    /* erf(+inf) = +1 */
             return 1.0f;

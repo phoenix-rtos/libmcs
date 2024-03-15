@@ -33,7 +33,7 @@ float fmodf(float x, float y)
     if (!FLT_UWORD_IS_FINITE(hx) || !FLT_UWORD_IS_FINITE(hy)) {     /* x or y is +-Inf/NaN */
         if (FLT_UWORD_IS_INFINITE(hx)) {                            /* x is +-Inf */
             return __raise_invalidf();
-        } else if (FLT_UWORD_IS_NAN(hx) || FLT_UWORD_IS_NAN(hy)) {  /* x or y is NaN */
+        } else if (FLT_UWORD_IS_NAN(hx & 0x7fffffffU) || FLT_UWORD_IS_NAN(hy)) {  /* x or y is NaN */
             return x + y;
         } else {
             /* No action required */
