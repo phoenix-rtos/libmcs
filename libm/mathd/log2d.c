@@ -71,7 +71,7 @@ double log2(double x)
 
     double f, hfsq, hi, lo, r, val_hi, val_lo, w, y;
     int32_t k;
-    uint32_t lx, hx, i;
+    uint32_t hx, lx, i;
 
     EXTRACT_WORDS(hx, lx, x);
 
@@ -83,7 +83,7 @@ double log2(double x)
         }
 
         if ((int32_t)hx < 0) {
-            if (isnan(x)) {
+            if (DBL_WORDS_IS_NAN(hx, lx)) {
                 return x + x;
             } else {
                 return __raise_invalid();   /* log(-#) = NaN */

@@ -85,7 +85,7 @@ double log10(double x)
         }
 
         if ((int32_t)hx < 0) {
-            if (isnan(x)) {
+            if (DBL_WORDS_IS_NAN(hx, lx)) {
                 return x + x;
             } else {
                 return __raise_invalid();   /* log(-#) = NaN */

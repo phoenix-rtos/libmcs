@@ -71,7 +71,7 @@ double acosh(double x)
     EXTRACT_WORDS(hx, lx, x);
 
     if ((int32_t)hx < 0x3ff00000) {     /* x < 1 */
-        if (isnan(x)) {
+        if (DBL_WORDS_IS_NAN(hx, lx)) {
             return x + x;
         } else {
             return __raise_invalid();

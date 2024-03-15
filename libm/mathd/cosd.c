@@ -83,7 +83,7 @@ double cos(double x)
 
     /* cos(Inf or NaN) is NaN */
     else if (ix >= 0x7ff00000U) {
-        if (isnan(x)) {
+        if (DBL_WORDS_IS_NAN(ix, lx)) {
             return x + x;
         } else {
             return __raise_invalid();

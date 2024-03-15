@@ -98,7 +98,7 @@ double jn(int n, double x)
     ix = 0x7fffffffU & hx;
 
     /* if J(n,NaN) is NaN */
-    if ((ix | (lx | -lx) >> 31U) > 0x7ff00000U) {
+    if (DBL_WORDS_IS_NAN(hx, lx)) {
         return x + x;
     }
 

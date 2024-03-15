@@ -95,7 +95,7 @@ double asin(double x)
             return x * pio2_hi + x * pio2_lo;
         }
 
-        if (isnan(x)) {
+        if (DBL_WORDS_IS_NAN(hx, lx)) {
             return x + x;
         }
 

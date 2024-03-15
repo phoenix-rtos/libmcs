@@ -115,7 +115,7 @@ double remainder(double x, double y)
 
     /* purge off exception values */
     if ((hx >= 0x7ff00000U) || (hy >= 0x7ff00000U)) { /* x or y not finite */
-        if (isnan(x) || isnan(y)) {                 /* x or y is NaN */
+        if (DBL_WORDS_IS_NAN(hx, lx) || DBL_WORDS_IS_NAN(hy, ly)) { /* x or y is NaN */
             return x + y;
         } else if (hx == 0x7ff00000U) {              /* x is infinite */
             return __raise_invalid();

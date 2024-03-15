@@ -117,7 +117,7 @@ double fmod(double x, double y)
     if (hx >= 0x7ff00000U || hy >= 0x7ff00000U) { /* x or y is +-Inf/NaN */
         if (hx == 0x7ff00000U && lx == 0U) {      /* x is +-Inf */
             return __raise_invalid();
-        } else if (isnan(x) || isnan(y)) {        /* x or y is NaN */
+        } else if (DBL_WORDS_IS_NAN(hx, lx) || DBL_WORDS_IS_NAN(hy, ly)) {  /* x or y is NaN */
             return x + y;
         } else {
             /* No action required */
