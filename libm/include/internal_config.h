@@ -129,6 +129,16 @@
     #define FLT_SMALLEST_EXP -23
 #endif
 
+/* Most routines need to check whether a double is a NaN. 
+   The macro below wraps up that kind of information:
+
+   DBL_WORDS_IS_NAN(X)
+    True if a double concatenated by both words represents a NaN.
+*/
+#define DBL_WORDS_IS_NAN(ix0,ix1)              \
+    ((((ix0) & 0x7FF00000U) >= 0x7FF00000U) && \
+     (((ix0) & 0x000FFFFFU) | (ix1)) > 0U)
+
 #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     #define __IEEE_BIG_ENDIAN
 #elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
