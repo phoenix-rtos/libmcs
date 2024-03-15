@@ -101,6 +101,7 @@ float atan2f(float y, float x)
     }
 
     /* compute y/x */
+    /* Computation based on 2-complement arithmetic shift, is in C standard implementation defined. */
     k = ((int32_t)iy - (int32_t)ix) >> 23;
 
     if (k > 26) {
