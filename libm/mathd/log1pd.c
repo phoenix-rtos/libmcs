@@ -137,13 +137,13 @@ double log1p(double x)
 
     double hfsq, f, c, R, u;
     int32_t k; 
-    uint32_t hx, hu, ax;
+    uint32_t hx, lx, hu, ax;
 
     c = NAN; /* initial value of c is never actually used */
     f = NAN; /* initial value of f is never actually used */
     hu = INT_MAX; /* initial value of hu is never actually used */
 
-    GET_HIGH_WORD(hx, x);
+    EXTRACT_WORDS(hx, lx, x);
     ax = hx & 0x7fffffffU;
 
     k = 1;

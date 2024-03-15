@@ -63,10 +63,10 @@ double sin(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double y[2], z = 0.0;
-    uint32_t n, ix;
+    uint32_t n, ix, lx;
 
     /* High word of x. */
-    GET_HIGH_WORD(ix, x);
+    EXTRACT_WORDS(ix, lx, x);
 
     /* |x| ~< pi/4 */
     ix &= 0x7fffffffU;
@@ -85,7 +85,7 @@ double sin(double x)
 
     /* sin(Inf or NaN) is NaN */
     else if (ix >= 0x7ff00000U) {
-        if (isnan(x)) {
+        if (DBL_WORDS_IS_NAN(ix, lx)) {
             return x + x;
         } else {
             return __raise_invalid();

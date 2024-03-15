@@ -396,9 +396,9 @@ static inline float __raise_inexactf(float x) {
 }
 
 static inline int __issignaling(double x) {
-    uint32_t hx;
-    GET_HIGH_WORD(hx, x);
-    if (isnan(x) && (hx & 0x00080000U) == 0U) {
+    uint32_t hx, lx;
+    EXTRACT_WORDS(hx, lx, x);
+    if (DBL_WORDS_IS_NAN(hx, lx) && (hx & 0x00080000U) == 0U) {
         return 1;
     }
     else {
