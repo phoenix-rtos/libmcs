@@ -322,6 +322,7 @@ float powf(float x, float y)
     GET_FLOAT_WORD(j, z);
     j = j + ((uint32_t)n << 23U);
 
+    /* Computation based on 2-complement arithmetic shift, is in C standard implementation defined. */
     if (((int32_t)j >> 23) <= 0) {
         z = scalbnf(z, n);    /* subnormal output */
     } else {

@@ -427,6 +427,7 @@ double pow(double x, double y)
     GET_HIGH_WORD(j, z);
     sj = (int32_t)(j + ((uint32_t)n << 20U));
 
+    /* Computation based on 2-complement arithmetic shift, is in C standard implementation defined. */
     if ((sj >> 20) <= 0) {
         z = scalbn(z, n);   /* subnormal output */
     } else {
