@@ -68,8 +68,11 @@ double tgamma(double x)
 
     int signgam_local = 0;
     double y = 0.0;
+    uint32_t hx, lx;
 
-    if (isnan(x) != 0) {                    /* tgamma(NaN) = NaN */
+    EXTRACT_WORDS(hx, lx, x);
+
+    if (DBL_WORDS_IS_NAN(hx, lx)) {                    /* tgamma(NaN) = NaN */
         return x + x;
     } else if (x == 0.0) {                  /* tgamma(+-0) = +-Inf */
         return __raise_div_by_zero(x);

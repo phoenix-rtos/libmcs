@@ -76,7 +76,11 @@ double fmax(double x, double y)
     y *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    if (isnan(x) || isnan(y)) {
+    uint32_t hx, lx, hy, ly;
+    EXTRACT_WORDS(hx, lx, x);
+    EXTRACT_WORDS(hy, ly, y);
+
+    if (DBL_WORDS_IS_NAN(hx, lx) || DBL_WORDS_IS_NAN(hy, ly)) {
         return x * y;
     }
 

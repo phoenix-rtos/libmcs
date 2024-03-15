@@ -137,9 +137,9 @@ double log1p(double x)
 
     double hfsq, f, c, R, u;
     int32_t k; 
-    uint32_t hx, hu, ax;
+    uint32_t hx, lx, hu, ax;
 
-    GET_HIGH_WORD(hx, x);
+    EXTRACT_WORDS(hx, lx, x);
     ax = hx & 0x7fffffffU;
 
     k = 1;

@@ -61,10 +61,9 @@ double cos(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double y[2], z = 0.0;
-    uint32_t ix, n;
+    uint32_t ix, lx, n;
 
-    /* High word of x. */
-    GET_HIGH_WORD(ix, x);
+    EXTRACT_WORDS(ix, lx, x);
 
     /* |x| ~< pi/4 */
     ix &= 0x7fffffffU;

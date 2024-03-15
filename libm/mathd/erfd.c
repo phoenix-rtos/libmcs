@@ -162,14 +162,14 @@ double erf(double x)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    uint32_t hx, ix;
+    uint32_t hx, lx, ix;
     double R, S, P, Q, s, z, r;
     
-    GET_HIGH_WORD(hx, x);
+    EXTRACT_WORDS(hx, lx, x);
     ix = hx & 0x7fffffffU;
 
     if (ix >= 0x7ff00000U) {
-        if (isnan(x)) {         /* erf(nan) = nan */
+        if (DBL_WORDS_IS_NAN(hx, lx)) {         /* erf(nan) = nan */
             return x + x;
         } else if ((int32_t)hx > 0) {    /* erf(+inf) = +1 */
             return 1.0;

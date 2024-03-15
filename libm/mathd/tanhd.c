@@ -64,15 +64,15 @@ double tanh(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double t, z;
-    uint32_t hx, ix;
+    uint32_t hx, lx, ix;
 
     /* High word of |x|. */
-    GET_HIGH_WORD(hx, x);
+    EXTRACT_WORDS(hx, lx, x);
     ix = hx & 0x7fffffffU;
 
     /* x is INF or NaN */
     if (ix >= 0x7ff00000U) {
-        if (isnan(x)) {             /* tanh(NaN) = NaN */
+        if (DBL_WORDS_IS_NAN(hx, lx)) {   /* tanh(NaN) = NaN */
             return x + x;
         } else if ((int32_t)hx >= 0) {
             return one;             /* tanh(+inf)=+1 */
