@@ -5,7 +5,7 @@
  *
  * This file contains a set of functions used by multiple procedures as
  * internal functions. These procedures should not be accessed directly by a
- * user. Note that all procedures are either macors or inline procedures.
+ * user. Note that all procedures are either macros or static inline procedures.
  *
  * Synopsis
  * ========
@@ -71,7 +71,7 @@
  * operand. If the amount is equal to the size the macro returns 0.
  *
  * ``__forced_calculation`` is a function to force the execution of the input
- * to go throught the :ref:`FPU <ABBR>`. The input for this function is usually
+ * to go through the :ref:`FPU <ABBR>`. The input for this function is usually
  * an arithmetic operation and not a single value. At the moment the function
  * is only used by others within this file and not expected to be called from
  * outside.
