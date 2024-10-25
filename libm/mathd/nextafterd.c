@@ -99,7 +99,7 @@ double nextafter(double x, double y)
         INSERT_WORDS(x, (hy & 0x80000000U) | 0x00100000U, 0U);  /* return +-minnormal */
 #else
         INSERT_WORDS(x, hy & 0x80000000U, 1U);                  /* return +-minsubnormal */
-        (void) __raise_underflowf(x);
+        (void) __raise_underflow(x);
 #endif /* defined(__LIBMCS_FPU_DAZ) */
         return x;
     } else if (hx >= 0) {               /* x > 0 */

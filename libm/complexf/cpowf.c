@@ -18,7 +18,7 @@ float complex cpowf(float complex x, float complex y)
     absx = cabsf(x);
 
     if (absx == 0.0f) {
-        return CMPLX(0.0f, 0.0f);
+        return CMPLXF(0.0f, 0.0f);
     }
 
     argx = cargf(x);
