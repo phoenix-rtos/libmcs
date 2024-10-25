@@ -214,7 +214,7 @@ static inline int __rem_pio2f_internal(float *x, float *y, int e0, int nx)
         }
 
         /* check if recomputation is needed in case of loss of significance in z and iq[] */
-        if (z == zero && !exhausted) {
+        if (z == zero) {
             j = 0;
 
             for (i = jz - 1; i >= jk; i--) {
@@ -250,7 +250,7 @@ static inline int __rem_pio2f_internal(float *x, float *y, int e0, int nx)
     /* The original authors of the algorithm Payne and Hanek estimate the
        amount of needed recomputing to be low. Currently only 2 recomputes
        are observed at most */
-    } while (recompute);
+    } while (recompute && !exhausted);
 
     /* chop off zero terms */
     if (z == 0.0f) {
