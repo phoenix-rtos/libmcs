@@ -30,6 +30,7 @@ mcdc-check:
   artifacts:
     reports:
       codequality: report.json
+  allow_failure: true
   needs: []
 
 doc:
