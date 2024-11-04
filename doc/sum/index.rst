@@ -23,3 +23,4 @@ This user manual also contains the :ref:`ICD <ABBR>`, most of its information ca
    6_Operations_Manual
    7_Reference_Manual
    8_Tutorial
+   9_Bindings
