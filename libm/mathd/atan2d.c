@@ -3,7 +3,7 @@
 
 /**
  *
- * This family of functions implements the arc tanget of :math:`\frac{y}{x}`.
+ * This family of functions implements the arc tangent of :math:`\frac{y}{x}`.
  *
  * Synopsis
  * ========

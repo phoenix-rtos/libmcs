@@ -3,7 +3,7 @@
 
 /**
  *
- * This family of functions detemines the minimum value of :math:`x` and :math:`y`.
+ * This family of functions determines the minimum value of :math:`x` and :math:`y`.
  *
  * Synopsis
  * ========

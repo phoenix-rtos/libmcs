@@ -5,7 +5,7 @@
  *
  * This file contains a set of functions used by multiple procedures as
  * internal functions. These procedures should not be accessed directly by a
- * user. Note that all procedures are either macors or inline procedures.
+ * user. Note that all procedures are either macros or static inline procedures.
  *
  * Synopsis
  * ========
@@ -24,8 +24,8 @@
  *     SAFE_RIGHT_SHIFT(op,amt);                // this macros return value has the same type as input `op`, the inputs are expected to be integer types
  *     double __forced_calculation(double x);
  *     float __forced_calculationf(float x);
- *     double __raise_invalid();
- *     float __raise_invalidf();
+ *     double __raise_invalid(void);
+ *     float __raise_invalidf(void);
  *     double __raise_div_by_zero(double x);
  *     float __raise_div_by_zerof(float x);
  *     double __raise_overflow(double x);
@@ -71,7 +71,7 @@
  * operand. If the amount is equal to the size the macro returns 0.
  *
  * ``__forced_calculation`` is a function to force the execution of the input
- * to go throught the :ref:`FPU <ABBR>`. The input for this function is usually
+ * to go through the :ref:`FPU <ABBR>`. The input for this function is usually
  * an arithmetic operation and not a single value. At the moment the function
  * is only used by others within this file and not expected to be called from
  * outside.
@@ -326,6 +326,27 @@ typedef union {
 #define SAFE_RIGHT_SHIFT(op,amt)                        \
     (((amt) < 8 * sizeof(op)) ? ((op) >> (amt)) : 0)
 
+/* Exception raising and signaling check functions */
+
+static inline double __forced_calculation(double x);
+static inline float __forced_calculationf(float x);
+
+static inline double __raise_invalid(void);
+static inline double __raise_div_by_zero(double x);
+static inline double __raise_overflow(double x);
+static inline double __raise_underflow(double x);
+static inline double __raise_inexact(double x);
+
+static inline float __raise_invalidf(void);
+static inline float __raise_div_by_zerof(float x);
+static inline float __raise_overflowf(float x);
+static inline float __raise_underflowf(float x);
+static inline float __raise_inexactf(float x);
+
+static inline int __issignaling(double x);
+static inline int __issignalingf(float x);
+
+
 static inline double __forced_calculation(double x) {
     volatile double r = x;
     return r;
@@ -335,7 +356,7 @@ static inline float __forced_calculationf(float x) {
     return r;
 }
 
-static inline double __raise_invalid() {
+static inline double __raise_invalid(void) {
     double r = __forced_calculation(0.0 / 0.0);
     return r;
 }
@@ -354,8 +375,7 @@ static inline double __raise_inexact(double x) {
     volatile double huge = 1.0e300;
     return (__forced_calculation(huge - 1.0e-300) != 0.0) ? x : 0.0;
 }
-
-static inline float __raise_invalidf() {
+static inline float __raise_invalidf(void) {
     float r = __forced_calculationf(0.0f / 0.0f);
     return r;
 }
