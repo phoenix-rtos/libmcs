@@ -39,15 +39,14 @@ code-quality:
         name: local.gtd-gmbh.de:4567/tools/sqarg
         entrypoint: [""]
     script:
-        - cd sw-quality
-        - mkdir misra-c
-        - find ../libm/common -name  "*.c" | grep -v "fenv.c" > misra-c/files.lnt
-        - find ../libm/complexd -name  "*.c" >> misra-c/files.lnt
-        - find ../libm/complexf -name  "*.c" >> misra-c/files.lnt
-        - find ../libm/mathd -name  "*.c" >> misra-c/files.lnt
-        - find ../libm/mathf -name  "*.c" >> misra-c/files.lnt
-        - wine ~/lint-nt.exe ./std.lnt misra-c/files.lnt > misra-c/lint.txt  || true
-        - python3 -m app -c squag-config.toml
+        - mkdir -p sw-quality/misra-c
+        - find libm/common -name  "*.c" | grep -v "fenv.c" > sw-quality/misra-c/files.lnt
+        - find libm/complexd -name  "*.c" >> sw-quality/misra-c/files.lnt
+        - find libm/complexf -name  "*.c" >> sw-quality/misra-c/files.lnt
+        - find libm/mathd -name  "*.c" >> sw-quality/misra-c/files.lnt
+        - find libm/mathf -name  "*.c" >> sw-quality/misra-c/files.lnt
+        - wine ~/lint-nt.exe sw-quality/std.lnt sw-quality/misra-c/files.lnt | sed 's#\\#/#g' > sw-quality/misra-c/lint.txt  || true
+        - python3 -m app -c sw-quality/squag-config.toml
     artifacts:
         reports:
             codequality: sw-quality/misra-c/report.json
