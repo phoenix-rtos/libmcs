@@ -125,7 +125,7 @@ The following is a depiction of the directory structure:
       LICENSES/
          Contains license files which are referenced by the :ref:`SPDX <ABBR>` headers in the other
          implementation files.
-      lint-libm/
+      sw-quality/
          Contains the configuration and scripts to run pc-lint.
       .gitignore
          Typical gitignore file.
