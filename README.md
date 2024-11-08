@@ -46,7 +46,7 @@ For CI and similar activities it can be useful to not use an interactive script 
 | Configure Flag                     | Description                                                                                                                                                                 |
 |------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `--cross-compile <CROSS_COMPILE>`  | Tells `make` which toolchain to use.                                                                                                                                        |
-| `--compilation-flags <CFLAGS>`     | Used do define additional flags to the compiler. Takes both user and library specific flags/defines.                                                                        |
+| `--compilation-flags <CFLAGS>`     | Used do define additional flags to the compiler. Takes both user and library specific flags/defines, e.g. `-mcpu=...`.                                                          |
 | `--enable-denormal-handling`       | The library will assume the platform does not provide denormals and use the platform to convert denormal inputs/outputs to 0.                                               |
 | `--disable-denormal-handling`      | The library will assume the platform does provide denormals properly.                                                                                                       |
 | `--enable-long-double-procedures`  | Should be set if the size of `long double` is 64 bit and the procedures shall be provided.                                                                                  |
@@ -63,19 +63,25 @@ Of special note here is also that the library needs to know which endianness the
 1. For a LEON2 processor and the EDISOFT RTEMS 4.8 tool-chain, without `long double` functions nor complex functions, the configuration would look like this:
 
 ```
-> ./configure --cross-compile /opt/rtems-4.8/bin/sparc-rtems4.8- --compilation-flags "" --enable-denormal-handling --disable-long-double-procedures --disable-complex-procedures --big-endian
+> ./configure --cross-compile /opt/rtems-4.8/bin/sparc-rtems4.8- --compilation-flags "-mcpu=leon" --enable-denormal-handling --disable-long-double-procedures --disable-complex-procedures --big-endian
 ```
 
 2. For a LEON3/LEON4 processor and an OAR RTEMS 4.11 tool-chain, without `long double` functions nor complex functions, the configuration would look like this:
 
 ```
-> ./configure --cross-compile /opt/rtems-4.11-2016.04.01.FPU/bin/sparc-rtems4.11- --compilation-flags "" --disable-denormal-handling --disable-long-double-procedures --disable-complex-procedures --big-endian
+> ./configure --cross-compile /opt/rtems-4.11-2016.04.01.FPU/bin/sparc-rtems4.11- --compilation-flags "-mcpu=leon3" --disable-denormal-handling --disable-long-double-procedures --disable-complex-procedures --big-endian
 ```
 
 3. For an ARM R52 processor and a certain GCC cross compiler,  without `long double` functions nor complex functions, the configuration would look like this:
 
 ```
-> ./configure --cross-compile <CROSS_COMPILER_PREFIX> --compilation-flags "" --enable-denormal-handling --disable-long-double-procedures --disable-complex-procedures --little-endian
+> ./configure --cross-compile <CROSS_COMPILER_PREFIX> --compilation-flags "-mcpu=cortex-r52" --enable-denormal-handling --disable-long-double-procedures --disable-complex-procedures --little-endian
+```
+
+4. For a LEON3/LEON4 processor and an RTEMS 6 UNI/SMP tool-chain, without `long double` functions nor complex functions, the configuration would look like this:
+
+```
+> ./configure --cross-compile /opt/rtems/rtems-6-sparc-gr712rc-smp-6/bin/sparc-rtems6- --compilation-flags "-mcpu=leon3" --disable-denormal-handling --disable-long-double-procedures --disable-complex-procedures --big-endian
 ```
 
 
