@@ -90,10 +90,10 @@ double nextafter(double x, double y)
     if (isnan(x) || isnan(y)) {         /* x or y is nan */
         return x + y;
     } else if (hx == hy && lx == ly) {
-        return x;                       /* x=y, return x */
+        return y;                       /* x == y, return y */
     } else if ((ix | lx) == 0) {        /* x == 0 */
         if (ix == (hy & 0x7fffffff) && ly == 0U) {
-            return x;                   /* x=y, return x */
+            return y;                   /* x == y, return y */
         }
 #ifdef __LIBMCS_FPU_DAZ
         INSERT_WORDS(x, (hy & 0x80000000U) | 0x00100000U, 0U);  /* return +-minnormal */

@@ -22,10 +22,10 @@ float nextafterf(float x, float y)
     if (FLT_UWORD_IS_NAN(ix) || FLT_UWORD_IS_NAN(iy)) {
         return x + y;
     } else if (hx == hy) {
-        return x;                      /* x=y, return x */
+        return y;                      /* x == y, return y */
     } else if (ix == 0) {              /* x == 0 */
         if (ix == iy) {
-            return x;                  /* x=y, return x */
+            return y;                  /* x == y, return y */
         }
 #ifdef __LIBMCS_FPU_DAZ
         SET_FLOAT_WORD(x, (hy & 0x80000000U) | 0x00800000U);    /* return +-minnormal */
