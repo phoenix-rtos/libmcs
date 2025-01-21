@@ -31,7 +31,7 @@
  *
  * ``csinh`` returns the complex hyperbolic sine of the input value.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

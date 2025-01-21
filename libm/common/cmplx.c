@@ -35,4 +35,4 @@
  * ``CMPLX`` returns a complex value where :math:`x` is real and :math:`y` is
  * the imaginary part.
  *
- *///
+ */

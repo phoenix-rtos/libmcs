@@ -35,7 +35,7 @@
  * output range of a strip mathematically unbounded along the imaginary axis
  * and in the interval :math:`[0, \pi]` radians along the real axis.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

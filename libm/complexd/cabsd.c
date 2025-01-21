@@ -34,7 +34,7 @@
  *
  * ``cabs`` returns the absolute value of :math:`z`.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

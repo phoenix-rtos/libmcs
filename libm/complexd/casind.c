@@ -35,7 +35,7 @@
  * the interval :math:`[-\frac{\pi}{2}, \frac{\pi}{2}]` radians along the real
  * axis.
  *
- *///
+ */
 
 #include <complex.h>
 

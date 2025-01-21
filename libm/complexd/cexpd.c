@@ -32,7 +32,7 @@
  *
  * ``cexp`` returns :math:`e` powered by :math:`z`.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

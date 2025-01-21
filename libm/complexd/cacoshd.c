@@ -35,7 +35,7 @@
  * in the output range of a half-strip of non-negative values along the real
  * axis and in the interval :math:`[-\pi i, +\pi i]` along the imaginary axis.
  *
- *///
+ */
 
 #include <complex.h>
 

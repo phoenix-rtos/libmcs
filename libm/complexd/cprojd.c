@@ -34,7 +34,7 @@
  * ``cproj`` returns the value of the projection of :math:`z` onto the Riemann
  * sphere.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

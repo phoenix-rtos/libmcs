@@ -37,7 +37,7 @@
  *
  * Does not raise exceptions.
  *
- *///
+ */
 
 #include <math.h>
 #include "../common/tools.h"

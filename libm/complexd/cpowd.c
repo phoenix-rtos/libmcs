@@ -35,7 +35,7 @@
  * ``cpow`` returns the value of complex :math:`x` raised to the power of
  * complex :math:`y`.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>
