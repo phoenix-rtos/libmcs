@@ -70,7 +70,7 @@
  *    issues may not apply to our use-cases.
  *    -->
  *
- *///
+ */
 
 #include <math.h>
 #include "../common/tools.h"

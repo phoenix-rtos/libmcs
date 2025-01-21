@@ -108,7 +108,7 @@
  *
  * The output maps are in the respective external functions :ref:`cos` and :ref:`sin`.
  *
- *///
+ */
 
 #include <math.h>
 #include "../../common/tools.h"

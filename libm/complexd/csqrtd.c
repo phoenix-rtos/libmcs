@@ -33,7 +33,7 @@
  * ``csqrt`` returns the complex square root of the input value, in the range
  * of the right halfplane (including the imaginary axis).
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

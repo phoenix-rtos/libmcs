@@ -32,7 +32,7 @@
  *
  * ``creal`` returns the real part of :math:`z` as a real.
  *
- *///
+ */
 
 #include <complex.h>
 #include "../common/tools.h"

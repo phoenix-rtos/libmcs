@@ -37,7 +37,7 @@
  * in the interval :math:`[-\frac{\pi}{2}i, \frac{\pi}{2}i]` along the
  * imaginary axis.
  *
- *///
+ */
 
 #include <complex.h>
 

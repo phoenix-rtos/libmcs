@@ -31,7 +31,7 @@
  *
  * ``ctan`` returns the complex tangent of the input value.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

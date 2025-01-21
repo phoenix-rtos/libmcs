@@ -19,7 +19,7 @@
  *     #include <math.h>
  *     int signgam;
  *
- *///
+ */
 
 #include "math.h"
 

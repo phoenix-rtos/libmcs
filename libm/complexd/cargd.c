@@ -34,7 +34,7 @@
  * ``carg`` returns the argument of the input value in the interval
  * :math:`[-\pi, \pi]`.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

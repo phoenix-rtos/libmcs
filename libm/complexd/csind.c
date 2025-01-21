@@ -31,7 +31,7 @@
  *
  * ``csin`` returns the complex sine of the input value.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

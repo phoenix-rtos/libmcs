@@ -32,7 +32,7 @@
  *
  * ``ccosh`` returns the complex hyperbolic cosine of the input value.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

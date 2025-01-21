@@ -61,7 +61,7 @@
  * The output maps are in the respective external functions :ref:`lgamma` and
  * :ref:`tgamma`.
  *
- *///
+ */
 
 /* __lgamma_r(x, signgamp)
  * Reentrant version of the logarithm of the Gamma function

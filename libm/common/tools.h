@@ -194,7 +194,7 @@
  * purpose. Additionally the procedures ``__raise_overflow`` and
  * ``__raise_underflow`` may raise ``inexact``.
  *
- *///
+ */
 
 #ifndef LIBMCS_TOOLS_H
 #define LIBMCS_TOOLS_H
