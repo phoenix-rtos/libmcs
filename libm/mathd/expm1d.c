@@ -178,6 +178,8 @@ double expm1(double x)
     int32_t k, xsb;
     uint32_t hx;
 
+    c = NAN; /* initial value of c is never actually used */
+
     GET_HIGH_WORD(hx, x);
     xsb = hx & 0x80000000U;      /* sign bit of x */
 

@@ -41,7 +41,8 @@
 
 double creal(double complex z)
 {
-    double_complex w = { .z = z };
+    double_complex w;
+    w.z = z;
 
     return (REAL_PART(w));
 }

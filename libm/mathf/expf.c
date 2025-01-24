@@ -29,8 +29,11 @@ float expf(float x)    /* default IEEE float exp */
     x *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    float y, hi, lo, c, t;
-    int32_t k = 0, xsb, sx;
+    float y, c, t;
+    float hi = 0.0;
+    float lo = 0.0;
+    int32_t k = 0;
+    int32_t xsb, sx;
     uint32_t hx;
 
     GET_FLOAT_WORD(sx, x);
