@@ -11,7 +11,7 @@ lint-file-separator = "$"
 
 # Path bend from current working dir to pc lint working dir
 # (lint path files are relative to working dir in lint.exe)
-lint-dir = "sw-quality"
+lint-dir = "."
 
 
 # Export directory and the required type
