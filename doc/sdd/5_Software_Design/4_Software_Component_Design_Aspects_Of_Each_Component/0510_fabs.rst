@@ -41,7 +41,7 @@ Source Code Files
 References
 ^^^^^^^^^^
 
-.. * :ref:`__ccoshsinh <internal_ctrig>`
+* :ref:`__ccoshsinh <internal_ctrig>`
 * :ref:`__lgamma <internal_gamma>`
 * :ref:`__rem_pio2 <internal_trig>`
 * :ref:`catan`
