@@ -26,6 +26,7 @@ SOFTWARE.
 */
 
 #include <stdint.h>
+#include <errno.h>
 #include "log_dint.h"
 
 // Warning: clang also defines __GNUC__
@@ -653,13 +654,21 @@ log (double x)
     if (x <= 0.0)
     {
       /* f(x<0) is NaN, f(+/-0) is -Inf and raises DivByZero */
-      if (x < 0)
+      if (x < 0) {
+#ifdef CORE_MATH_SUPPORT_ERRNO
+        errno = EDOM;
+#endif
         return 0.0 / 0.0;
-      else
+      }
+      else {
+#ifdef CORE_MATH_SUPPORT_ERRNO
+        errno = ERANGE;
+#endif
         return 1.0 / -0.0;
+      }
     }
     if (e == 0x400 || e == 0xc00) /* +Inf or NaN */
-      return x;
+      return x + x;
     if (e == -0x3ff) /* subnormal */
     {
       v.f *= 0x1p52;
@@ -668,8 +677,10 @@ log (double x)
   }
   /* now x > 0 */
   /* normalize v in [1,2) */
-  v.u = (0x3fful << 52) | (v.u & 0xfffffffffffff);
+  v.u = (0x3ffull << 52) | (v.u & 0xfffffffffffff);
   /* now x = m*2^e with 1 <= m < 2 (m = v.f) and -1074 <= e <= 1023 */
+  if (__builtin_expect (v.u == 0x3ff0000000000000ull && e == 0, 0))
+    return 0;
   double h, l;
   log_fast (&h, &l, e, v);
 
@@ -772,7 +783,7 @@ static inline void fast_extract(int64_t *e, uint64_t *m, double x) {
   f64_u _x = {.f = x};
 
   *e = (_x.u >> 52) & 0x7ff;
-  *m = (_x.u & (~0ul >> 12)) + (*e ? (1ul << 52) : 0);
+  *m = (_x.u & (~0ull >> 12)) + (*e ? (1ull << 52) : 0);
   *e = *e - 0x3ff;
 }
 
@@ -780,7 +791,7 @@ static inline void fast_extract(int64_t *e, uint64_t *m, double x) {
 static inline void dint_fromd(dint64_t *a, double b) {
   fast_extract(&a->ex, &a->hi, b);
 
-  uint32_t t = __builtin_clzl(a->hi);
+  uint32_t t = __builtin_clzll(a->hi);
 
   a->sgn = b < 0.0;
   a->hi = a->hi << t;
@@ -792,7 +803,7 @@ static inline void dint_fromd(dint64_t *a, double b) {
 // assuming the input is not in the subnormal range
 static inline double dint_tod(dint64_t *a) {
 
-  f64_u r = {.u = (a->hi >> 11) | (0x3ffl << 52)};
+  f64_u r = {.u = (a->hi >> 11) | (0x3ffll << 52)};
   /* r contains the upper 53 bits of a->hi, 1 <= r < 2 */
 
   double rd = 0.0;

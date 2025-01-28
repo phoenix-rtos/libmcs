@@ -46,8 +46,10 @@ float acospif(float x){
   if(__builtin_expect(e>=127, 0)){
     if(x == 1.0f) return 0.0f;
     if(x ==-1.0f) return 1.0f;
-    if(e==0xff && (t.u<<9)) return x; // nan
+    if(e==0xff && (t.u<<9)) return x + x; // nan
+#ifdef CORE_MATH_SUPPORT_ERRNO
     errno = EDOM;
+#endif
     feraiseexcept(FE_INVALID);
     return __builtin_nanf("1");
   }
@@ -96,7 +98,10 @@ float acospif(float x){
     double c6 = c[6] + z2*c[7];
     c0 += c2*z4;
     c4 += c6*z4;
-    c0 += c4*(z4*z4);
+    /* For |x| <= 0x1.0fd288p-127, c0 += c4*(z4*z4) would raise a spurious
+       underflow exception, we use an FMA instead, where c4 * z4 does not
+       underflow. */
+    c0 = __builtin_fma (c4 * z4, z4, c0);
     return 0.5 - z*c0;
   } else {
     double f = __builtin_sqrt(1-az);
@@ -113,7 +118,7 @@ float acospif(float x){
   }
 }
 
-#ifndef __INTEL_CLANG_COMPILER // icx provides this function
+#ifndef SKIP_C_FUNC_REDEF // icx provides this function
 /* just to compile since glibc does not contain this function */
 float acospif(float x){
   return acospif(x);

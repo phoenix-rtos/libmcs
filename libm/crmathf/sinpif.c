@@ -71,11 +71,13 @@ float sinpif(float x){
   int32_t e = (ix.u>>23)&0xff;
   if(__builtin_expect(e == 0xff, 0)){
     if(!(ix.u << 9)){
+#ifdef CORE_MATH_SUPPORT_ERRNO
       errno = EDOM;
+#endif
       feraiseexcept (FE_INVALID);
       return __builtin_nanf("inf");
     }
-    return x;
+    return x + x; // nan
   }
   int32_t m = (ix.u&~0u>>9)|1<<23, sgn = ix.u; sgn >>= 31;
   m = (m^sgn) - sgn;
@@ -104,7 +106,7 @@ float sinpif(float x){
   return r;
 }
 
-#ifndef __INTEL_CLANG_COMPILER // icx provides this function
+#ifndef SKIP_C_FUNC_REDEF // icx provides this function
 /* just to compile since glibc does not contain this function */
 float sinpif(float x){
   return sinpif(x);

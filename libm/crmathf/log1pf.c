@@ -40,13 +40,17 @@ typedef union {double f; uint64_t u;} b64u64_u;
 static __attribute__((noinline)) float as_special(float x){
   b32u32_u t = {.f = x};
   if(t.u==0xbf800000u){// +0.0
+#ifdef CORE_MATH_SUPPORT_ERRNO
     errno = ERANGE;
+#endif
     return -1.0f/0.0f; // to raise FE_DIVBYZERO
   }
   if(t.u == 0x7f800000u) return x; // +inf
   uint32_t ax = t.u<<1;
-  if(ax > 0xff000000u) return x; // nan
+  if(ax > 0xff000000u) return x + x; // nan
+#ifdef CORE_MATH_SUPPORT_ERRNO
   errno = EDOM;
+#endif
   return 0.0f/0.0f; // to raise FE_INVALID
 }
 
@@ -84,21 +88,24 @@ float log1pf(float x) {
   b32u32_u t = {.f = x};
   uint32_t ux = t.u, ax = ux&(~0u>>1);
   if(__builtin_expect(ax<0x3c880000, 1)){
-    if(__builtin_expect(ax<0x33000000, 0)) return __builtin_fmaf(x,-x,x);
+    if(__builtin_expect(ax<0x33000000, 0)){
+      if(!ax) return x;
+      return __builtin_fmaf(x,-x,x);
+    }
     double z2 = z*z, z4 = z2*z2;
     double f = z2*((b[1] + z*b[2]) + z2*(b[3] + z*b[4]) + z4*((b[5] + z*b[6]) + z2*b[7]));
     b64u64_u r = {.f = z + f};
-    if(__builtin_expect((r.u&0xfffffffl) == 0, 0)) r.f += 0x1p14*(f + (z - r.f));
+    if(__builtin_expect((r.u&0xfffffffll) == 0, 0)) r.f += 0x1p14*(f + (z - r.f));
     return r.f;
   } else {
     if(__builtin_expect(ux>=0xbf800000u||ax>=0x7f800000u, 0)) return as_special(x);
-    b64u64_u t = {.f = z + 1};
-    int e = t.u>>52;
-    unsigned long m52 = t.u&(~0ul>>12);
-    unsigned j = (t.u >> (52-5))&31;
+    b64u64_u tp = {.f = z + 1};
+    int e = tp.u>>52;
+    uint64_t m52 = tp.u&(~(uint64_t)0>>12);
+    unsigned j = (tp.u >> (52-5))&31;
     e -= 0x3ff;
-    b64u64_u xd = {.u = m52 | (0x3fful<<52)};
-    double z = xd.f*x0[j] - 1;
+    b64u64_u xd = {.u = m52 | ((uint64_t)0x3ff<<52)};
+    z = xd.f*x0[j] - 1;
     static const double c[] =
       {-0x1.3902c33434e7fp-43, 0x1.ffffffe1cbed5p-1, -0x1.ffffff7d1b014p-2, 0x1.5564e0ed3613ap-2, -0x1.0012232a00d4ap-2};
     const double ln2 = 0x1.62e42fefa39efp-1;
@@ -108,18 +115,18 @@ float log1pf(float x) {
       double z4 = z2*z2, f = z*((b[0] + z*b[1]) + z2*(b[2] + z*b[3]) + z4*((b[4] + z*b[5]) + z2*(b[6] + z*b[7])));
       const double ln2l = 0x1.7f7d1cf79abcap-20, ln2h = 0x1.62e4p-1;
       double Lh = ln2h * e, Ll = ln2l * e, rl = f + Ll + lix[j];
-      b64u64_u r = {.f = rl + Lh};
-      if(__builtin_expect((r.u&0xfffffffl) == 0 , 0)){
+      b64u64_u tr = {.f = rl + Lh};
+      if(__builtin_expect((tr.u&0xfffffffll) == 0 , 0)){
 	if(x==-0x1.247ab0p-6) return -0x1.271f0ep-6f - 0x1p-31f;
 	if(x==-0x1.3a415ep-5) return -0x1.407112p-5f + 0x1p-30f;
 	if(x== 0x1.fb035ap-2) return  0x1.9bddc2p-2f + 0x1p-27f;
-	r.f += 64*(rl + (Lh - r.f));
-      } else if(rl+(Lh-r.f)==0.0){
+	tr.f += 64*(rl + (Lh - tr.f));
+      } else if(rl+(Lh-tr.f)==0.0){
 	if(x== 0x1.b7fd86p-4) return  0x1.a1ece2p-4f + 0x1p-29f;
 	if(x==-0x1.3a415ep-5) return -0x1.407112p-5f + 0x1p-30f;
 	if(x== 0x1.43c7e2p-6) return  0x1.409f80p-6f + 0x1p-31f;
       }
-      ub = r.f;
+      ub = tr.f;
     }
     return ub;
   }

@@ -37,6 +37,7 @@ SOFTWARE.
 
 #include <stdint.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 /*
   Type definition
@@ -45,8 +46,13 @@ SOFTWARE.
 #ifndef UINT128_T
 #define UINT128_T
 
+#if (defined(__clang__) && __clang_major__ >= 14) || (defined(__GNUC__) && __GNUC__ >= 14)
+typedef unsigned _BitInt(128) u128;
+#else
 typedef unsigned __int128 u128;
+#endif
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 typedef union {
   u128 r;
   struct {
@@ -54,16 +60,25 @@ typedef union {
     uint64_t h;
   };
 } uint128_t;
+#else
+typedef union {
+  u128 r;
+  struct {
+    uint64_t h;
+    uint64_t l;
+  };
+} uint128_t;
+#endif
 
 // Add two 128-bit integers and return 1 if a carry occured
-static inline char addu_128 (uint128_t a, uint128_t b, uint128_t *r) {
+static inline int addu_128 (uint128_t a, uint128_t b, uint128_t *r) {
   r->r = a.r + b.r;
   // Return the carry
   return r->r < a.r;
 }
 
 // Subtract two 128-bit integers and return 1 if a borrow occured
-static inline char subu_128 (uint128_t a, uint128_t b, uint128_t *r) {
+static inline int subu_128 (uint128_t a, uint128_t b, uint128_t *r) {
   r->r = a.r - b.r;
   // Return the borrow
   return r->r > a.r;
@@ -84,19 +99,20 @@ static inline signed char cmpu (uint64_t a, uint64_t b) {
 #endif
 
 // Add two 128-bit integers and return 1 if a carry occured
-static inline char addu128 (u128 a, u128 b, u128 *r) {
+static inline int addu128 (u128 a, u128 b, u128 *r) {
   *r = a + b;
   // Return the carry
   return *r < a;
 }
 
 // Subtract two 128-bit integers and return 1 if a borrow occured
-static inline char subu128 (u128 a, u128 b, u128 *r) {
+static inline int subu128 (u128 a, u128 b, u128 *r) {
   *r = a - b;
   // Return the borrow
   return *r > a;
 }
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 typedef union {
   /* Use a little-endian representation.
      FIXME: adapt for big-endian processors. */
@@ -115,6 +131,24 @@ typedef union {
     uint64_t sgn;
   };
 } qint64_t;
+#else
+typedef union {
+  struct {
+    u128 rl;
+    u128 rh;
+    int64_t _ex;
+    uint64_t _sgn;
+  };
+  struct {
+    uint64_t lh; /* upper low part */
+    uint64_t ll; /* lower low part */
+    uint64_t hh; /* upper high part */
+    uint64_t hl; /* lower high part */
+    int64_t ex;
+    uint64_t sgn;
+  };
+} qint64_t;
+#endif
 
 /*
   Constants
@@ -249,10 +283,10 @@ add_qint (qint64_t *r, const qint64_t *a, const qint64_t *b) {
     /* we cannot have C=0 since |A| > |B| */
     uint64_t chh = ch >> 64, clh = cl >> 64;
     ex =
-      chh ? __builtin_clzl(chh)
-      : 64 + (ch ? __builtin_clzl(ch)
-              : 64 + (clh ? __builtin_clzl(clh)
-                      : 64 + __builtin_clzl(cl)));
+      chh ? __builtin_clzll(chh)
+      : 64 + (ch ? __builtin_clzll(ch)
+              : 64 + (clh ? __builtin_clzll(clh)
+                      : 64 + __builtin_clzll(cl)));
     /* ex < 256 since |A| > |B| */
 
     /* If ex=0 or ex=1, the rounding error is bounded by 2 ulps. */
@@ -302,10 +336,10 @@ add_qint (qint64_t *r, const qint64_t *a, const qint64_t *b) {
         chh = ch >> 64;
         clh = cl >> 64;
         ex =
-          chh ? __builtin_clzl(chh)
-          : 64 + (ch ? __builtin_clzl(ch)
-                  : 64 + (clh ? __builtin_clzl(clh)
-                          : 64 + __builtin_clzl(cl)));
+          chh ? __builtin_clzll(chh)
+          : 64 + (ch ? __builtin_clzll(ch)
+                  : 64 + (clh ? __builtin_clzll(clh)
+                          : 64 + __builtin_clzll(cl)));
       }
     if (ex) {
       ch = (ch << ex) | (cl >> (128 - ex));
@@ -396,7 +430,7 @@ add_qint_22 (qint64_t *r, const qint64_t *a, const qint64_t *b) {
 
     /* we cannot have ch=0 since |A| > |B| */
     uint64_t chh = ch >> 64;
-    ex = chh ? __builtin_clzl(chh) : 64 + __builtin_clzl(ch);
+    ex = chh ? __builtin_clzll(chh) : 64 + __builtin_clzll(ch);
 
     /* ex < 128 since |A| > |B| */
 
@@ -416,7 +450,7 @@ add_qint_22 (qint64_t *r, const qint64_t *a, const qint64_t *b) {
 
         /* we cannot have C=0 since |A| > |B| */
         chh = ch >> 64;
-        ex = chh ? __builtin_clzl(chh) : 64 + __builtin_clzl(ch);
+        ex = chh ? __builtin_clzll(chh) : 64 + __builtin_clzll(ch);
         /* rounding error is bounded by 1 ulp(128) */
       }
     ch = ch << ex;
@@ -797,7 +831,7 @@ static inline void mul_qint_2 (qint64_t *r, int64_t b, const qint64_t *a) {
   r->ex = a->ex + 64;
 
   /* scale c so that 2^63 <= c < 2^64 */
-  int k = __builtin_clzl (c);
+  int k = __builtin_clzll (c);
   c = c << k;
   r->ex -= k;
 
@@ -821,7 +855,7 @@ static inline void mul_qint_2 (qint64_t *r, int64_t b, const qint64_t *a) {
   t3 += (((u128) cy << 64) | (t2 >> 64));
   /* (t3,low(t2):64,low(t1):64) is the sum of the terms of degree 0 to 3 */
 
-  uint32_t ex = __builtin_clzl (t3 >> 64);
+  uint32_t ex = __builtin_clzll (t3 >> 64);
 
   t2 = (t2 << 64) | (t1 & (u128) 0xffffffffffffffff);
 
@@ -846,7 +880,7 @@ static inline void mul_qint_2 (qint64_t *r, int64_t b, const qint64_t *a) {
 
 // Prints a qint64_t value for debugging purposes
 static inline void print_qint(const qint64_t *a) {
-  printf("{.hh=0x%lx, .hl=0x%lx, .lh=0x%lx, .ll=0x%lx, .ex=%ld, .sgn=0x%lx}\n",
+  printf("{.hh=0x%"PRIx64", .hl=0x%"PRIx64", .lh=0x%"PRIx64", .ll=0x%"PRIx64", .ex=%"PRId64", .sgn=0x%"PRIx64"}\n",
          a->hh, a->hl, a->lh, a->ll, a->ex, a->sgn);
 }
 /*

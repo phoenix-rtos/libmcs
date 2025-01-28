@@ -37,6 +37,7 @@ SOFTWARE.
 
 #include <stdint.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 /*
   Type and structure definitions
@@ -45,8 +46,13 @@ SOFTWARE.
 #ifndef UINT128_T
 #define UINT128_T
 
+#if (defined(__clang__) && __clang_major__ >= 14) || (defined(__GNUC__) && __GNUC__ >= 14 && __BITINT_MAXWIDTH__ && __BITINT_MAXWIDTH__ >= 128)
+typedef unsigned _BitInt(128) u128;
+#else
 typedef unsigned __int128 u128;
+#endif
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 typedef union {
   u128 r;
   struct {
@@ -54,9 +60,18 @@ typedef union {
     uint64_t h;
   };
 } uint128_t;
+#else
+typedef union {
+  u128 r;
+  struct {
+    uint64_t h;
+    uint64_t l;
+  };
+} uint128_t;
+#endif
 
 // Add two 128 bit integers and return 1 if an overflow occured
-static inline char addu_128(uint128_t a, uint128_t b, uint128_t *r) {
+static inline int addu_128(uint128_t a, uint128_t b, uint128_t *r) {
   r->l = a.l + b.l;
   r->h = a.h + b.h + (r->l < a.l);
 
@@ -64,8 +79,8 @@ static inline char addu_128(uint128_t a, uint128_t b, uint128_t *r) {
   return r->h == a.h ? r->l < a.l : r->h < a.h;
 }
 
-// Substract two 128 bit integers and return 1 if an underflow occured
-static inline char subu_128(uint128_t a, uint128_t b, uint128_t *r) {
+// Subtract two 128 bit integers and return 1 if an underflow occured
+static inline int subu_128(uint128_t a, uint128_t b, uint128_t *r) {
   uint128_t c = {.r = -b.r};
   r->l = a.l + c.l;
   r->h = a.h + c.h + (r->l < a.l);
@@ -74,9 +89,9 @@ static inline char subu_128(uint128_t a, uint128_t b, uint128_t *r) {
   return a.h != r->h ? r->h > a.h : r->l > a.l;
 }
 
-static inline char cmp(int64_t a, int64_t b) { return (a > b) - (a < b); }
+static inline int cmp(int64_t a, int64_t b) { return (a > b) - (a < b); }
 
-static inline char cmpu(uint64_t a, uint64_t b) { return (a > b) - (a < b); }
+static inline int cmpu(uint64_t a, uint64_t b) { return (a > b) - (a < b); }
 
 #endif
 
@@ -190,7 +205,7 @@ static inline void add_dint(dint64_t *r, const dint64_t *a, const dint64_t *b) {
   }
 
   uint64_t ex =
-      C.h ? __builtin_clzl(C.h) : 64 + (C.l ? __builtin_clzl(C.l) : a->ex);
+      C.h ? __builtin_clzll(C.h) : 64 + (C.l ? __builtin_clzll(C.l) : a->ex);
   C.r = C.r << ex;
 
   r->sgn = sgn;
@@ -241,7 +256,7 @@ static inline void mul_dint_2(dint64_t *r, int64_t b, const dint64_t *a) {
 
   t.r = (u128)(a->hi) * (u128)c;
 
-  int m = t.h ? __builtin_clzl(t.h) : 64;
+  int m = t.h ? __builtin_clzll(t.h) : 64;
   t.r = (t.r << m);
 
   // Will pose issues if b is too large but for now we assume it never happens
@@ -258,11 +273,11 @@ static inline void mul_dint_2(dint64_t *r, int64_t b, const dint64_t *a) {
   r->hi = t.h;
   r->lo = t.l;
   r->ex = a->ex + 64 - m;
-};
+}
 
 // Prints a dint64_t value for debugging purposes
 static inline void print_dint(const dint64_t *a) {
-  printf("{.hi=0x%lx, .lo=0x%lx, .ex=%ld, .sgn=0x%lx}\n", a->hi, a->lo, a->ex,
+  printf("{.hi=0x%"PRIx64", .lo=0x%"PRIx64", .ex=%"PRId64", .sgn=0x%"PRIx64"}\n", a->hi, a->lo, a->ex,
          a->sgn);
 }
 

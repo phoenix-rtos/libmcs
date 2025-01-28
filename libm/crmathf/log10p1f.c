@@ -38,20 +38,33 @@ SOFTWARE.
 typedef union {float f; uint32_t u;} b32u32_u;
 typedef union {double f; uint64_t u;} b64u64_u;
 
+/* clang does not like __builtin_nan("<0") even with -fhonor-nans,
+   https://www.mail-archive.com/llvm-branch-commits@lists.llvm.org/msg14854.html */
+static double
+get_nan (void)
+{
+  b32u32_u v = {.u = 0xffffffff};
+  return v.f;
+}
+
 static __attribute__((noinline)) float as_special(float x){
   b32u32_u t = {.f = x};
   uint32_t ux = t.u;
   if(ux == 0x7f800000u) return x; // +inf
   uint32_t ax = ux<<1;
   if(ax == 0x17fu<<24) { // x+1 = 0.0
+#ifdef CORE_MATH_SUPPORT_ERRNO
     errno = ERANGE;
+#endif
     feraiseexcept(FE_DIVBYZERO);
     return -__builtin_inff(); // -inf
   }
-  if(ax > 0xff000000u) return x; // nan
+  if(ax > 0xff000000u) return x + x; // nan
+#ifdef CORE_MATH_SUPPORT_ERRNO
   errno = EDOM;
+#endif
   feraiseexcept(FE_INVALID);
-  return __builtin_nanf("<0"); // nan
+  return get_nan (); // x < 0
 }
 
 float log10p1f(float x){
@@ -111,9 +124,9 @@ float log10p1f(float x){
   if(__builtin_expect(ux == st[je].u, 0)) return je;
 
   b64u64_u tz = {.f = z + 1.0};
-  uint64_t m = tz.u&(~0ul>>12);
-  int32_t e = (tz.u>>52) - 1023, j = ((m + (1l<<45))>>46);
-  tz.u = m | (0x3fful<<52);
+  uint64_t m = tz.u&(~(uint64_t)0>>12);
+  int32_t e = (tz.u>>52) - 1023, j = ((m + ((int64_t)1<<45))>>46);
+  tz.u = m | ((uint64_t)0x3ff<<52);
   double ix = tr[j], l = tl[j];
   double off = e*0x1.34413509f79ffp-2 + l, v = tz.f*ix - 1;
 
@@ -128,7 +141,7 @@ float log10p1f(float x){
       z /= 2.0 + z;
       double z2 = z*z, z4 = z2*z2;
       static const double c[] = {0x1.bcb7b1526e50fp-1, 0x1.287a76370129dp-2, 0x1.63c62378fa3dbp-3, 0x1.fca4139a42374p-4};
-      double r = z*((c[0] + z2*c[1]) + z4*(c[2] + z2*c[3]));
+      r = z*((c[0] + z2*c[1]) + z4*(c[2] + z2*c[3]));
       return r;
     }
     if(__builtin_expect(ux==0x7956ba5eu,0)) return 0x1.16bebap+5f + 0x1p-20f;
@@ -136,16 +149,19 @@ float log10p1f(float x){
     static const double c[] =
       {0x1.bcb7b1526e50ep-2, -0x1.bcb7b1526e53dp-3, 0x1.287a7636f3fa2p-3, -0x1.bcb7b146a14b3p-4,
        0x1.63c627d5219cbp-4, -0x1.2880736c8762dp-4, 0x1.fc1ecf913961ap-5};
-    double f = v*((c[0] + v*c[1]) + v2*((c[2] + v*c[3]) + v2*(c[4] + v*c[5] + v2*c[6])));
+    f = v*((c[0] + v*c[1]) + v2*((c[2] + v*c[3]) + v2*(c[4] + v*c[5] + v2*c[6])));
     f += l - tl[0];
-    double el = e*0x1.34413509f79ffp-2, r = el + f;
+    double el = e*0x1.34413509f79ffp-2;
+    r = el + f;
     ub = r;
     tz.f = r;
   }
   return ub;
 }
 
+#ifndef SKIP_C_FUNC_REDEF
 /* just to compile since glibc does not contain this function */
 float log10p1f(float x){
   return log10p1f(x);
 }
+#endif

@@ -58,6 +58,16 @@ SOFTWARE.
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <errno.h>
+#ifdef __x86_64__
+#include <x86intrin.h>
+#endif
+#if defined(__x86_64__)
+#define FLAG_T uint32_t
+#else
+#include <fenv.h>
+#define FLAG_T fexcept_t
+#endif
 
 // Warning: clang also defines __GNUC__
 #if defined(__GNUC__) && !defined(__clang__)
@@ -74,6 +84,66 @@ SOFTWARE.
 #define ENABLE_ZIV2 (POW_ITERATION & 0x2)
 #define ENABLE_EXACT (POW_ITERATION & 0x4)
 #define ENABLE_ZIV3 (POW_ITERATION & 0x8)
+
+// This code emulates the _mm_getcsr SSE intrinsic by reading the FPCR register.
+// fegetexceptflag accesses the FPSR register, which seems to be much slower
+// than accessing FPCR, so it should be avoided if possible.
+// Adapted from sse2neon: https://github.com/DLTcollab/sse2neon
+#if defined(__aarch64__) || defined(__arm64__) || defined(_M_ARM64)
+#if defined(_MSC_VER)
+#include <arm64intr.h>
+#endif
+
+typedef struct
+{
+  uint16_t res0;
+  uint8_t  res1  : 6;
+  uint8_t  bit22 : 1;
+  uint8_t  bit23 : 1;
+  uint8_t  bit24 : 1;
+  uint8_t  res2  : 7;
+  uint32_t res3;
+} fpbitfield;
+
+inline static unsigned int _mm_getcsr()
+{
+  union
+  {
+    fpbitfield field;
+    uint64_t value;
+  } r;
+
+#if defined(_MSC_VER) && !defined(__clang__)
+  r.value = _ReadStatusReg(ARM64_FPCR);
+#else
+  __asm__ __volatile__("mrs %0, FPCR" : "=r"(r.value));
+#endif
+  static const unsigned int lut[2][2] = {{0x0000, 0x2000}, {0x4000, 0x6000}};
+  return lut[r.field.bit22][r.field.bit23];
+}
+#endif  // defined(__aarch64__) || defined(__arm64__) || defined(_M_ARM64)
+
+static FLAG_T
+get_flag (void)
+{
+#if defined(__x86_64__) || defined(__aarch64__) || defined(__arm64__) || defined(_M_ARM64)
+  return _mm_getcsr ();
+#else
+  fexcept_t flag;
+  fegetexceptflag (&flag, FE_INEXACT);
+  return flag;
+#endif
+}
+
+static void
+set_flag (FLAG_T flag)
+{
+#ifdef __x86_64__
+  _mm_setcsr (flag);
+#else
+  fesetexceptflag (&flag, FE_INEXACT);
+#endif
+}
 
 /***************** polynomial approximations of exp(z) ***********************/
 
@@ -207,8 +277,7 @@ static inline void q_2 (dint64_t *r, dint64_t *y) {
 }
 
 /* Given |y| < 0.00016923 < 2^-12.52, put in r an approximation of exp(y),
-   with 0.999830 < r < 1.000170, relative error bounded by 2^-242.00, and
-   absolute error bounded by 2^-242.00.
+   with 0.999830 < r < 1.000170, absolute/relative error bounded by 2^-241.11.
    The error analysis is from the analyze_q3() function in the accompanying
    file qint.sage. */
 static inline void q_3 (qint64_t *r, qint64_t *y) {
@@ -268,9 +337,9 @@ static inline void q_3 (qint64_t *r, qint64_t *y) {
   }
 
   /* The function analyze_q3() from the accompanying qint.sage file gives
-     a total absolute error bounded by 2^-242.006. Since r > exp(-0.00016923),
-     this corresponds to a relative error < 2^-242.006/exp(-0.00016923)
-     < 2^-242.00. */
+     a total absolute error bounded by 2^-241.113. Since r > exp(-0.00016923),
+     this corresponds to a relative error < 2^-241.113/exp(-0.00016923)
+     < 2^-241.11. */
 }
 
 /**************** polynomial approximations of log(1+x) **********************/
@@ -548,21 +617,21 @@ p_3 (qint64_t *r, qint64_t *z) {
 */
 static inline int log_1 (double *h, double *l, double x) {
   f64_u _x = {.f = x};
-  uint64_t _m = _x.u & (~0ul >> 12);
+  uint64_t _m = _x.u & (~0ull >> 12);
   int64_t _e = (_x.u >> 52) & 0x7ff;
 
   f64_u _t;
 
   if (__builtin_expect(_e,1)) {
-    _t.u = _m | (0x3ffl << 52);
-    _m += 1ul << 52;
+    _t.u = _m | (0x3ffll << 52);
+    _m += 1ull << 52;
     _e -= 0x3ff;
   } else { /* x is a subnormal double  */
-    uint32_t k = __builtin_clzl (_m) - 11;
+    uint32_t k = __builtin_clzll (_m) - 11;
 
-    _e = -0x3fel - k;
+    _e = -0x3fell - k;
     _m <<= k;
-    _t.u = _m | (0x3ffl << 52);
+    _t.u = _m | (0x3ffll << 52);
   }
 
   /* now |x| = 2^_e*_t = 2^(_e-52)*m with 1 <= _t < 2,
@@ -915,7 +984,8 @@ static void log_3 (qint64_t *r, qint64_t *x) {
 
    See Lemma 7 from reference [5].
 
-   The result eh+el is multiplied by s (which is +1 or -1).
+   The result eh+el is multiplied by s (which is +1 or -1),
+   where s=-1 can only happen when x < 0 and y is an integer.
 */
 static inline void
 exp_1 (double *eh, double *el, double rh, double rl, double s) {
@@ -927,25 +997,48 @@ exp_1 (double *eh, double *el, double rh, double rl, double s) {
 
   if (__builtin_expect(rh > RHO2, 0)) {
     if (rh > RHO3) {
+      /* If rh > RHO3, we are sure there is overflow,
+         For s=1 we return eh = el = DBL_MAX, which yields
+         res_min = res_max = +Inf for rounding up or to nearest,
+         and res_min = res_max = DBL_MAX for rounding down or toward zero,
+         which will yield the correct rounding.
+         For s=-1 we return eh = el = -DBL_MAX, which similarly gives
+         res_min = res_max = -Inf or res_min = res_max = -DBL_MAX,
+         which is the correct rounding. */
+#ifdef CORE_MATH_SUPPORT_ERRNO
+      errno = ERANGE;
+#endif
+
       *eh = 0x1.fffffffffffffp+1023 * s;
       *el = 0x1.fffffffffffffp+1023 * s;
     }
     else
+      /* If RHO2 < rh <= RHO3, we are in the intermediate region
+         where there might be overflow or not, thus we set eh = el = NaN,
+         which will set res_min = res_max = NaN, the comparison
+         res_min == res_max will fail: we defer to the 2nd phase. */
       *eh = *el = NAN;
     return;
   }
 
   if (__builtin_expect(rh < RHO1, 0)) {
-    if (rh < RHO0 && s > 0)
+    if (rh < RHO0)
     {
-      *eh = 0x1p-1074;
-      *el = -0x1p-1074;
-      /* For s=1, we have eh=el=2^-1074, thus res_h=res_l=2^-1074 in the main
-         code, and in the rounding test fma(err,+/-res_h,rel_l) rounds to
-         2^-1074 for rounding to nearest, thus res_min=res_max=+0, which is
-         the expected result (underflow case).
-         For directed roundings res_min and res_max round to different
-         multiples of 2^-1074, and the rounding test fails. */
+      *eh = +0.0 * s;
+      *el = 0x1p-1074 * (0.5 * s);
+      /* For s=1, we have eh=el=+0 except for rounding up,
+         thus res_min=+0 or -0, res_max=+0 in the main code,
+         the rounding test succeeds, and we return res_max which is the
+         expected result in the underflow case.
+         For s=1 and rounding up, we have eh=+0, el=2^-1074,
+         thus res_min = res_max = 2^-1074, which is the expected result too.
+         For s=-1, we have eh=el=-0 except for rounding down,
+         thus res_min=-0 or +0, res_max=-0 in the main code,
+         the rounding test succeeds, and we return res_max which is the
+         expected result in the underflow case.
+         For s=-1 and rounding down, we have eh=-0, el=-2^-1074,
+         thus res_min = res_max = -2^-1074, which is the expected result too.
+      */
     }
     else /* RHO0 <= rh < RHO1 or s < 0: we defer to the 2nd phase */
       *eh = *el = NAN;
@@ -959,7 +1052,7 @@ exp_1 (double *eh, double *el, double rh, double rl, double s) {
      const double magic = 0x1.8p+52;
      double k = __builtin_fma (rh, INVLOG2, magic) - magic;
   */
-  double k = __builtin_roundeven (rh * INVLOG2);
+  double k = roundeven_finite (rh * INVLOG2);
 
 #define LOG2H 0x1.62e42fefa39efp-13
 #define LOG2L 0x1.abc9e3b39803fp-68
@@ -1063,7 +1156,7 @@ static void exp_2 (dint64_t *r, dint64_t *x) {
 }
 
 /* put in r an approximation of exp(x), for |x| < 744.45,
-   with relative error < 2^-241.99 */
+   with relative error < 2^-241.10 */
 static void exp_3 (qint64_t *r, qint64_t *x) {
   qint64_t K, y;
 
@@ -1105,7 +1198,7 @@ static void exp_3 (qint64_t *r, qint64_t *x) {
   int64_t i2 = (k >> 6) & 0x3f;
   int64_t i1 = k & 0x3f;
 
-  q_3 (r, &y); /* relative error bounded by 2^-242.00, with |r| < 1.0002 */
+  q_3 (r, &y); /* relative error bounded by 2^-241.11, with |r| < 1.0002 */
 
   mul_qint (r, &T1_3[i2], r);
   /* the rounding error of mul_qint() is bounded by 14 ulps, which translates
@@ -1118,11 +1211,11 @@ static void exp_3 (qint64_t *r, qint64_t *x) {
      the approximation error for T2_3[i2] is bounded by 2^-128 relatively. */
 
   /* Total relative errors:
-     2^-242.00 from q_3()
+     2^-241.11 from q_3()
      14*2^-255 and 2^-256 from the multiplication by T1_3[i2]
      14*2^-255 and 2^-256 from the multiplication by T2_3[i1].
-     With e1=2^-242.00, e2=14*2^-255 and e3=2^-256, this gives:
-     (1+e1)*(1+e2)^2*(1+e3)^2 - 1 < 2^-241.99. */
+     With e1=2^-241.11, e2=14*2^-255 and e3=2^-256, this gives:
+     (1+e1)*(1+e2)^2*(1+e3)^2 - 1 < 2^-241.10. */
 
   r->ex = r->ex + M; /* exact */
 }
@@ -1161,7 +1254,8 @@ static void exp_3 (qint64_t *r, qint64_t *x) {
   (b) x=2^E*m with m odd and y = 2^F*n with -5 <= F < 0, n odd, 3 <= n <= 34
 */
 static char
-exact_pow (double *r, double x, double y, const dint64_t *z) {
+exact_pow (double *r, double x, double y, const dint64_t *z)
+{
   int64_t _s = z->sgn ? -1 : 1;
 
   // Check if x = 2^E
@@ -1196,10 +1290,10 @@ exact_pow (double *r, double x, double y, const dint64_t *z) {
 
   if (F < 0) { /* case (b) */
     /* check that E is divisible by 2^-F */
-    if ((E & (~0ul >> (64 + F))))
+    if ((E & (~0ull >> (64 + F))))
       return 0;
 
-    int64_t G, g = (E >> -F) * n;
+    int64_t G, g = (E >> -F) * n; // since F < 0, the shift by -F is ok
     /* g = E*y */
     int64_t k;
     round_54 (&G, &k, z); /* z is rounded to k*2^G */
@@ -1210,7 +1304,7 @@ exact_pow (double *r, double x, double y, const dint64_t *z) {
        the 2nd phase is less than 2^-116, since if |2^G*k-z| >= 2^-116*z
        the rounding test from the 2nd phase did succeed.
     */
-    int cnt = __builtin_clzl (k);
+    int cnt = __builtin_clzll (k);
     dint64_t d = { .hi = k << cnt, .lo = 0, .ex = G + 63 - cnt, .sgn = 1 - z->sgn };
     add_dint (&d, z, &d); /* exact by Sterbenz theorem */
     /* multiply d by 2^116 */
@@ -1225,7 +1319,7 @@ exact_pow (double *r, double x, double y, const dint64_t *z) {
     /* The following code is used when k is a multiple of a power of 2,
        to reduce to 2^X*r with odd r. It checks whether k is an odd number
        multiplied by 2^(g-G). */
-    if (((k & ~(~1ul << (g - G))) == (1ul << (g - G)))) {
+    if (((k & ~(~1ull << (g - G))) == (1ull << (g - G)))) {
       *r = (double)((k >> (g - G)) * _s);
       pow2(r, g);
 
@@ -1265,6 +1359,153 @@ exact_pow (double *r, double x, double y, const dint64_t *z) {
   return 1;
 }
 
+// return non-zero if x^y is exact (and exactly representable as a double)
+static int
+is_exact (double x, double y)
+{
+  /* All cases such that x^y might be exact are:
+     (a) |x| = 1
+     (b) y integer, 0 <= y <= 33
+     (c) y<0: x=1 or (x=2^e and |y|=n*2^-k with 2^k dividing e)
+     (d) y>0: y=n*2^f with -5 <= f <= -1 and 1 <= n <= 33
+     In cases (b)-(d), the low 42 bits of the encoding of y are zero,
+     thus we use that for an early exit test. */
+
+  f64_u v = {.f = x}, w = {.f = y};
+  if (__builtin_expect ((v.u << 1) != 0x7fe0000000000000ull &&
+                        (w.u << 22) != 0, 1))
+    return 0;
+
+  if (__builtin_expect ((v.u << 1) == 0x7fe0000000000000ull, 0)) // |x| = 1
+    return 1;
+
+  // xmax[y] for 1<=y<=33 is the largest m such that m^y fits in 53 bits
+  static const uint64_t xmax[] = { 0, 0xffffffffffffffff,
+                                   94906265, 208063, 9741, 1552, 456, 190, 98,
+                                   59, 39, 28, 21, 16, 13, 11, 9, 8, 7, 6, 6,
+                                   5, 5, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3 };
+  if (y >= 0 && is_int (y)) {
+    /* let x = m*2^e with m an odd integer, x^y is exact when
+       - y = 0 or y = 1
+       - m = 1 or -1 and -1074 <= e*y < 1024
+       - if |x| is not a power of 2, 2 <= y <= 33 and
+         m^y should fit in 53 bits
+    */
+    uint64_t m = v.u & 0xfffffffffffffull;
+    int64_t e = ((v.u << 1) >> 53) - 0x433;
+    if (e >= -1074)
+      m |= 0x10000000000000ull;
+    else // subnormal numbers
+      e++;
+    int t = __builtin_ctzll (m);
+    m = m >> t;
+    e += t;
+    /* For normal numbers, we have x = m*2^e. */
+    if (y == 0 || y == 1)
+      return 1;
+    if (m == 1)
+      return -1074 <= y * e && y * e < 1024;
+    // now for y < 0 or 33 < y it cannot be exact
+    if (y < 0 || 33 < y)
+      return 0;
+    // now 2 <= y <= 33
+    int y_int = (int) y;
+    if (m > xmax[y_int])
+      return 0;
+    // |x^y| = m^y * 2^(e*y)
+    uint64_t my = m * m;
+    for (int i = 2; i < y_int; i++)
+      my = my * m;
+    // my = m^y
+    t = 64 - __builtin_clzll (m);
+    // 2^(t-1) <= m^y < 2^t thus 2^(e*y + t - 1) <= |x^y| < 2^(e*y + t)
+    int64_t ez = e * y_int + t;
+    if (ez <= -1074 || 1024 < ez)
+      return 0;
+    // since m is odd, x^y is an odd multiple of 2^(e*y)
+    return e * y_int >= -1074;
+  }
+
+  uint64_t n = w.u & 0xfffffffffffffull;
+  int64_t f = ((w.u << 1) >> 53) - 0x433;
+  if (f >= -1074)
+    n |= 0x10000000000000ull;
+  else // subnormal numbers
+    f++;
+  int t = __builtin_ctzll (n);
+  n = n >> t;
+  f += t;
+  // |y| = n*2^f with n odd
+
+  uint64_t m = v.u & 0xfffffffffffffull;
+  int64_t e = ((v.u << 1) >> 53) - 0x433;
+  if (e >= -1074)
+    m |= 0x10000000000000ull;
+  else // subnormal numbers
+    e++;
+  t = __builtin_ctzll (m);
+  m = m >> t;
+  e += t;
+  // |x| = m*2^e with m odd
+
+  /* if y < 0 and y is not an integer, the only case where x^y might be
+     exact is when x = 2^e and n*e*2^f is an integer */
+  if (y < 0)
+  {
+    if (m != 1) return 0;
+    // now e <> 0 since the case |x|=1 has already been treated
+    int64_t ez;
+    if (f >= 0)
+      // if f >= 12, since n*e <> 0, (n*e)<<f cannot be in [-1074,1024)
+      ez = (f < 12) ? (-n * e) << f : 1024;
+    else { // f < 0 thus 2^-f should divide e
+      t = __builtin_ctzll (e);
+      if (-f > t) return 0; // 2^-f does not divide e
+      ez = (-e >> (-f)) * n;
+    }
+    return -1074 <= ez && ez < 1024;
+  }
+
+  /* now y > 0, y is not a integer, y = n*2^f with n odd and f < 0.
+     Since x^(n*2^f) = (x^(2^f))^n, and n is odd, necessarily
+     x is an exact (2^k)th power with k=-f.
+     This implies x is a square. Since x = m*2^e with m odd,
+     necessarily m is a square, and e is even. */
+  while (f++) {
+    // try to extract a square from m*2^e
+    if (e&1) return 0;
+    e = e / 2;
+    double dm = (double) m;
+    double s = __builtin_round (__builtin_sqrt (dm));
+    if (s * s != dm)
+      return 0;
+    /* The above call of sqrt() might set the inexact flag, but in case
+       it happens, m is not a square, thus x^y cannot be exact. */
+    m = (uint64_t) s; // m remains odd (square root of an odd number)
+  }
+
+  // Now |x^y| = (m*2^e)^n with m, n odd integers
+  // now for 33 < n it cannot be exact, unless m=1
+  if (m > 1)
+  {
+    if (33 < n)
+      return 0;
+    // now n <= 33
+    if (m > xmax[n])
+      return 0;
+  }
+  // |x^y| = m^n * 2^(e*n) with m odd
+  uint64_t my = m, n0 = n;
+  while (n0-- > 1)
+    my = my * m;
+  // |x^y| = my * 2^(e*n)
+  t = 64 - __builtin_clzll (my); // number of significant bits of m^n
+  /* x^y is an odd multiple of 2^(e*n) thus we should have e*n >= -1074,
+     we also have 2^(t-1) <= m^n thus 2^(e*n+t-1) <= |x^y| < 2^(e*n+t)
+     and we need e*n+t <= 1024 */
+  return -1074 <= e * (int) n && e * (int) n + t <= 1024;
+}
+
 // Correctly rounded power function
 double pow (double x, double y) {
   double s = 1.0; /* sign of the result */
@@ -1275,17 +1516,37 @@ double pow (double x, double y) {
   if (__builtin_expect((_x.u >= 0x7ff0000000000000 || _y.u >= 0x7ff0000000000000), 0)) {
 
     if (__builtin_isnan(x)) {
+      // IEEE 754-2019: pow(x,+/-0) = 1 if x is not a signaling NaN
       if (y == 0.0 && !issignaling(x))
         return 1.0;
 
-      return x;
+      /* pow(sNaN, y) = qNaN. This is implicit in IEEE 754-2019,
+         Section 7.2: "the default result of an operation that signals the
+         invalid operation exception shall be a quiet NaN" and "These
+         operations are: a) any general-computational operation on a signaling
+         NaN".
+
+         Moreover, in 6.2.3:
+         "An operation that propagates a NaN operand to its result and has a
+         single NaN as an input should produce a NaN with the payload of the
+         input NaN if representable in the destination format. If two or more
+         inputs are NaN, then the payload of the resulting NaN should be
+         identical to the payload of one of the input NaNs if representable in
+         the destination format. This standard does not specify which of the
+         input NaNs will provide the payload."
+
+         Returning x+x has the double effect to quiet the signaling bit
+         and to raise the invalid exception if x=sNaN. */
+      return x + x;
     }
 
     if (__builtin_isnan(y)) {
-      if (x == 1.0)
+      // IEEE 754-2019: pow(1,y) = 1 for any y (even a quiet NaN)
+      if (x == 1.0 && !issignaling(y))
         return 1.0;
 
-      return y;
+      // pow(x, sNaN) = qNaN (see above)
+      return y + y;
     }
 
     switch (_x.u) {
@@ -1382,6 +1643,9 @@ double pow (double x, double y) {
         // y is a negative odd integer
         if (y < 0.0) {
           feraiseexcept(FE_DIVBYZERO);
+#ifdef CORE_MATH_SUPPORT_ERRNO
+          errno = ERANGE;
+#endif
           return INFINITY;
         }
 
@@ -1395,6 +1659,9 @@ double pow (double x, double y) {
 
       // y is negative, finite and an even integer or a non-integer
       feraiseexcept(FE_DIVBYZERO);
+#ifdef CORE_MATH_SUPPORT_ERRNO
+      errno = ERANGE;
+#endif
       return INFINITY;
 
     // x = -0.0
@@ -1405,6 +1672,9 @@ double pow (double x, double y) {
 
         // y is a negative odd integer
         if (y < 0.0) {
+#ifdef CORE_MATH_SUPPORT_ERRNO
+          errno = ERANGE;
+#endif
           feraiseexcept(FE_DIVBYZERO);
           return -INFINITY;
         }
@@ -1417,20 +1687,29 @@ double pow (double x, double y) {
       if (y > 0.0)
         return 0.0;
 
+
       // y is negative, finite and an even integer or a non-integer
+#ifdef CORE_MATH_SUPPORT_ERRNO
+      errno = ERANGE;
+#endif
       feraiseexcept(FE_DIVBYZERO);
       return INFINITY;
 
     }
 
     if (!is_int(y)) {
+#ifdef CORE_MATH_SUPPORT_ERRNO
+      errno = EDOM;
+#endif
       feraiseexcept(FE_INVALID);
       return NAN;
     }
 
     double cs[] = {1.0, -1.0};
 
-    s = cs[(int64_t)y & 0x1];
+    // set sign to 1 for y even, to -1 for y odd
+    int y_parity = __builtin_fabs (y) >= 0x1p53 ? 0 : ((int64_t) y & 0x1);
+    s = cs[y_parity];
 
     // Set x to |x| for the rest of the computation
     x = -x;
@@ -1441,6 +1720,8 @@ double pow (double x, double y) {
   double res_h, res_l;
 
   double lh, ll;
+
+  FLAG_T flag = get_flag ();
 
   // approximate log(x)
   int cancel = log_1 (&lh, &ll, x);
@@ -1462,9 +1743,6 @@ double pow (double x, double y) {
   exp_1 (&res_h, &res_l, rh, rl, s); /* 1 <= res_h < 2 */
   /* See Lemma 7 from reference [5] for the error analysis of exp_1(). */
 
-  /* Define ROUNDING_IS_TO_NEAREST_EVEN if the rounding mode is static and
-     to nearest-even, to use Ziv's rounding test instead. */
-#ifndef ROUNDING_IS_TO_NEAREST_EVEN
   /* The error bounds 2^-63.797 and 2^-57.579 are those from Algorithm
      phase_1 from reference [5]. */
   static const double err[] = { 0x1.27p-64, /* 2^-63.797 < 0x1.27p-64 */
@@ -1476,57 +1754,29 @@ double pow (double x, double y) {
   /* if res_h < 0, we have res_max < res_min, but since we only check
      equality between res_min and res_max, it does not matter */
 
-  if (res_min == res_max)
+  if (is_exact (x, y))
+    // restore inexact flag
+    set_flag (flag);
+
+  if (__builtin_expect (res_min == res_max, 1))
     /* when res_min * ex is in the subnormal range, exp_1() returns NaN
        to avoid double-rounding issues */
-    return res_min;
-#else
-  /* From Theorem 2.1 of [6], if the rounding is to nearest-even, we can
-     replace the rounding test by yh = RN(yh + RN(yl*e)) ==> yh = RN(y),
-     where yh = res_h, yl = res_l, and
-     e = RU((1+2^-p)/(1-err-2^(p+1)*err)), where err is the relative error:
-     yh + yl = y * (1 + alpha) with |alpha| <= err [Equation (2) from [6]].
-     The reference [5] does not express the relative error in that form,
-     but instead in equation (9) from [5]:
-     |eh + el - x^y| <= tau * eh (*)
-     with tau = 2^-63.7977 if x < 1/sqrt(2) or sqrt(2) < 2, and
-     tau = 2^-57.5798 otherwise.
-     Then we get alpha = tau * eh/x^y, and since |el/eh| < 2^-41.7
-     (Lemma 7 of [5]), we get:
-     From (*) we get: eh <= x^y + |el| + tau * eh
-                         <= x^y + (2^-41.7 + tau)*eh
-     thus eh/x^y <= 1/(1-2^-41.7-tau).
-     It follows we can take alpha = RU(tau/(1-2^-41.7-tau)),
-     thus we can take err = 2^-63.7976 if x < 1/sqrt(2) or sqrt(2) < 2,
-     and err = 2^-57.5797 otherwise. We can thus take
-     e = 0x1.0049b8d09331fp+0 if x < 1/sqrt(2) or sqrt(2) < 2, and
-     e = 0x1.175d93c9061b1p+0 otherwise. */
-  static double err[] = { 0x1.0049b8d09331fp+0, 0x1.175d93c9061b1p+0 };
-  /* Warning: we should make sure no FMA is used to compute
-     res_h + res_l * err! */
-  /* Reference [6] requires that yh+yl rounds to yl. */
-  fast_two_sum (&res_h, &res_l, res_h, res_l);
-  double res = res_l * err[cancel];
-  if (res_h == res_h + res)
-    return res;
-#endif
+    return res_max;
+  /* the idea of returning res_max instead of res_min is due to Laurent
+     Théry: it is better in case of underflow since res_max = +0 always. */
 
   // Easy cases
-  if (y == 1.0) {
+  if (y == 1.0)
     return s * x;
-  }
-
-  if (y == 2.0) {
+  
+  if (y == 2.0)
     return x * x;
-  }
 
-  if (y == 0.5) {
+  if (y == 0.5)
     return sqrt(x);
-  }
 
-  if (y == 0.0) {
+  if (y == 0.0)
     return 1.0;
-  }
 #endif /* ENABLE_FP */
 
   uint64_t rd; // used in the 2nd and 3rd phases
@@ -1564,6 +1814,8 @@ double pow (double x, double y) {
 
   // Rounding test
 
+  // 2^R.ex <= R < 2^(R.ex+1)
+
   /* case R < 2^-1075: underflow case */
   if (R.ex < -1075) {
     return 0.5 * (s * 0x1p-1074);
@@ -1572,6 +1824,7 @@ double pow (double x, double y) {
   if (R.ex < -1022) { /* subnormal case */
     /* -1075 <= R.ex <= -1023 thus 2^-1075 <= R < 2^-1022 */
     uint64_t ex = -(1022 + R.ex); /* 1 <= ex <= 53 */
+    // the significand has to be shifted right by ex bits
     uint64_t m = R.lo >> (10 + ex) | R.hi << (54 - ex);
 
     /* In principle, the bound 28 which holds for the normal case below
@@ -1594,8 +1847,14 @@ double pow (double x, double y) {
 
   R.sgn = s == -1.0;
 
-  if (rd)
-    return dint_tod (&R);
+  if (rd) {
+    double z = dint_tod (&R);
+#ifdef CORE_MATH_SUPPORT_ERRNO
+    if (__builtin_isinf (z))
+      errno = ERANGE;
+#endif
+    return z;
+  }
 
 #if ENABLE_EXACT > 0
   // Detect rounding boundary cases
@@ -1630,17 +1889,17 @@ double pow (double x, double y) {
      qR = y*log|x| * (1+eps1) with |eps1| < 2^-250.59 */
 
   qint64_t qZ;
-  exp_3 (&qZ, &qR); /* relative error < 2^-241.99:
-                       qZ = exp(qR) * (1+eps2) with |eps2| < 2^-241.99 */
+  exp_3 (&qZ, &qR); /* relative error < 2^-241.10:
+                       qZ = exp(qR) * (1+eps2) with |eps2| < 2^-241.10 */
 
   /* We thus have qZ = |x|^y * exp(y*log|x|*eps1) * (1+eps2).
      Since y*log|x| < 744.45, we have |y*log|x|*eps1| < 744.45*2^-250.59
      < eps3 = 2^-241.049 thus the relative error is bounded by
-     exp(eps3)*(1+eps2)-1 < 2^-240.44.
-     This corresponds to an error of at most 2^-240.44*2^256 < 48309 ulps. */
+     exp(eps3)*(1+eps2)-1 < 2^-240.07.
+     This corresponds to an error of at most 2^-240.07*2^256 < 62433 ulps. */
 
   /* extra rounding test */
-#define ERR_BND_3 47 /* floor(48309/2^10) */
+#define ERR_BND_3 60 /* floor(62433/2^10) */
   uint64_t r1 = qZ.hh << 54 | qZ.hl >> 10;
   uint64_t r2 = qZ.hl << 54 | qZ.lh >> 10;
   uint64_t r3 = qZ.lh << 54 | qZ.ll >> 10;
@@ -1650,7 +1909,7 @@ double pow (double x, double y) {
   if (rd)
   {
     qZ.sgn = s == -1.0;
-    qZ.ll = qZ.ll & (~0ul << 10);
+    qZ.ll = qZ.ll & (~0ull << 10);
 
     return qint_tod (&qZ);
   }

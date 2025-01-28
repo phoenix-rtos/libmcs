@@ -34,51 +34,6 @@ SOFTWARE.
 #include <fenv.h>
 #include <math.h>
 
-#include "dint.h"
-#include "qint.h"
-
-double cr_pow(double x, double y);
-
-/* __builtin_roundeven was introduced in gcc 10:
-   https://gcc.gnu.org/gcc-10/changes.html,
-   and in clang 17 */
-#if (defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)
-#define HAS_BUILTIN_ROUNDEVEN
-#endif
-
-#if !defined(HAS_BUILTIN_ROUNDEVEN) && (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__))
-inline double __builtin_roundeven(double x){
-   double ix;
-#if defined __AVX__
-   __asm__("vroundsd $0x8,%1,%1,%0":"=x"(ix):"x"(x));
-#else /* __SSE4_1__ */
-   __asm__("roundsd $0x8,%1,%0":"=x"(ix):"x"(x));
-#endif
-   return ix;
-}
-#define HAS_BUILTIN_ROUNDEVEN
-#endif
-
-#ifndef HAS_BUILTIN_ROUNDEVEN
-#include <math.h>
-/* round x to nearest integer, breaking ties to even */
-static double
-__builtin_roundeven (double x)
-{
-  double y = round (x); /* nearest, away from 0 */
-  if (fabs (y - x) == 0.5)
-  {
-    /* if y is odd, we should return y-1 if x>0, and y+1 if x<0 */
-    union { double f; uint64_t n; } u, v;
-    u.f = y;
-    v.f = (x > 0) ? y - 1.0 : y + 1.0;
-    if (__builtin_ctz (v.n) > __builtin_ctz (u.n))
-      y = v.f;
-  }
-  return y;
-}
-#endif
-
 /*
   Type definition
 */
@@ -88,24 +43,65 @@ typedef union {
   uint64_t u;
 } f64_u;
 
-/*
-  Utility functions
-*/
-
-// When x is a NaN, returns 1 if x is an sNaN and 0 if it is a qNaN
-inline int issignaling(double x) {
-  f64_u _x = {.f = x};
-
-  return !(_x.u & (1ul << 51));
-}
-
 // Extract both the mantissa and exponent of a double
 static inline void fast_extract (int64_t *e, uint64_t *m, double x) {
   f64_u _x = {.f = x};
 
   *e = (_x.u >> 52) & 0x7ff;
-  *m = (_x.u & (~0ul >> 12)) + (*e ? (1ul << 52) : 0);
+  *m = (_x.u & (~0ull >> 12)) + (*e ? (1ull << 52) : 0);
   *e = *e - 0x3ff;
+}
+
+#define CORE_MATH_POW
+#include "dint.h"
+#include "pow_qint.h"
+
+double cr_pow(double x, double y);
+
+/* __builtin_roundeven was introduced in gcc 10:
+   https://gcc.gnu.org/gcc-10/changes.html,
+   and in clang 17 */
+#if ((defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)) && (defined(__aarch64__) || defined(__x86_64__) || defined(__i386__))
+# define roundeven_finite(x) __builtin_roundeven (x)
+#else
+/* round x to nearest integer, breaking ties to even */
+static double
+roundeven_finite (double x)
+{
+  double ix;
+# if (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__) || (__ARM_ARCH >= 8))
+#  if defined __AVX__
+   __asm__("vroundsd $0x8,%1,%1,%0":"=x"(ix):"x"(x));
+#  elif __ARM_ARCH >= 8
+   __asm__ ("frintn %d0, %d1":"=w"(ix):"w"(x));
+#  else /* __SSE4_1__ */
+   __asm__("roundsd $0x8,%1,%0":"=x"(ix):"x"(x));
+#  endif
+# else
+  ix = __builtin_round (x); /* nearest, away from 0 */
+  if (__builtin_fabs (ix - x) == 0.5)
+  {
+    /* if ix is odd, we should return ix-1 if x>0, and ix+1 if x<0 */
+    union { double f; uint64_t n; } u, v;
+    u.f = ix;
+    v.f = ix - __builtin_copysign (1.0, x);
+    if (__builtin_ctz (v.n) > __builtin_ctz (u.n))
+      ix = v.f;
+  }
+# endif
+  return ix;
+}
+#endif
+
+/*
+  Utility functions
+*/
+
+// When x is a NaN, returns 1 if x is an sNaN and 0 if it is a qNaN
+static inline int issignaling(double x) {
+  f64_u _x = {.f = x};
+
+  return !(_x.u & (1ull << 51));
 }
 
 /* Add a + b, such that *hi + *lo approximates a + b.
@@ -181,18 +177,18 @@ static inline void d_square(double *hi, double *lo, double ah, double al) {
   *lo = __builtin_fma(ah, b, s);
 }
 
-static inline long dtoi(double x) { return (long)x; };
+static inline long dtoi(double x) { return (long)x; }
 
 // Returns 1 if x is an integer
-static inline char is_int(double x) { return x == __builtin_roundeven (x); }
+static inline int is_int(double x) { return x == roundeven_finite (x); }
 
 // Returns (e, m) such that m is odd and x = 2^E \times m
 static inline void extract(int64_t *e, uint64_t *m, double x) {
   f64_u _x = {.f = x};
 
   *e = (_x.u >> 52) & 0x7ff;
-  *m = (_x.u & (~0ul >> 12)) + (*e ? (1ul << 52) : 0);
-  int32_t t = __builtin_ctzl(*m);
+  *m = (_x.u & (~0ull >> 12)) + (*e ? (1ull << 52) : 0);
+  int32_t t = __builtin_ctzll(*m);
   *m = *m >> t;
   *e = *e + t - (0x433 - !*e);
 }
@@ -213,71 +209,76 @@ static inline void pow2(double *x, int64_t e) {
   *x = (*x * e2.f) * e2.f;
 }
 
-/*
-  dint64_t conversions
-*/
-
-// Convert a non-zero double to the corresponding dint64_t value
-static inline void dint_fromd (dint64_t *a, double b) {
-  fast_extract (&a->ex, &a->hi, b);
-
-  /* |b| = 2^(ex-52)*hi */
-
-  uint32_t t = __builtin_clzl (a->hi);
-
-  a->sgn = b < 0.0;
-  a->hi = a->hi << t;
-  a->ex = a->ex - (t > 11 ? t - 12 : 0);
-  /* b = 2^ex*hi/2^63 where 1 <= hi/2^63 < 2 */
-  a->lo = 0;
-}
-
 // Convert a dint64_t value to an integer, rounding towards zero
 static inline int64_t dint_toi(const dint64_t *a) {
   if (a->ex < 0)
-    return 0l;
+    return 0ll;
 
   int64_t r = a->hi >> (63 - a->ex);
 
   return a->sgn ? -r : r;
 }
 
-static inline void subnormalize_dint(dint64_t *a) {
-  if (a->ex > -1023)
-    return;
+// round a, assuming a is in the subnormal range
+static inline double dint_tod_subnormal(dint64_t *a) {
 
-  uint64_t ex = -(1011 + a->ex);
+  uint64_t ex = -(1011 + a->ex); // ex >= 12
+  // we have to shift right hi,lo by ex bits so that the least significant
+  // bit of hi corresponds to 2^-1074 (the number of extra bits is
+  // -1022 - a->ex, and we add 11 = 64 - 53 since hi has 64 bits)
 
-  uint64_t hi = a->hi >> ex;
-  uint64_t md = (a->hi >> (ex - 1)) & 0x1;
-  uint64_t lo = (a->hi & (~0ul >> ex)) || a->lo;
+  uint64_t rb, sb;
+
+  if (ex >= 64) // all bits disappear: |a| < 2^-1074
+    switch (fegetround()) {
+      double ret;
+    case FE_TONEAREST:
+      rb = (a->hi >> 63);        // only used when e=64
+      sb = (a->hi << 1) | a->lo; // idem
+      ret = (ex > 64 || rb == 0 || sb == 0) ? +0.0 : 0x1p-1074;
+      return (a->sgn) ? -ret : ret;
+      break;
+    case FE_DOWNWARD:
+      return (a->sgn) ? -0x1p-1074 : +0.0;
+    case FE_UPWARD:
+      return (!a->sgn) ? 0x1p-1074 : -0.0;
+    case FE_TOWARDZERO:
+      return (a->sgn) ? -0.0 : +0.0;
+    }
+
+  // now ex < 64
+  uint64_t hi;
+  hi = a->hi >> ex;
+  rb = (a->hi >> (ex - 1)) & 0x1; // round bit
+  sb = (a->hi << (65 - ex)) || a->lo; // sticky bit
 
   switch (fegetround()) {
   case FE_TONEAREST:
-    hi += lo ? md : hi & md;
+    hi += sb ? rb : hi & rb;
     break;
   case FE_DOWNWARD:
-    hi += a->sgn & (md | lo);
+    hi += a->sgn & (sb | rb);
     break;
   case FE_UPWARD:
-    hi += (!a->sgn) & (md | lo);
+    hi += (!a->sgn) & (sb | rb);
     break;
+  // for rounding towards zero, don't do anything
   }
 
-  a->hi = hi << ex;
-  a->lo = 0;
+  // now hi <= 2^52 stores the low bits of the result (up to sign)
+  // (if hi has overflowed in 2^52 this is exactly what we want)
 
-  if (!a->hi) {
-    a->ex++;
-    a->hi = (1l << 63);
-  }
+  f64_u v = {.u = hi};
+  v.u |= a->sgn << 63;
+  return v.f;
 }
 
 // Convert a dint64_t value to a double
 static inline double dint_tod(dint64_t *a) {
-  subnormalize_dint (a);
+  if (__builtin_expect (a->ex < -1022, 0))
+    return dint_tod_subnormal (a);
 
-  f64_u r = {.u = (a->hi >> 11) | (0x3ffl << 52)};
+  f64_u r = {.u = (a->hi >> 11) | (0x3ffll << 52)};
 
   double rd = 0.0;
   if ((a->hi >> 10) & 0x1)
@@ -315,7 +316,7 @@ static inline double dint_tod(dint64_t *a) {
         e.f = 0x0.0000000000001p-1022;
       }
     } else {
-      e.u = 1l << (a->ex + 1074);
+      e.u = 1ll << (a->ex + 1074);
     }
   }
 
@@ -328,7 +329,7 @@ static inline void qint_fromd (qint64_t *a, double b) {
 
   /* |b| = 2^(ex-52)*hi */
 
-  uint32_t t = __builtin_clzl (a->hh);
+  uint32_t t = __builtin_clzll (a->hh);
 
   a->sgn = b < 0.0;
   a->ex = a->ex - (t > 11 ? t - 12 : 0);
@@ -342,7 +343,7 @@ static inline void qint_fromd (qint64_t *a, double b) {
 // Convert a qint64_t value to an integer
 static inline int64_t qint_toi(const qint64_t *a) {
   if (a->ex < 0)
-    return 0l;
+    return 0ll;
 
   int64_t r = a->hh >> (63 - a->ex);
 
@@ -357,7 +358,7 @@ static inline void subnormalize_qint(qint64_t *a) {
 
   uint64_t hi = a->hh >> ex;
   uint64_t md = (a->hh >> (ex - 1)) & 0x1;
-  uint64_t lo = (a->hh & (~0ul >> ex)) || a->hl || a->lh || a->ll;
+  uint64_t lo = (a->hh & (~0ull >> ex)) || a->hl || a->lh || a->ll;
 
   switch (fegetround()) {
   case FE_TONEAREST:
@@ -378,7 +379,7 @@ static inline void subnormalize_qint(qint64_t *a) {
 
   if (!a->hh) {
     a->ex++;
-    a->hh = (1l << 63);
+    a->hh = (1ll << 63);
   }
 }
 
@@ -386,7 +387,7 @@ static inline void subnormalize_qint(qint64_t *a) {
 static inline double qint_tod(qint64_t *a) {
   subnormalize_qint(a);
 
-  f64_u r = {.u = (a->hh >> 11) | (0x3ffl << 52)};
+  f64_u r = {.u = (a->hh >> 11) | (0x3ffll << 52)};
 
   double rd = 0.0;
   if (a->hh & 0x400)
@@ -424,7 +425,7 @@ static inline double qint_tod(qint64_t *a) {
         e.f = 0x0.0000000000001p-1022;
       }
     } else {
-      e.u = 1l << (a->ex + 1074);
+      e.u = 1ll << (a->ex + 1074);
     }
   }
 

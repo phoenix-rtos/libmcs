@@ -37,40 +37,35 @@ SOFTWARE.
 /* __builtin_roundeven was introduced in gcc 10:
    https://gcc.gnu.org/gcc-10/changes.html,
    and in clang 17 */
-#if (defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)
-#define HAS_BUILTIN_ROUNDEVEN
-#endif
-
-#if !defined(HAS_BUILTIN_ROUNDEVEN) && (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__))
-inline double __builtin_roundeven(double x){
-   double ix;
-#if defined __AVX__
-   __asm__("vroundsd $0x8,%1,%1,%0":"=x"(ix):"x"(x));
-#else /* __SSE4_1__ */
-   __asm__("roundsd $0x8,%1,%0":"=x"(ix):"x"(x));
-#endif
-   return ix;
-}
-#define HAS_BUILTIN_ROUNDEVEN
-#endif
-
-#ifndef HAS_BUILTIN_ROUNDEVEN
-#include <math.h>
+#if ((defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)) && (defined(__aarch64__) || defined(__x86_64__) || defined(__i386__))
+# define roundeven_finite(x) __builtin_roundeven (x)
+#else
 /* round x to nearest integer, breaking ties to even */
 static double
-__builtin_roundeven (double x)
+roundeven_finite (double x)
 {
-  double y = round (x); /* nearest, away from 0 */
-  if (fabs (y - x) == 0.5)
+  double ix;
+# if (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__) || (__ARM_ARCH >= 8))
+#  if defined __AVX__
+   __asm__("vroundsd $0x8,%1,%1,%0":"=x"(ix):"x"(x));
+#  elif __ARM_ARCH >= 8
+   __asm__ ("frintn %d0, %d1":"=w"(ix):"w"(x));
+#  else /* __SSE4_1__ */
+   __asm__("roundsd $0x8,%1,%0":"=x"(ix):"x"(x));
+#  endif
+# else
+  ix = __builtin_round (x); /* nearest, away from 0 */
+  if (__builtin_fabs (ix - x) == 0.5)
   {
-    /* if y is odd, we should return y-1 if x>0, and y+1 if x<0 */
+    /* if ix is odd, we should return ix-1 if x>0, and ix+1 if x<0 */
     union { double f; uint64_t n; } u, v;
-    u.f = y;
-    v.f = (x > 0) ? y - 1.0 : y + 1.0;
+    u.f = ix;
+    v.f = ix - __builtin_copysign (1.0, x);
     if (__builtin_ctz (v.n) > __builtin_ctz (u.n))
-      y = v.f;
+      ix = v.f;
   }
-  return y;
+# endif
+  return ix;
 }
 #endif
 
@@ -312,7 +307,7 @@ typedef union {
 
 static inline void exp_1 (double *hi, double *lo, double xh, double xl) {
 #define INVLOG2 0x1.71547652b82fep+12 /* |INVLOG2-2^12/log(2)| < 2^-43.4 */
-  double k = __builtin_roundeven (xh * INVLOG2);
+  double k = roundeven_finite (xh * INVLOG2);
 
   double kh, kl;
 #define LOG2H 0x1.62e42fefa39efp-13
@@ -416,7 +411,7 @@ static inline void exp_2 (double *hi, double *lo, double x) {
 
   double eh, el;
 #define INVLOG2_10 0x1.a934f0979a371p+13 // 2^12*log(10)/log(2)
-  double k = __builtin_roundeven (x * INVLOG2_10); // -221184 <= k <= 4194304
+  double k = roundeven_finite (x * INVLOG2_10); // -221184 <= k <= 4194304
   if (__builtin_expect (k == 4194304, 0))
     k = 4194303; // ensures M < 2047 below
 
@@ -825,9 +820,9 @@ exp10m1_accurate_tiny (double x)
 static double exp10m1_accurate (double x)
 {
   b64u64_u t = {.f = x};
-  uint64_t ux = t.u, ax = ux & 0x7ffffffffffffffflu;
+  uint64_t ux = t.u, ax = ux & 0x7fffffffffffffffllu;
 
-  if (ax <= 0x3fb0000000000000lu) // |x| <= 0.0625
+  if (ax <= 0x3fb0000000000000llu) // |x| <= 0.0625
     return exp10m1_accurate_tiny (x);
 
   /* now -0x1.041704c068efp+4 < x < -0.0625 or
@@ -952,17 +947,17 @@ double
 exp10m1 (double x)
 {
   b64u64_u t = {.f = x};
-  uint64_t ux = t.u, ax = ux & 0x7ffffffffffffffflu;
+  uint64_t ux = t.u, ax = ux & 0x7fffffffffffffffllu;
 
-  if (__builtin_expect (ux >= 0xc03041704c068ef0lu, 0))
+  if (__builtin_expect (ux >= 0xc03041704c068ef0llu, 0))
   {
     // x = -NaN or x <= -0x1.041704c068efp+4
     if ((ux >> 52) == 0xfff) // -NaN or -Inf
-      return (ux > 0xfff0000000000000lu) ? x : -1.0;
+      return (ux > 0xfff0000000000000llu) ? x : -1.0;
     // for x <= -0x1.041704c068efp+4, exp10m1(x) rounds to -1 to nearest
     return -1.0 + 0x1p-54;
   }
-  else if (__builtin_expect (ax > 0x40734413509f79felu, 0))
+  else if (__builtin_expect (ax > 0x40734413509f79fellu, 0))
   {
     // x = +NaN or x > 0x1.34413509f79fep+8
     if ((ux >> 52) == 0x7ff) // +NaN
@@ -970,13 +965,13 @@ exp10m1 (double x)
     // for x > 0x1.34413509f79fep+8, exp10m1(x) rounds to +Inf to nearest
     return 0x1.fffffffffffffp+1023 * x;
   }
-  else if (ax <= 0x3c90000000000000lu) // |x| <= 2^-54
+  else if (ax <= 0x3c90000000000000llu) // |x| <= 2^-54
   {
     double h, l;
     /* we use special code when log(10)*|x| is very small, in which case
        the double-double approximation h+l has its lower part l
        "truncated" */
-    if (ax <= 0x3970000000000000lu) // |x| <= 2^-104
+    if (ax <= 0x3970000000000000llu) // |x| <= 2^-104
     {
       // special case for 0
       if (x == 0)
@@ -1116,18 +1111,20 @@ exp10m1 (double x)
      or 2^-54 < x <= 0x1.34413509f79fep+8 */
 
   double err, h, l;
-  err = exp10m1_fast (&h, &l, x, ax <= 0x3fb0000000000000lu);
+  err = exp10m1_fast (&h, &l, x, ax <= 0x3fb0000000000000llu);
   double left = h + (l - err);
   double right = h + (l + err);
-  if (left == right)
+  if (__builtin_expect (left == right, 1))
     return left;
 
   return exp10m1_accurate (x);
 }
 
+#ifndef SKIP_C_FUNC_REDEF
 // fake function as long as GNU libc does not provide it
 double exp10m1 (double x)
 {
   // we don't use exp10 since it is not in C99 (would need _GNU_SOURCE)
   return pow (10.0, x) - 1.0;
 }
+#endif

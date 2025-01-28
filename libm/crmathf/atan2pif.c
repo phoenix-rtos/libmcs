@@ -26,6 +26,7 @@ SOFTWARE.
 */
 
 #include <stdint.h>
+#include <errno.h>
 
 // Warning: clang also defines __GNUC__
 #if defined(__GNUC__) && !defined(__clang__)
@@ -72,8 +73,8 @@ float atan2pif(float y, float x){
   b32u32_u tx = {.f = x}, ty = {.f = y};
   uint32_t ux = tx.u, uy = ty.u, ax = ux&(~0u>>1), ay = uy&(~0u>>1);
   if(__builtin_expect(ay >= (0xff<<23)||ax >= (0xff<<23), 0)){
-    if(ay > (0xff<<23)) return y; // nan
-    if(ax > (0xff<<23)) return x; // nan
+    if(ay > (0xff<<23)) return y + y; // nan
+    if(ax > (0xff<<23)) return x + x; // nan
     uint32_t yinf = ay==(0xff<<23), xinf = ax==(0xff<<23);
     if(yinf&xinf){
       if(ux>>31)
@@ -98,27 +99,36 @@ float atan2pif(float y, float x){
     }
     if(!(ux>>31)) return 0.0f*sgnf[uy>>31];
   }
+  if(__builtin_expect(ax==ay, 0)){
+    static const float s[] = {0.25,0.75,-0.25,-0.75};
+    uint32_t i = (uy>>31)*2 + (ux>>31);
+    return s[i];
+  }
   uint32_t gt = ay>ax, i = (uy>>31)*4 + (ux>>31)*2 + gt;
   
   double zx = x, zy = y;
   double z = (m[gt]*zx + m[1-gt]*zy)/(m[gt]*zy + m[1-gt]*zx);
-  double z2 = z*z, z4 = z2*z2, z8 = z4*z4;
-  double cn0 = cn[0] + z2*cn[1];
-  double cn2 = cn[2] + z2*cn[3];
-  double cn4 = cn[4] + z2*cn[5];
-  double cn6 = cn[6];
-  cn0 += z4*cn2;
-  cn4 += z4*cn6;
-  cn0 += z8*cn4;
+  double r = cn[0], z2 = z*z;
   z *= sgn[gt];
-  double cd0 = cd[0] + z2*cd[1];
-  double cd2 = cd[2] + z2*cd[3];
-  double cd4 = cd[4] + z2*cd[5];
-  double cd6 = cd[6];
-  cd0 += z4*cd2;
-  cd4 += z4*cd6;
-  cd0 += z8*cd4;
-  double r = cn0/cd0;
+  // avoid spurious underflow in the polynomial evaluation excluding extremely small arguments
+  if(__builtin_expect(z2>0x1p-54, 1)){
+    double z4 = z2*z2, z8 = z4*z4;
+    double cn0 =     r + z2*cn[1];
+    double cn2 = cn[2] + z2*cn[3];
+    double cn4 = cn[4] + z2*cn[5];
+    double cn6 = cn[6];
+    cn0 += z4*cn2;
+    cn4 += z4*cn6;
+    cn0 += z8*cn4;
+    double cd0 = cd[0] + z2*cd[1];
+    double cd2 = cd[2] + z2*cd[3];
+    double cd4 = cd[4] + z2*cd[5];
+    double cd6 = cd[6];
+    cd0 += z4*cd2;
+    cd4 += z4*cd6;
+    cd0 += z8*cd4;
+    r = cn0/cd0;
+  }
   r = z*r + off[i];
   b64u64_u res = {.f = r};
   if(__builtin_expect((res.u<<1) > 0x6d40000000000000 && ((res.u + 8)&0xfffffff) <= 16, 0)){
@@ -168,10 +178,15 @@ float atan2pif(float y, float x){
       }
     }
   }
-  return r;
+  float rf = r;
+#ifdef CORE_MATH_SUPPORT_ERRNO
+  if (__builtin_expect (rf == 0.0f && y != 0.0f, 0))
+    errno = ERANGE;
+#endif
+  return rf;
 }
 
-#ifndef __INTEL_CLANG_COMPILER // icx provides this function
+#ifndef SKIP_C_FUNC_REDEF // icx provides this function
 /* just to compile since glibc does not contain this function */
 float atan2pif(float x, float y){
   return atan2pif(x, y);

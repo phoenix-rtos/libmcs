@@ -25,7 +25,10 @@ SOFTWARE.
 */
 
 #include <stdint.h>
+#include <errno.h>
+#if defined(__x86_64__)
 #include <x86intrin.h>
+#endif
 
 // Warning: clang also defines __GNUC__
 #if defined(__GNUC__) && !defined(__clang__)
@@ -264,14 +267,21 @@ double sinh(double x){
   const double s = 0x1.71547652b82fep+12;
   double ax = __builtin_fabs(x), v0 = __builtin_fma(ax, s, 0x1.8000002p+26);
   b64u64_u jt = {.f = v0};
+#if defined(__x86_64__)
   __m128d v = _mm_set_sd (v0);
   __m128i tt = {~((1<<26)-1l),0};
   v = _mm_and_pd(v,(__m128d)tt);
   double t = v[0] - 0x1.8p26;
+#else
+  b64u64_u v = {.f = v0};
+  uint64_t tt = ~((1<<26)-1l);
+  v.u &= tt;
+  double t = v.f - 0x1.8p26;
+#endif
   b64u64_u ix = {.f = ax};
   u64 aix = ix.u;
-  if(__builtin_expect(aix<0x3fd0000000000000ul, 0)){
-    if(__builtin_expect(aix<0x3e57137449123ef7ul, 0)) return __builtin_fma(x,0x1p-55,x);
+  if(__builtin_expect(aix<0x3fd0000000000000ull, 0)){
+    if(__builtin_expect(aix<0x3e57137449123ef7ull, 0)) return __builtin_fma(x,0x1p-55,x);
     static const double c[] =
       {0x1.5555555555555p-3, 0x1.1111111111087p-7, 0x1.a01a01a12e1c3p-13, 0x1.71de2e415aa36p-19, 0x1.aed2bff4269e6p-26};
     double x2 = x*x, x3 = x2*x, x4 = x2*x2, p = x3*((c[0] + x2*c[1]) + x4*((c[2] + x2*c[3]) + x4*c[4]));
@@ -279,9 +289,9 @@ double sinh(double x){
     if(lb == ub) return lb;
     return as_sinh_zero(x);
   }
-  long il = ((long)jt.u<<14)>>40, jl = -il;
-  long i1 = il&0x3f, i0 = (il>>6)&0x3f, ie = il>>12;
-  long j1 = jl&0x3f, j0 = (jl>>6)&0x3f, je = jl>>12;
+  int64_t il = ((int64_t)jt.u<<14)>>40, jl = -il;
+  int64_t i1 = il&0x3f, i0 = (il>>6)&0x3f, ie = il>>12;
+  int64_t j1 = jl&0x3f, j0 = (jl>>6)&0x3f, je = jl>>12;
   b64u64_u sp = {.u = (1022 + ie)<<52}, sm = {.u = (1022 + je)<<52};
   double t0h = t0[i0][1], t0l = t0[i0][0];
   double t1h = t1[i1][1], t1l = t1[i1][0];
@@ -291,14 +301,18 @@ double sinh(double x){
   static const double ch[] = {0x1p+0, 0x1p-1, 0x1.5555555aaaaaep-3, 0x1.55555551c98cp-5};
   double pp = dx*((ch[0] + dx*ch[1]) + dx2*(ch[2] + dx*ch[3]));
   double rh, rl;
-  if(__builtin_expect(aix>0x4014000000000000ul, 0)){ // |x| > 5
-    if(__builtin_expect(aix>0x40425e4f7b2737faul, 0)){ // |x| >~ 36.736801
-      if(__builtin_expect(aix>0x408633ce8fb9f87dul, 0)){ // |x| >~ 710.47586
-	if(aix>0x7ff0000000000000ul) return x;
+  if(__builtin_expect(aix>0x4014000000000000ull, 0)){ // |x| > 5
+    if(__builtin_expect(aix>0x40425e4f7b2737faull, 0)){ // |x| >~ 36.736801
+      if(__builtin_expect(aix>0x408633ce8fb9f87dull, 0)){ // |x| >~ 710.47586
+	if(aix>=0x7ff0000000000000ull) return x + x; // nan
+#ifdef CORE_MATH_SUPPORT_ERRNO
+  errno = ERANGE;
+#endif
 	return __builtin_copysign(0x1p1023, x)*2.0;
       }
       sp.u = (1021 + ie)<<52;
-      double rh = th, rl = tl + th*pp;
+      rh = th;
+      rl = tl + th*pp;
       rh *= __builtin_copysign(1, x);
       rl *= __builtin_copysign(1, x);
       double e = 0.11e-18*th, lb = rh + (rl - e), ub = rh + (rl + e);
@@ -309,7 +323,7 @@ double sinh(double x){
       th *= __builtin_copysign(1, x);
       tl *= __builtin_copysign(1, x);
       b64u64_u uh = {.f = th}, ul = {.f = tl};
-      long eh = (uh.u>>52)&0x7ff, el = (ul.u>>52)&0x7ff, ml = (ul.u + 8)&(~0ul>>12);
+      int64_t eh = (uh.u>>52)&0x7ff, el = (ul.u>>52)&0x7ff, ml = (ul.u + 8)&(~0ul>>12);
       th += tl;
       th *= 2;
       th *= sp.f;
@@ -331,7 +345,7 @@ double sinh(double x){
     if(lb == ub) return lb;
 
     th = as_exp_accurate( ax, t, th, tl, &tl);
-    if(__builtin_expect(aix>0x403f666666666666ul, 0)){
+    if(__builtin_expect(aix>0x403f666666666666ull, 0)){
       rh = th - qh; rl = ((th - rh) - qh) + tl;
     } else {
       qh = q0h*q1h;
@@ -367,10 +381,10 @@ double sinh(double x){
   }
   rh = fasttwosum(rh, rl, &rl);
   b64u64_u uh = {.f = rh}, ul = {.f = rl};
-  long eh = (uh.u>>52)&0x7ff, el = (ul.u>>52)&0x7ff, ml = (ul.u + 8)&(~0ul>>12);
+  int64_t eh = (uh.u>>52)&0x7ff, el = (ul.u>>52)&0x7ff, ml = (ul.u + 8)&(~0ul>>12);
   rh *= __builtin_copysign(1, x);
   rl *= __builtin_copysign(1, x);
   rh += rl;
-  if(ml<=16 || eh-el>103) return as_sinh_database(x, rh);
+  if(__builtin_expect(ml<=16 || eh-el>103, 0)) return as_sinh_database(x, rh);
   return rh;
 }

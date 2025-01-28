@@ -83,7 +83,7 @@ static inline double polydd(double xh, double xl, int n, const double c[][2], do
   return ch;
 }
 
-double as_sinpi_zero(double x){
+static double as_sinpi_zero(double x){
   double x2 = x*x, dx2 = __builtin_fma(x,x,-x2);
   double x3 = x2*x, dx3 = __builtin_fma(x2,x,-x3) + dx2*x;
   static const double ch[][2] = {
@@ -97,7 +97,7 @@ double as_sinpi_zero(double x){
   double y0 = pi0*x;
   b64u64_u b = {.f = y0};
   b.u &= ~0ul>>12;
-  b.u += 85l<<51;
+  b.u += (int64_t)85<<51;
   y0 = (y0 + b.f) - b.f;
   double y0l = __builtin_fma(pi0,x,-y0);
   double y1 = pi1*x, y2 = __builtin_fma(pi1,x,-y1) + pi2*x;
@@ -117,7 +117,7 @@ double as_sinpi_zero(double x){
   return y0 + y1;
 }
 
-double as_sinpi_refine(int iq, double z){
+static double as_sinpi_refine(int iq, double z){
   double x = z*0x1p-63, x2 = x*x, dx2 = __builtin_fma(x,x,-x2);
   static const double sh[][2] = {
     {0x1.921fb54442d18p+1, 0x1.1a62633145c06p-53}, {-0x1.4abbce625be53p-22, 0x1.05511cbc65743p-76},
@@ -136,7 +136,7 @@ double as_sinpi_refine(int iq, double z){
   double tsl, tsh = fasttwosum(sch, csh, &tsl); tsl += csl + scl;
   double tsl2; tsh = fasttwosum(sbh, tsh, &tsl2); tsl = sbl + tsl + tsl2;
   b64u64_u t = {.f = tsl};
-  if((t.u|(0xffful<<52)) == ~0ul || (t.u<<12) == 0){
+  if((t.u|((uint64_t)0xfff<<52)) == ~(uint64_t)0 || (t.u<<12) == 0){
     static const struct {int iq; double x, r, d;} db[] = {
       { 76, -0x1.276b3fef466p-2, 0x1.db8a79a80c3a0p-4,  0x1p-110},
       {108, -0x1.33caea0f24cp-2, 0x1.5146c0bc45bcep-3,  0x1p-109},
@@ -155,16 +155,18 @@ double sinpi(double x){
   static const double sn[] = { 0x1.921fb54442d18p-74, -0x1.4abbce625be51p-223, 0x1.466bc6044ba16p-374};
   static const double cn[] = {-0x1.3bd3cc9be45dbp-148, 0x1.03c1f00186416p-298};
   b64u64_u ix = {.f = x};
-  uint64_t ax = ix.u&(~0ul>>1);
+  uint64_t ax = ix.u&(~(uint64_t)0>>1);
   if(__builtin_expect(ax==0, 0)) return x;
   int32_t e = ax>>52;
-  int64_t m = (ix.u&(~0ul>>12))|(1ul<<52), sgn = ix.u; sgn >>= 63;
+  int64_t m = (ix.u&(~(uint64_t)0>>12))|((uint64_t)1<<52), sgn = ix.u; sgn >>= 63;
   m = (m^sgn) - sgn;
   int32_t s = 1063 - e;
   if(__builtin_expect(s<0, 0)){
     if(__builtin_expect(e == 0x7ff, 0)){
       if(!(ix.u << 12)){
+#ifdef CORE_MATH_SUPPORT_ERRNO
 	errno = EDOM;
+#endif
 	feraiseexcept (FE_INVALID);
 	return __builtin_nan("inf");
       }
@@ -178,7 +180,7 @@ double sinpi(double x){
     return sh + sl;
   }
 
-  if(__builtin_expect(ax<=0x3fa2000000000000ul, 0)){ // = 0x1.2p-5 = 3.515625e-02
+  if(__builtin_expect(ax<=0x3fa2000000000000ull, 0)){ // = 0x1.2p-5 = 3.515625e-02
     double ph = 0x1.921fb54442d18p+1, pl = 0x1.1a62633145c07p-53;
     double zh = ph*x, zl = __builtin_fma(ph, x, -zh) + pl*x;
     if(__builtin_expect(__builtin_fabs(x)<0x1p-54, 0)){
@@ -212,7 +214,7 @@ double sinpi(double x){
   double er = 5.5e-19;
   double r = sl + sh*(z2*fc) + ch*(z*fs);
   double lb = (r - er) + sh, ub = (r + er) + sh;
-  if(lb == ub) return lb;
+  if(__builtin_expect(lb == ub,1)) return lb;
   return as_sinpi_refine(iq, z);
 }
 
@@ -379,7 +381,7 @@ void sincosn2(int s, double *sh, double *sl, double *ch, double *cl){
   *sl = __builtin_copysign(1.0, sgn[ss])*tsl;
 }
 
-#ifndef __INTEL_CLANG_COMPILER // icx provides this function
+#ifndef SKIP_C_FUNC_REDEF // icx provides this function
 /* just to compile since glibc does not provide this function */
 double sinpi(double x){
   return sin(M_PI*x);

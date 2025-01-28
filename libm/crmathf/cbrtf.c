@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 #include <stdint.h>
+#include <fenv.h>
 
 // Warning: clang also defines __GNUC__
 #if defined(__GNUC__) && !defined(__clang__)
@@ -33,35 +34,93 @@ SOFTWARE.
 
 #pragma STDC FENV_ACCESS ON
 
-#define INEXACTFLAG 0
-#if INEXACTFLAG!=0
-#  include <x86intrin.h> /* for the x86 architecture with SSE to rise the inexact flag only when the root is indeed inexact */
-#endif
-
 typedef union {float f; uint32_t u;} b32u32_u;
 typedef union {double f; uint64_t u;} b64u64_u;
 
+#ifdef CORE_MATH_CHECK_INEXACT
+#ifdef __x86_64__
+#include <x86intrin.h>
+#endif
+
+// This code emulates the _mm_getcsr SSE intrinsic by reading the FPCR register.
+// fegetexceptflag accesses the FPSR register, which seems to be much slower
+// than accessing FPCR, so it should be avoided if possible.
+// Adapted from sse2neon: https://github.com/DLTcollab/sse2neon
+#if defined(__aarch64__) || defined(__arm64__) || defined(_M_ARM64)
+#if defined(_MSC_VER)
+#include <arm64intr.h>
+#endif
+
+typedef struct
+{
+  uint16_t res0;
+  uint8_t  res1  : 6;
+  uint8_t  bit22 : 1;
+  uint8_t  bit23 : 1;
+  uint8_t  bit24 : 1;
+  uint8_t  res2  : 7;
+  uint32_t res3;
+} fpbitfield;
+
+inline static unsigned int _mm_getcsr()
+{
+  union
+  {
+    fpbitfield field;
+    uint64_t value;
+  } r;
+
+#if defined(_MSC_VER) && !defined(__clang__)
+  r.value = _ReadStatusReg(ARM64_FPCR);
+#else
+  __asm__ __volatile__("mrs %0, FPCR" : "=r"(r.value));
+#endif
+  static const unsigned int lut[2][2] = {{0x0000, 0x2000}, {0x4000, 0x6000}};
+  return lut[r.field.bit22][r.field.bit23];
+}
+#endif  // defined(__aarch64__) || defined(__arm64__) || defined(_M_ARM64)
+
+static inline void get_rounding_mode (fexcept_t *flagp)
+{
+#if defined(__x86_64__) || defined(__aarch64__) || defined(__arm64__) || defined(_M_ARM64)
+  *flagp = _mm_getcsr ();
+#else
+  fegetexceptflag (flagp, FE_ALL_EXCEPT);
+#endif
+}
+
+static inline void set_flags (const fexcept_t *flagp)
+{
+#ifdef __x86_64__
+  _mm_setcsr (*flagp);
+#else
+  fesetexceptflag (flagp, FE_ALL_EXCEPT);
+#endif
+}
+#endif
+
 float cbrtf (float x){
   static const double escale[3] = {1.0, 0x1.428a2f98d728bp+0/* 2^(1/3) */, 0x1.965fea53d6e3dp+0/* 2^(2/3) */};
-#if INEXACTFLAG!=0
-  volatile uint32_t flag = _mm_getcsr(); /* store MXCSR Control/Status Register */
+#ifdef CORE_MATH_CHECK_INEXACT
+  fexcept_t flag;
+  get_rounding_mode (&flag);
 #endif
   b32u32_u t = {.f = x};
   uint32_t u = t.u, au = u<<1, sgn = u>>31, e = au>>24;
   if(__builtin_expect(au<1u<<24 || au>=0xffu<<24, 0)){
-    if(au>=0xffu<<24) return x; /* inf, nan */
+    if(au>=0xffu<<24) return x + x; /* inf, nan */
     if(au==0) return x; /* +-0 */
     int nz = __builtin_clz(au) - 7;  /* subnormal */
     au <<= nz;
     e -= nz-1;
   }
   uint32_t mant = au&0xffffff;
-  b64u64_u cvt1 = {.u = (uint64_t)mant<<28|(0x3fful<<52)};
+  b64u64_u cvt1 = {.u = (uint64_t)mant<<28|((uint64_t)0x3ff<<52)};
   e += 899;
   uint32_t et = e/3, it = e%3;
   uint64_t isc = ((const uint64_t*)escale)[it];
-  isc += (long)(et - 342)<<52;
-  isc |= (long)sgn<<63;
+  isc += (int64_t)(et - 342)<<52;
+  isc |= (int64_t)sgn<<63;
   b64u64_u cvt2 = {.u = isc};
   static const double c[] =
     {0x1.2319d352ea5d5p-1, 0x1.67ad8ee258d1ap-1, -0x1.9342edf9cbad9p-2, 0x1.b6388fc510a75p-3,
@@ -70,19 +129,26 @@ float cbrtf (float x){
   double f = ((c[0] + z*c[1]) + z2*(c[2] + z*c[3])) + z4*((c[4] + z*c[5]) + z2*(c[6] + z*c[7])) + r0;
   double r = f * cvt2.f;
   float ub = r, lb = r - cvt2.f*1.4182e-9;
-  if(__builtin_expect(ub==lb, 1)) return ub;
+  if(__builtin_expect(ub==lb, 1)){
+    cvt2.f = r;
+#ifdef CORE_MATH_CHECK_INEXACT
+    if(__builtin_expect((cvt2.u&((int64_t)0x1fffff<<24)) == 0, 0))
+      set_flags (&flag);
+#endif
+    return ub;
+  }
   const double u0 = -0x1.ab16ec65d138fp+3;
   double h = f*f*f - z;
   f -= (f*r0*u0)*h;
   r = f * cvt2.f;
   cvt1.f = r;
   ub = r;
-  long m0 = cvt1.u<<19, m1 = m0>>63;
-  if(__builtin_expect((m0^m1)<(1l<<31),0)){
-    cvt1.u = (cvt1.u + (1ul<<31))&0xffffffff00000000ul;
+  int64_t m0 = cvt1.u<<19, m1 = m0>>63;
+  if(__builtin_expect((m0^m1)<((int64_t)1<<31),0)){
+    cvt1.u = (cvt1.u + ((uint64_t)1<<31))&(uint64_t)0xffffffff00000000ull;
     ub = cvt1.f;
-#if INEXACTFLAG!=0
-    _mm_setcsr(flag); /* restore MXCSR Control/Status Register for exact roots to get rid of the inexact flag if risen inside the function */
+#ifdef CORE_MATH_CHECK_INEXACT
+    set_flags (&flag);
 #endif
   }
   return ub;

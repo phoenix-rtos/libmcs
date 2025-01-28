@@ -36,68 +36,86 @@ SOFTWARE.
 
 #pragma STDC FENV_ACCESS ON
 
+/* __builtin_roundeven was introduced in gcc 10:
+   https://gcc.gnu.org/gcc-10/changes.html,
+   and in clang 17 */
+#if ((defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)) && (defined(__aarch64__) || defined(__x86_64__) || defined(__i386__))
+# define roundevenf_finite(x) __builtin_roundevenf (x)
+#else
+/* round x to nearest integer, breaking ties to even */
+static float
+roundevenf_finite (float x)
+{
+  float ix;
+# if (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__) || (__ARM_ARCH >= 8))
+#  if defined __AVX__
+   __asm__("vroundss $0x8,%1,%1,%0":"=x"(ix):"x"(x));
+#  elif __ARM_ARCH >= 8
+   __asm__ ("frintn %s0, %s1":"=w"(ix):"w"(x));
+#  else /* __SSE4_1__ */
+   __asm__("roundss $0x8,%1,%0":"=x"(ix):"x"(x));
+#  endif
+# else
+  ix = __builtin_roundf (x); /* nearest, away from 0 */
+  if (__builtin_fabsf (ix - x) == 0.5)
+  {
+    /* if ix is odd, we should return ix-1 if x>0, and ix+1 if x<0 */
+    union { float f; uint32_t n; } u, v;
+    u.f = ix;
+    v.f = ix - __builtin_copysign (1.0, x);
+    if (__builtin_ctz (v.n) > __builtin_ctz (u.n))
+      ix = v.f;
+  }
+# endif
+  return ix;
+}
+#endif
+
 typedef union {float f; uint32_t u;} b32u32_u;
 
 float tanpif(float x){
   b32u32_u ix = {.f = x};
-  int32_t e = (ix.u>>23)&0xff;
-  if(__builtin_expect(e == 0xff, 0)){
-    if(!(ix.u << 9)){
-      errno = EDOM;
-      feraiseexcept (FE_INVALID);
-      return __builtin_nanf("inf");
-    }
-    return x;
-  }
-  static const double tn[] = {0x1.921fb54442d18p-37, 0x1.4abbce6260fdbp-111, 0x1.466bc4dfb775dp-185, 0x1.4628bbec47de1p-259};
-  static const double T[] =
-    {0x0p+0, 0x1.927278a3b1162p-5, 0x1.936bb8c5b2da2p-4, 0x1.2fcac73a6064p-3, 0x1.975f5e0553158p-3, 0x1.007fa758626aep-2,
-    0x1.36a08355c63dcp-2, 0x1.6e649f7d78649p-2, 0x1.a827999fcef32p-2, 0x1.e450e0d273e7ap-2, 0x1.11ab7190834ecp-1,
-    0x1.32e1889047ffdp-1, 0x1.561b82ab7f99p-1, 0x1.7bb99ed2990cfp-1, 0x1.a43002ae4285p-1, 0x1.d00cbc7384d2ep-1,0x1p+0,
-    0x1.1a73d55278c4bp+0, 0x1.37efd8d87607ep+0, 0x1.592d11142fa55p+0, 0x1.7f218e25a7461p+0, 0x1.ab1c35d8a74eap+0,
-    0x1.def13b73c1406p+0, 0x1.0ea21d716fbf7p+1, 0x1.3504f333f9de6p+1, 0x1.65bc6cc825147p+1, 0x1.a5f59e90600ddp+1,
-    0x1.ff01305ecd8dcp+1, 0x1.41bfee2424771p+2, 0x1.af73f4ca3310fp+2, 0x1.44e6c595afdccp+3, 0x1.45affed201b55p+4,
-    0x1p989, -0x1.45affed201b55p+4, -0x1.44e6c595afdccp+3, -0x1.af73f4ca3310fp+2, -0x1.41bfee2424771p+2,
-    -0x1.ff01305ecd8dcp+1, -0x1.a5f59e90600ddp+1, -0x1.65bc6cc825147p+1, -0x1.3504f333f9de6p+1, -0x1.0ea21d716fbf7p+1,
-    -0x1.def13b73c1406p+0, -0x1.ab1c35d8a74eap+0, -0x1.7f218e25a7461p+0, -0x1.592d11142fa55p+0, -0x1.37efd8d87607ep+0,
-    -0x1.1a73d55278c4bp+0, -0x1p+0, -0x1.d00cbc7384d2ep-1, -0x1.a43002ae4285p-1, -0x1.7bb99ed2990cfp-1,
-    -0x1.561b82ab7f99p-1, -0x1.32e1889047ffdp-1, -0x1.11ab7190834ecp-1, -0x1.e450e0d273e7ap-2, -0x1.a827999fcef32p-2,
-    -0x1.6e649f7d78649p-2, -0x1.36a08355c63dcp-2, -0x1.007fa758626aep-2, -0x1.975f5e0553158p-3, -0x1.2fcac73a6064p-3,
-    -0x1.936bb8c5b2da2p-4, -0x1.927278a3b1162p-5};
-  int32_t m = (ix.u&~0u>>9)|1<<23, sgn = ix.u; sgn >>= 31;
-  m = (m^sgn) - sgn;
-  int32_t s = 143 - e;
-  if(__builtin_expect(s<0,0)){
-    if(__builtin_expect(s<-7,0)) return __builtin_copysign(0.0f, x);
-    int32_t iq = m<<(-s-1);
-    double ts = T[iq&63];
-    if(ts>1e3) return ((iq&64)?-1.0f:1.0f)/0.0f;
-    if(ts==0.0f) return ((iq&64)?-ts:ts)*__builtin_copysignf(1.0f,x);
-    return ts;
-  } else if(__builtin_expect(s>29, 0)){
-    double z = x, z2 = z*z, r = z * (0x1.921fb54442d17p+1 + z2 *  0x1.4abbcfa8c7acfp+3);
-    return r;
-  }
-  int32_t si = 26 - s;
-  if(__builtin_expect(si>=0, 1)){
-    if(__builtin_expect((m<<si)==0, 0)){
-      b32u32_u o = {.u = ((m << (si - 2)) & (1<<31)) | 0x3f800000};
-      if(!((m >> (32 - si))&1)) {
-	return o.f*__builtin_copysignf(0.0f, x);
-      } else {
-	return o.f/0.0f;
+  uint32_t e = ix.u&(0xff<<23);
+  if(__builtin_expect(e > (150<<23), 0)){
+    if(e==(0xff<<23)){
+      if(!(ix.u << 9)){
+#ifdef CORE_MATH_SUPPORT_ERRNO
+	errno = EDOM;
+#endif
+	feraiseexcept (FE_INVALID);
+	return __builtin_nanf("inf");
       }
+      return x + x; // nan
     }
+    return __builtin_copysign(0.0f, x);
   }
-  int32_t k = m<<(31-s);
-  double z = k, z2 = z*z, z4 = z2*z2;
-  unsigned iq = m>>s; iq = (iq + 1)>>1;
-  double ts = T[iq&63], fs = (tn[0] + z2*tn[1]) + z4*(tn[2] + z2*tn[3]);
-  double r = (ts + z*fs)/(1 - (ts*z)*fs);
+  float x4 = 4.0f*x, nx4 = roundevenf_finite(x4), dx4 = x4-nx4;
+  float ni = roundevenf_finite(x), zf = x-ni;
+  if(__builtin_expect(dx4 == 0.0f, 0)){
+    int k = x4;
+    if(k&1) return __builtin_copysignf(1.0f,zf);
+    k &= 7;
+    if(k==0) return  __builtin_copysignf(0.0f,x);
+    if(k==4) return  -__builtin_copysignf(0.0f,x);
+#ifdef CORE_MATH_SUPPORT_ERRNO
+    errno = ERANGE;
+#endif
+    if(k==2) return  1.0f/0.0f;
+    if(k==6) return -1.0f/0.0f;
+  }
+  ix.f = zf;
+  uint32_t a = ix.u&(~0u>>1);
+  if(__builtin_expect(a == 0x3e933802u, 0)) return  __builtin_copysignf(0x1.44cfbap+0f,zf) + __builtin_copysignf(0x1p-25f,zf);
+  if(__builtin_expect(a == 0x38f26685u, 0)) return  __builtin_copysignf(0x1.7cc304p-12,zf) + __builtin_copysignf(0x1p-37f,zf);;
+  double z = zf, z2 = z*z;
+
+  static const double cn[] = {0x1.921fb54442d19p-1, -0x1.1f458b3e1f8d6p-2, 0x1.68a34bd0b8f6ap-6, -0x1.e4866f7a25f99p-13};
+  static const double cd[] = {0x1p+0, -0x1.4b4b98d2df3a7p-1, 0x1.8e9926d2bb901p-4, -0x1.a6f77fd847eep-9};
+  double z4 = z2*z2, r = (z-z*z2)*((cn[0]+z2*cn[1])+z4*(cn[2]+z2*cn[3]))/(((cd[0]+z2*cd[1])+z4*(cd[2]+z2*cd[3]))*(0.25-z2));
   return r;
 }
 
-#ifndef __INTEL_CLANG_COMPILER // icx provides this function
+#ifndef SKIP_C_FUNC_REDEF // icx provides this function
 /* just to compile since glibc does not contain this function */
 float tanpif(float x){
   return tanpif(x);

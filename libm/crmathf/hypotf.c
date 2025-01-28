@@ -52,8 +52,10 @@ float hypotf(float x, float y){
   double r = __builtin_sqrt(r2);
   b64u64_u t = {.f = r};
   float c = r;
-  if(t.u>0x47efffffe0000000ul){
+  if(t.u>(uint64_t)0x47efffffe0000000ull){
+#ifdef CORE_MATH_SUPPORT_ERRNO
     if(c>0x1.fffffep127f) errno = ERANGE;
+#endif
     return c;
   }
   if(__builtin_expect(((t.u + 1)&0xfffffff) > 2, 1)) return c;

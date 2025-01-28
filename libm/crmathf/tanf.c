@@ -38,55 +38,61 @@ SOFTWARE.
 /* __builtin_roundeven was introduced in gcc 10:
    https://gcc.gnu.org/gcc-10/changes.html,
    and in clang 17 */
-#if (defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)
-#define HAS_BUILTIN_ROUNDEVEN
-#endif
-
-#if !defined(HAS_BUILTIN_ROUNDEVEN) && (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__))
-inline double __builtin_roundeven(double x){
-   double ix;
-#if defined __AVX__
-   __asm__("vroundsd $0x8,%1,%1,%0":"=x"(ix):"x"(x));
-#else /* __SSE4_1__ */
-   __asm__("roundsd $0x8,%1,%0":"=x"(ix):"x"(x));
-#endif
-   return ix;
-}
-#define HAS_BUILTIN_ROUNDEVEN
-#endif
-
-#ifndef HAS_BUILTIN_ROUNDEVEN
-#include <math.h>
+#if ((defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)) && (defined(__aarch64__) || defined(__x86_64__) || defined(__i386__))
+# define roundeven_finite(x) __builtin_roundeven (x)
+#else
 /* round x to nearest integer, breaking ties to even */
 static double
-__builtin_roundeven (double x)
+roundeven_finite (double x)
 {
-  double y = round (x); /* nearest, away from 0 */
-  if (fabs (y - x) == 0.5)
+  double ix;
+# if (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__) || (__ARM_ARCH >= 8))
+#  if defined __AVX__
+   __asm__("vroundsd $0x8,%1,%1,%0":"=x"(ix):"x"(x));
+#  elif __ARM_ARCH >= 8
+   __asm__ ("frintn %d0, %d1":"=w"(ix):"w"(x));
+#  else /* __SSE4_1__ */
+   __asm__("roundsd $0x8,%1,%0":"=x"(ix):"x"(x));
+#  endif
+# else
+  ix = __builtin_round (x); /* nearest, away from 0 */
+  if (__builtin_fabs (ix - x) == 0.5)
   {
-    /* if y is odd, we should return y-1 if x>0, and y+1 if x<0 */
+    /* if ix is odd, we should return ix-1 if x>0, and ix+1 if x<0 */
     union { double f; uint64_t n; } u, v;
-    u.f = y;
-    v.f = (x > 0) ? y - 1.0 : y + 1.0;
+    u.f = ix;
+    v.f = ix - __builtin_copysign (1.0, x);
     if (__builtin_ctz (v.n) > __builtin_ctz (u.n))
-      y = v.f;
+      ix = v.f;
   }
-  return y;
+# endif
+  return ix;
 }
 #endif
 
 typedef union {float f; uint32_t u;} b32u32_u;
 typedef union {double f; uint64_t u;} b64u64_u;
+#if (defined(__clang__) && __clang_major__ >= 14) || (defined(__GNUC__) && __GNUC__ >= 14 && __BITINT_MAXWIDTH__ && __BITINT_MAXWIDTH__ >= 128)
+typedef unsigned _BitInt(128) u128;
+#else
 typedef unsigned __int128 u128;
+#endif
 typedef uint64_t u64;
 
+
+// argument reduction
+// for |z| < 2^28, return r such that 2/pi*x = q + r
 static inline double rltl(float z, int *q){
   double x = z;
-  double idl = -0x1.b1bbead603d8bp-32*x, idh = 0x1.45f306ep-1*x, id = __builtin_roundeven(idh);
-  *q = (long)id;
+  /* The constants in idh, idl approximate 2/pi. Since idh is representable
+     on 28 bits, and x on 24 bits, idh is exact */
+  double idl = -0x1.b1bbead603d8bp-32*x, idh = 0x1.45f306ep-1*x, id = roundeven_finite(idh);
+  *q = (int64_t)id;
   return (idh - id) + idl;
 }
 
+// argument reduction
+// same as rltl, but for |x| >= 2^28
 static double __attribute__((noinline)) rbig(uint32_t u, int *q){
   static const u64 ipi[] = {0xfe5163abdebbc562, 0xdb6295993c439041, 0xfc2757d1f534ddc0, 0xa2f9836e4e441529};
   int e = (u>>23)&0xff, i;
@@ -96,10 +102,11 @@ static double __attribute__((noinline)) rbig(uint32_t u, int *q){
   u128 p2 = (u128)m*ipi[2]; p2 += p1>>64;
   u128 p3 = (u128)m*ipi[3]; p3 += p2>>64;
   u64 p3h = p3>>64, p3l = p3, p2l = p2, p1l = p1;
-  long a;
+  int64_t a;
   int k = e-127, s = k-23;
   /* in tanf(), rbig() is called in the case 127+28 <= e < 0xff
      thus 155 <= e <= 254, which yields 28 <= k <= 127 and 5 <= s <= 104 */
+
   if (s<64) {
     i = p3h<<s|p3l>>(64-s);
     a = p3l<<s|p2l>>(64-s);
@@ -111,7 +118,7 @@ static double __attribute__((noinline)) rbig(uint32_t u, int *q){
     a = p2l<<(s-64)|p1l>>(128-s);
   }
   int sgn = u; sgn >>= 31;
-  long sm = a>>63;
+  int64_t sm = a>>63;
   i -= sm;
   double z = (a^sgn)*0x1p-64;
   i = (i^sgn) - sgn;
@@ -123,7 +130,7 @@ float tanf(float x){
   b32u32_u t = {.f = x};
   int e = (t.u>>23)&0xff, i;
   double z;
-  if (__builtin_expect(e<127+28, 1)){
+  if (__builtin_expect(e<127+28, 1)){ // |x| < 2^28
     if (__builtin_expect(e<115, 0)){
       if (__builtin_expect(e<102, 0))
 	return __builtin_fmaf(x, __builtin_fabsf(x), x);
@@ -134,8 +141,10 @@ float tanf(float x){
   } else if (e<0xff){
     z = rbig(t.u, &i);
   } else {
-    if(t.u<<9) return x; // nan
+    if(t.u<<9) return x + x; // nan
+#ifdef CORE_MATH_SUPPORT_ERRNO
     errno = EDOM;
+#endif
     feraiseexcept(FE_INVALID);
     return __builtin_nanf("tinf"); // inf
   }
@@ -149,7 +158,7 @@ float tanf(float x){
   double s0 = s[i&1], s1 = s[1-(i&1)];
   double r1 = (n*s1 - d*s0)/(n*s0 + d*s1);
   b64u64_u tr = {.f = r1};
-  u64 tail = (tr.u + 7)&(~0ul>>35);
+  u64 tail = (tr.u + 7)&(~(uint64_t)0>>35);
   if(__builtin_expect(tail<=14, 0)){
     static const struct {union{float arg; uint32_t uarg;}; float rh, rl;} st[] = {
       {{0x1.143ec4p+0f}, 0x1.ddf9f6p+0f, -0x1.891d24p-52f},
@@ -162,12 +171,12 @@ float tanf(float x){
       {{0x1.6a0b76p+102f}, -0x1.e42a1ep+0f, -0x1.1dc906p-52f},
     };
     uint32_t ax = t.u&(~0u>>1), sgn = t.u>>31;
-    for(int i=0;i<8;i++) {
-      if(__builtin_expect(st[i].uarg == ax, 0)){
+    for(int j=0;j<8;j++) {
+      if(__builtin_expect(st[j].uarg == ax, 0)){
 	if(sgn)
-	  return -st[i].rh - st[i].rl;
+	  return -st[j].rh - st[j].rl;
 	else
-	  return  st[i].rh + st[i].rl;
+	  return  st[j].rh + st[j].rl;
       }
     }
   }

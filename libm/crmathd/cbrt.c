@@ -25,7 +25,11 @@ SOFTWARE.
 */
 
 #include <stdint.h>
+#include <fenv.h>
+
+#ifdef __x86_64__
 #include <x86intrin.h>
+#endif
 
 // Warning: clang also defines __GNUC__
 #if defined(__GNUC__) && !defined(__clang__)
@@ -33,6 +37,76 @@ SOFTWARE.
 #endif
 
 #pragma STDC FENV_ACCESS ON
+
+// This code emulates the _mm_getcsr SSE intrinsic by reading the FPCR register.
+// fegetexceptflag accesses the FPSR register, which seems to be much slower
+// than accessing FPCR, so it should be avoided if possible.
+// Adapted from sse2neon: https://github.com/DLTcollab/sse2neon
+#if defined(__aarch64__) || defined(__arm64__) || defined(_M_ARM64)
+#if defined(_MSC_VER)
+#include <arm64intr.h>
+#endif
+
+typedef struct
+{
+  uint16_t res0;
+  uint8_t  res1  : 6;
+  uint8_t  bit22 : 1;
+  uint8_t  bit23 : 1;
+  uint8_t  bit24 : 1;
+  uint8_t  res2  : 7;
+  uint32_t res3;
+} fpbitfield;
+
+inline static unsigned int _mm_getcsr()
+{
+  union
+  {
+    fpbitfield field;
+    uint64_t value;
+  } r;
+
+#if defined(_MSC_VER) && !defined(__clang__)
+  r.value = _ReadStatusReg(ARM64_FPCR);
+#else
+  __asm__ __volatile__("mrs %0, FPCR" : "=r"(r.value));
+#endif
+  static const unsigned int lut[2][2] = {{0x0000, 0x2000}, {0x4000, 0x6000}};
+  return lut[r.field.bit22][r.field.bit23];
+}
+#endif  // defined(__aarch64__) || defined(__arm64__) || defined(_M_ARM64)
+
+static inline int get_rounding_mode (fexcept_t *flagp)
+{
+  /* Warning: on __aarch64__ (for example cfarm103), FE_UPWARD=0x400000
+     instead of 0x800. */
+#if defined(__x86_64__) || defined(__arm64__) || defined(_M_ARM64)
+  *flagp = _mm_getcsr ();
+  return ((*flagp)>>13) & 3;
+#else
+  fegetexceptflag (flagp, FE_ALL_EXCEPT);
+  switch (fegetround ())
+  {
+  case FE_TONEAREST:
+    return 0;
+  case FE_DOWNWARD:
+    return 1;
+  case FE_UPWARD:
+    return 2;
+  }
+  // case FE_TOWARDZERO:
+  return 3;
+#endif
+}
+
+static inline void set_flags (const fexcept_t *flagp)
+{
+#ifdef __x86_64__
+  _mm_setcsr (*flagp);
+#else
+  fesetexceptflag (flagp, FE_ALL_EXCEPT);
+#endif
+}
 
 typedef union {double f; uint64_t u;} b64u64_u;
 
@@ -46,22 +120,26 @@ cbrt (double x)
   const double u0 = 0x1.5555555555555p-2, u1 = 0x1.c71c71c71c71cp-3;
   static const double rsc[] = { 1, -1, 0.5, -0.5, 0.25, -0.25};
   static const double off[] = {0x1p-53, 0, 0, 0};
-  volatile unsigned flag = _mm_getcsr(); /* store MXCSR Control/Status Register */
-  unsigned rm = (flag>>13)&3;
+  fexcept_t flag;
+  unsigned int rm = get_rounding_mode (&flag);
   /* rm=0 for rounding to nearest, and other values for directed roundings */
   b64u64_u cvt0 = {.f = x};
-  uint64_t hx = cvt0.u, mant = hx&((~0ul)>>12), sign = hx>>63;
+  uint64_t hx = cvt0.u, mant = hx&((~(uint64_t)0)>>12), sign = hx>>63;
   unsigned e = (hx>>52)&0x7ff;
   if(__builtin_expect(((e+1)&0x7ff)<2, 0)){
-    uint64_t ix = hx&((~0ul)>>1);
-    if(e==0x7ff||ix==0) return x + x; /* 0, inf, nan */
-    int nz = __builtin_clzl(ix) - 11;  /* subnormal */
+    uint64_t ix = hx&((~(uint64_t)0)>>1);
+    if(e==0x7ff||ix==0) return x + x; /* 0, inf, nan: we return x + x instead of simply x,
+                                         to that for x a signaling NaN, it correctly triggers
+                                         the invalid exception. */
+    /* use __builtin_clzll otherwise ix might be truncated to 32 bits
+       on 32-bit processors */
+    int nz = __builtin_clzll(ix) - 11;  /* subnormal */
     mant <<= nz;
-    mant &= (~(0ul))>>12;
+    mant &= (~((uint64_t)0))>>12;
     e -= nz - 1;
   }
   e += 3072;
-  b64u64_u cvt1 = {.u = mant|(0x3fful<<52)}, cvt5 = {.u = cvt1.u};
+  b64u64_u cvt1 = {.u = mant|((uint64_t)0x3ff<<52)}, cvt5 = {.u = cvt1.u};
   unsigned et = e/3, it = e%3;
   /* 2^(3k+it) <= x < 2^(3k+it+1), with 0 <= it <= 3 */
   cvt5.u += (int64_t)it<<52;
@@ -140,14 +218,14 @@ cbrt (double x)
     }
   }
   b64u64_u cvt3 = {.f = y1};
-  cvt3.u += (long)(et - 342 - 1023)<<52;
+  cvt3.u += (int64_t)(et - 342 - 1023)<<52;
   int64_t m0 = cvt3.u<<30, m1 = m0>>63;
   if(__builtin_expect((uint64_t)(m0^m1)<=(1ul<<30),0)){
     b64u64_u cvt4 = {.f = y1};
-    cvt4.u = (cvt4.u + (1ul<<15))&0xffffffffffff0000ul;
+    cvt4.u = (cvt4.u + (1ul<<15))&0xffffffffffff0000ull;
     if( __builtin_fabs((cvt4.f - y1) - dy) < 0x1p-60 || __builtin_fabs(zz) == 1.0 ){
-      cvt3.u = (cvt3.u + (1ul<<15))&0xffffffffffff0000ul;
-      _mm_setcsr(flag);
+      cvt3.u = (cvt3.u + (1ul<<15))&0xffffffffffff0000ull;
+      set_flags (&flag);
     }
   }
   return cvt3.f;

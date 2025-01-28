@@ -42,10 +42,14 @@ float atanpif(float x){
   if(__builtin_expect(e>127+24, 0)) {
     float f = __builtin_copysignf(0.5f, x);
     if(__builtin_expect(e==0xff, 0)) {
-      if(t.u<<9) return x; // nan
+      if(t.u<<9) return x + x; // nan
       return f; // inf
     }
-    return f - 0x1.45f306p-2f/x;
+    // Warning: 0x1.45f306p-2f / x underflows for |x| >= 0x1.45f306p+124
+    if (__builtin_fabsf (x) >= 0x1.45f306p+124f)
+      return f - 4.0f / x;
+    else
+      return f - 0x1.45f306p-2f / x;
   }
   double z = x;
   if (__builtin_expect(e<127-13, 0)){
@@ -83,7 +87,7 @@ float atanpif(float x){
   return r;
 }
 
-#ifndef __INTEL_CLANG_COMPILER // icx provides this function
+#ifndef SKIP_C_FUNC_REDEF // icx provides this function
 /* just to compile since glibc does not contain this function */
 float atanpif(float x){
   return atanpif(x);

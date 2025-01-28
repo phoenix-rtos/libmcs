@@ -86,7 +86,7 @@ SRC =   libm/common/signgam.c \
         libm/crmathd/acosh.c \
         libm/crmathd/asin.c \
         libm/crmathd/asinh.c \
-        libm/mathd/atan2d.c \
+        libm/crmathd/atan2.c \
         libm/crmathd/atan.c \
         libm/crmathd/atanh.c \
         libm/crmathd/cbrt.c \
@@ -143,7 +143,7 @@ SRC =   libm/common/signgam.c \
         libm/mathd/sqrtd.c \
         libm/crmathd/tan.c \
         libm/crmathd/tanh.c \
-        libm/mathd/tgammad.c \
+        libm/crmathd/tgamma.c \
         libm/mathd/truncd.c \
         libm/mathd/y0d.c \
         libm/mathd/y1d.c \
@@ -179,7 +179,7 @@ SRC =   libm/common/signgam.c \
         libm/mathf/internal/signbitf.c \
         libm/mathf/internal/trigf.c \
         libm/mathf/ldexpf.c \
-        libm/mathf/lgammaf.c \
+        libm/crmathf/lgammaf.c \
         libm/mathf/llrintf.c \
         libm/mathf/llroundf.c \
         libm/crmathf/log10f.c \
@@ -206,7 +206,7 @@ SRC =   libm/common/signgam.c \
         libm/mathf/sqrtf.c \
         libm/crmathf/tanf.c \
         libm/crmathf/tanhf.c \
-        libm/mathf/tgammaf.c \
+        libm/crmathf/tgammaf.c \
         libm/mathf/truncf.c
 
 ifeq ($(WANT_COMPLEX),1)
@@ -228,7 +228,7 @@ BIN_DIR = $(BUILD_ROOT)/bin
 
 OUT = $(BIN_DIR)/libm.a
 
-CFLAGS = -c -Wall -std=c11 -pedantic -Wextra -frounding-math -fsignaling-nans -g -O2 -fno-tree-dominator-opts -fno-tree-vrp -fno-builtin $(EXTRA_CFLAGS)
+CFLAGS = -c -Wall -std=gnu23 -pedantic -Wextra -Wno-unused-parameter -frounding-math -fsignaling-nans -g -O2 -fno-tree-dominator-opts -fno-tree-vrp -fno-builtin $(EXTRA_CFLAGS)
 
 ifndef COVERAGE
     COVERAGE=0

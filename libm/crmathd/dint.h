@@ -36,6 +36,7 @@ SOFTWARE.
 #define DINT_H
 
 #include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
 
 /*
@@ -45,8 +46,13 @@ SOFTWARE.
 #ifndef UINT128_T
 #define UINT128_T
 
+#if (defined(__clang__) && __clang_major__ >= 14) || (defined(__GNUC__) && __GNUC__ >= 14 && __BITINT_MAXWIDTH__ && __BITINT_MAXWIDTH__ >= 128)
+typedef unsigned _BitInt(128) u128;
+#else
 typedef unsigned __int128 u128;
+#endif
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 typedef union {
   u128 r;
   struct {
@@ -54,6 +60,15 @@ typedef union {
     uint64_t h;
   };
 } uint128_t;
+#else
+typedef union {
+  u128 r;
+  struct {
+    uint64_t h;
+    uint64_t l;
+  };
+} uint128_t;
+#endif
 
 // Add two 128-bit integers and return 1 if a carry occurred
 static inline uint64_t addu_128 (uint128_t a, uint128_t b, uint128_t *r) {
@@ -63,20 +78,21 @@ static inline uint64_t addu_128 (uint128_t a, uint128_t b, uint128_t *r) {
 }
 
 // Subtract two 128 bit integers and return 1 if a borrow occurred
-static inline char subu_128 (uint128_t a, uint128_t b, uint128_t *r) {
+static inline int subu_128 (uint128_t a, uint128_t b, uint128_t *r) {
   r->r = a.r - b.r;
   // Return the borrow
   return r->r > a.r;
 }
 
-static inline char cmp(int64_t a, int64_t b) { return (a > b) - (a < b); }
+static inline int cmp(int64_t a, int64_t b) { return (a > b) - (a < b); }
 
-static inline char cmpu(uint64_t a, uint64_t b) { return (a > b) - (a < b); }
+static inline int cmpu(uint64_t a, uint64_t b) { return (a > b) - (a < b); }
 
-static inline char cmpu128 (u128 a, u128 b) { return (a > b) - (a < b); }
+static inline int cmpu128 (u128 a, u128 b) { return (a > b) - (a < b); }
 
 #endif
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 typedef union {
   struct {
     u128 r;
@@ -90,6 +106,21 @@ typedef union {
     uint64_t sgn;
   };
 } dint64_t;
+#else
+typedef union {
+  struct {
+    u128 r;
+    int64_t _ex;
+    uint64_t _sgn;
+  };
+  struct {
+    uint64_t hi;
+    uint64_t lo;
+    int64_t ex;
+    uint64_t sgn;
+  };
+} dint64_t;
+#endif
 
 /*
   Constants
@@ -155,7 +186,7 @@ static inline signed char cmp_dint_11(const dint64_t *a, const dint64_t *b) {
 
 // Prints a dint64_t value for debugging purposes
 static inline void print_dint(const dint64_t *a) {
-  printf("{.hi=0x%lx, .lo=0x%lx, .ex=%ld, .sgn=0x%lx}\n", a->hi, a->lo, a->ex,
+  printf("{.hi=0x%"PRIx64", .lo=0x%"PRIx64", .ex=%"PRId64", .sgn=0x%"PRIx64"}\n", a->hi, a->lo, a->ex,
          a->sgn);
 }
 
@@ -216,8 +247,8 @@ add_dint (dint64_t *r, const dint64_t *a, const dint64_t *b) {
     C = A - B;
     uint64_t ch = C >> 64;
     /* We can't have C=0 here since we excluded the case |A| = |B|,
-       thus __builtin_clzl(C) is well-defined below. */
-    uint64_t ex = ch ? __builtin_clzl(ch) : 64 + __builtin_clzl(C);
+       thus __builtin_clzll(C) is well-defined below. */
+    uint64_t ex = ch ? __builtin_clzll(ch) : 64 + __builtin_clzll(C);
     /* The error from the truncated part of B (1 ulp) is multiplied by 2^ex,
        thus by 2 ulps when ex <= 1. */
     if (ex > 0)
@@ -236,7 +267,7 @@ add_dint (dint64_t *r, const dint64_t *a, const dint64_t *b) {
          one (as if no truncation); moreover in some rare cases we need to
          shift by 1 bit to the left. */
       r->ex -= ex;
-      ex = __builtin_clzl (C >> 64);
+      ex = __builtin_clzll (C >> 64);
       /* Fall through with the code for ex = 0. */
     }
     C = C << ex;
@@ -318,8 +349,8 @@ add_dint_11 (dint64_t *r, const dint64_t *a, const dint64_t *b) {
     // a and b have different signs C = A + (-B)
     C = A - B;
     /* we can't have C=0 here since we excluded the case |A| = |B|,
-       thus __builtin_clzl(C) is well-defined below */
-    uint64_t ex = __builtin_clzl (C);
+       thus __builtin_clzll(C) is well-defined below */
+    uint64_t ex = __builtin_clzll (C);
     /* The error from the truncated part of B (1 ulp) is multiplied by 2^ex.
        Thus for ex <= 2, we get an error bounded by 4 ulps in the final result.
        For ex >= 3, we pre-shift the operands. */
@@ -336,7 +367,7 @@ add_dint_11 (dint64_t *r, const dint64_t *a, const dint64_t *b) {
          one (as if no truncation); moreover in some rare cases we need to
          shift by 1 bit to the left. */
       r->ex -= ex;
-      ex = __builtin_clzl (C);
+      ex = __builtin_clzll (C);
       /* Fall through with the code for ex = 0. */
     }
     C = C << ex;
@@ -422,6 +453,39 @@ mul_dint_21 (dint64_t *r, const dint64_t *a, const dint64_t *b) {
      part of lo). After the shift this can be as large as 2 ulps. */
 }
 
+// Multiply an integer with a dint64_t variable
+static inline void mul_dint_2(dint64_t *r, int64_t b, const dint64_t *a) {
+  uint128_t t;
+
+  if (!b) {
+    cp_dint(r, &ZERO);
+    return;
+  }
+
+  uint64_t c = b < 0 ? -b : b;
+  r->sgn = b < 0 ? !a->sgn : a->sgn;
+
+  t.r = (u128)(a->hi) * (u128)c;
+
+  int m = t.h ? __builtin_clzll(t.h) : 64;
+  t.r = (t.r << m);
+
+  // Will pose issues if b is too large but for now we assume it never happens
+  // TODO: FIXME
+  uint128_t l = {.r = (u128)(a->lo) * (u128)c};
+  l.r = (l.r << (m - 1)) >> 63;
+
+  if (addu_128(l, t, &t)) {
+    t.r += t.r & 0x1;
+    t.r = ((u128)1 << 127) | (t.r >> 1);
+    m--;
+  }
+
+  r->hi = t.h;
+  r->lo = t.l;
+  r->ex = a->ex + 64 - m;
+}
+
 /* Same as mul_dint_21, but assumes the low part of a and b is zero.
    This operation is exact. */
 static inline void
@@ -454,7 +518,7 @@ mul_dint_int64 (dint64_t *r, const dint64_t *a, int64_t b) {
   r->r = (u128) (a->hi) * (u128) c;
 
   // Warning: if c=1, we might have r->hi=0
-  int m = r->hi ? __builtin_clzl (r->hi) : 64;
+  int m = r->hi ? __builtin_clzll (r->hi) : 64;
   r->r = r->r << m;
   r->ex -= m;
 
@@ -478,7 +542,44 @@ mul_dint_int64 (dint64_t *r, const dint64_t *a, int64_t b) {
      case "r->r < l", since before the right shift, the error was at most
      1 ulp, thus 1/2 ulp after the shift, and the ignored least significant
      bit of r->r which is discarded counts also as 1/2 ulp. */
-};
+}
+
+// Convert a non-zero double to the corresponding dint64_t value
+static inline void dint_fromd (dint64_t *a, double b) {
+  fast_extract (&a->ex, &a->hi, b);
+
+  /* |b| = 2^(ex-52)*hi */
+
+  uint32_t t = __builtin_clzll (a->hi);
+
+  a->sgn = b < 0.0;
+  a->hi = a->hi << t;
+  a->ex = a->ex - (t > 11 ? t - 12 : 0);
+  /* b = 2^ex*hi/2^63 where 1 <= hi/2^63 < 2 */
+  a->lo = 0;
+}
+
+/* put in r an approximation of 1/a, assuming a is not zero */
+static inline void inv_dint (dint64_t *r, double a)
+{
+  dint64_t q, A;
+  dint_fromd (r, 1.0 / a); /* accurate to about 53 bits */
+  /* we use Newton's iteration: r -> r + r*(1-a*r) */
+  dint_fromd (&A, -a);
+  mul_dint (&q, &A, r);    /* -a*r */
+  add_dint (&q, &ONE, &q); /* 1-a*r */
+  mul_dint (&q, r, &q);    /* r*(1-a*r) */
+  add_dint (r, r, &q);
+}
+
+/* put in r an approximation of b/a, assuming a is not zero */
+static inline void div_dint (dint64_t *r, double b, double a)
+{
+  dint64_t B;
+  inv_dint (r, a);
+  dint_fromd (&B, b);
+  mul_dint (r, r, &B);
+}
 
 /*
   Approximation tables
@@ -1111,6 +1212,7 @@ static const dint64_t T2_2[] = {
     {.hi = 0x815f370cce408bc8, .lo = 0xe2404468cfe5ab9f, .ex = 0, .sgn = 0x0},
 };
 
+#ifdef CORE_MATH_POW
 /* The following is a degree-9 polynomial generated by Sollya, with zero
    constant coefficient, which approximates log(1+z) for |z| < 0.0001221,
    see sollya/approximations_r2.sollya.
@@ -1129,6 +1231,7 @@ static const dint64_t P_2[] = {
     {.hi = 0xffffffffffffffff, .lo = 0xfffffffffffe33ca, .ex = -2, .sgn = 0x1},
     {.hi = 0x8000000000000000, .lo = 0x0, .ex = 0, .sgn = 0x0},
 };
+#endif
 
 /* The following is a degree-7 polynomial generated by Sollya,
    which approximates exp(z) for |z| < 0.00016923,

@@ -45,8 +45,10 @@ float asinpif(float x){
   int32_t e = (t.u>>23)&0xff;
   if(__builtin_expect(e>=127, 0)){
     if(ax == 1.0f) return __builtin_copysignf(0.5f, x);
-    if(e==0xff && (t.u<<9)) return x; // nan
+    if(e==0xff && (t.u<<9)) return x+x; // nan
+#ifdef CORE_MATH_SUPPORT_ERRNO
     errno = EDOM;
+#endif
     feraiseexcept(FE_INVALID);
     return __builtin_nanf("1");
   }
@@ -95,6 +97,10 @@ float asinpif(float x){
     c0 += c2*z4;
     c4 += c6*z4;
     c0 += c4*(z4*z4);
+#ifdef CORE_MATH_SUPPORT_ERRNO
+    if (__builtin_expect(ax <= 0x1.921fb4p-126f && ax != 0.0f, 0))
+      errno = ERANGE; // underflow
+#endif
     return z*c0;
   } else {
     double f = __builtin_sqrt(1-az);
@@ -110,7 +116,7 @@ float asinpif(float x){
   }
 }
 
-#ifndef __INTEL_CLANG_COMPILER // icx provides this function
+#ifndef SKIP_C_FUNC_REDEF // icx provides this function
 /* just to compile since glibc does not contain this function */
 float asinpif(float x){
   return asinpif(x);

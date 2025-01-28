@@ -37,40 +37,35 @@ SOFTWARE.
 /* __builtin_roundeven was introduced in gcc 10:
    https://gcc.gnu.org/gcc-10/changes.html,
    and in clang 17 */
-#if (defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)
-#define HAS_BUILTIN_ROUNDEVEN
-#endif
-
-#if !defined(HAS_BUILTIN_ROUNDEVEN) && (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__))
-inline double __builtin_roundeven(double x){
-   double ix;
-#if defined __AVX__
-   __asm__("vroundsd $0x8,%1,%1,%0":"=x"(ix):"x"(x));
-#else /* __SSE4_1__ */
-   __asm__("roundsd $0x8,%1,%0":"=x"(ix):"x"(x));
-#endif
-   return ix;
-}
-#define HAS_BUILTIN_ROUNDEVEN
-#endif
-
-#ifndef HAS_BUILTIN_ROUNDEVEN
-#include <math.h>
+#if ((defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)) && (defined(__aarch64__) || defined(__x86_64__) || defined(__i386__))
+# define roundeven_finite(x) __builtin_roundeven (x)
+#else
 /* round x to nearest integer, breaking ties to even */
 static double
-__builtin_roundeven (double x)
+roundeven_finite (double x)
 {
-  double y = round (x); /* nearest, away from 0 */
-  if (fabs (y - x) == 0.5)
+  double ix;
+# if (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__) || (__ARM_ARCH >= 8))
+#  if defined __AVX__
+   __asm__("vroundsd $0x8,%1,%1,%0":"=x"(ix):"x"(x));
+#  elif __ARM_ARCH >= 8
+   __asm__ ("frintn %d0, %d1":"=w"(ix):"w"(x));
+#  else /* __SSE4_1__ */
+   __asm__("roundsd $0x8,%1,%0":"=x"(ix):"x"(x));
+#  endif
+# else
+  ix = __builtin_round (x); /* nearest, away from 0 */
+  if (__builtin_fabs (ix - x) == 0.5)
   {
-    /* if y is odd, we should return y-1 if x>0, and y+1 if x<0 */
+    /* if ix is odd, we should return ix-1 if x>0, and ix+1 if x<0 */
     union { double f; uint64_t n; } u, v;
-    u.f = y;
-    v.f = (x > 0) ? y - 1.0 : y + 1.0;
+    u.f = ix;
+    v.f = ix - __builtin_copysign (1.0, x);
     if (__builtin_ctz (v.n) > __builtin_ctz (u.n))
-      y = v.f;
+      ix = v.f;
   }
-  return y;
+# endif
+  return ix;
 }
 #endif
 
@@ -108,21 +103,23 @@ float expm1f(float x){
     double r = z + z2*((b[0]+z*b[1]) + z2*(b[2]+z*b[3]) + z4*((b[4]+z*b[5]) + z2*(b[6]+z*b[7])));
     return r;
   }
-  if(__builtin_expect(ax>0x8562e430u, 0)){  // |x| > 88.72
-    if(ax>(0xffu<<24)) return x; // nan
+  if(__builtin_expect(ax>=0x8562e430u, 0)){  // |x| > 88.72
+    if(ax>(0xffu<<24)) return x + x; // nan
     if(__builtin_expect(ux>>31, 0)){ // x < 0
       if(ax==(0xffu<<24)) return -1.0f;
       return -1.0f + 0x1p-26f;
     }
     if(ax==(0xffu<<24)) return __builtin_inff();
+#ifdef CORE_MATH_SUPPORT_ERRNO
+    errno = ERANGE;
+#endif
     float r = 0x1.fffffep127*z;
-    if(r>0x1.fffffep127f) errno = ERANGE;
     return r;
   }
-  double a = iln2*z, ia = __builtin_roundeven(a), h = a - ia, h2 = h*h;
+  double a = iln2*z, ia = roundeven_finite(a), h = a - ia, h2 = h*h;
   b64u64_u u = {.f = ia + big};
   double c2 = c[2] + h*c[3], c0 = c[0] + h*c[1];
-  const unsigned long *tdl = (const unsigned long *)td;
+  const uint64_t *tdl = (uint64_t *)((void*)td);
   b64u64_u sv = {.u = tdl[u.u&0x1f] + ((u.u>>5)<<52)};
   double r = (c0 + h2*c2)*sv.f - 1.0;
   float ub = r, lb = r - sv.f*0x1.3b3p-33;
@@ -130,8 +127,11 @@ float expm1f(float x){
     if(__builtin_expect(ux>0xc18aa123u, 0)) // x < -17.32
       return -1.0f + 0x1p-26f;
     const double iln2h = 0x1.7154765p+5, iln2l = 0x1.5c17f0bbbe88p-26;
-    double h = (iln2h*z - ia) + iln2l*z, s = sv.f, h2 = h*h, w = s*h;
-    double r = (s-1) + w*((ch[0] + h*ch[1]) + h2*((ch[2] + h*ch[3]) + h2*(ch[4] + h*ch[5])));
+    double s = sv.f;
+    h = (iln2h*z - ia) + iln2l*z;
+    h2 = h*h;
+    double w = s*h;
+    r = (s-1) + w*((ch[0] + h*ch[1]) + h2*((ch[2] + h*ch[3]) + h2*(ch[4] + h*ch[5])));
     ub = r;
   }
   return ub;

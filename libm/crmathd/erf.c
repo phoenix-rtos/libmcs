@@ -506,7 +506,7 @@ erf_accurate_tiny (double *h, double *l, double z)
     {0x1.e71184977c017p-4, 0x1.1182584b11eb2p-3, -0x1.1090da30ef177p-106},
     {0x1.ef3067c6cf276p-4, 0x1.16067d36b3d43p-3, 0x1.aa0e12c21f3f6p-104},
   };
-  unsigned long i, j, k;
+  uint64_t i, j, k;
   /* use dichotomy */
   for (i = 0, j = sizeof(exceptions)/sizeof(exceptions[0]); i + 1 < j;)
   {
@@ -543,10 +543,10 @@ erf_accurate_tiny (double *h, double *l, double z)
   };
   double z2 = z * z, th, tl;
   *h = p[21/2+4]; /* degree 21 */
-  for (int j = 19; j > 11; j-=2)
-    *h = __builtin_fma (*h, z2, p[j/2+4]); /* degree j */
+  for (int a = 19; a > 11; a-=2)
+    *h = __builtin_fma (*h, z2, p[a/2+4]); /* degree j */
   *l = 0;
-  for (int j = 11; j > 7; j-=2)
+  for (int a = 11; a > 7; a-=2)
   {
     /* multiply h+l by z^2 */
     a_mul (&th, &tl, *h, z);
@@ -554,18 +554,18 @@ erf_accurate_tiny (double *h, double *l, double z)
     a_mul (h, l, th, z);
     *l = __builtin_fma (tl, z, *l);
     /* add p[j] to h + l */
-    fast_two_sum (h, &tl, p[j/2+4], *h);
+    fast_two_sum (h, &tl, p[a/2+4], *h);
     *l += tl;
   }
-  for (int j = 7; j >= 1; j-=2)
+  for (int a = 7; a >= 1; a-=2)
   {
     /* multiply h+l by z^2 */
     a_mul (&th, &tl, *h, z);
     tl = __builtin_fma (*l, z, tl);
     a_mul (h, l, th, z);
     *l = __builtin_fma (tl, z, *l);
-    fast_two_sum (h, &tl, p[j-1], *h);
-    *l += p[j] + tl;
+    fast_two_sum (h, &tl, p[a-1], *h);
+    *l += p[a] + tl;
   }
   /* multiply by z */
   a_mul (h, &tl, *h, z);
@@ -603,7 +603,10 @@ erf_accurate (double *h, double *l, double z)
        the interval, namely i/8+1/16
   */
   if (z < 0.125) /* z < 1/8 */
-    return erf_accurate_tiny (h, l, z);
+  {
+    erf_accurate_tiny (h, l, z);
+    return;
+  }
   double v = __builtin_floor (8.0 * z);
   uint32_t i = 8.0 * z;
   z = (z - 0.0625) - 0.125 * v;
@@ -643,10 +646,11 @@ erf (double x)
   b64u64_u t = {.f = z};
   uint64_t ux = t.u;
   /* erf(x) rounds to +/-1 for RNDN for |x| > 0x1.7afb48dc96626p+2 */
-  if (ux > 0x4017afb48dc96626) /* 0x4017afb48dc96626 == 0x1.7afb48dc96626p+2 */
+  if (__builtin_expect (ux > 0x4017afb48dc96626, 0))
+    /* 0x4017afb48dc96626 == 0x1.7afb48dc96626p+2 */
   {
     double os = __builtin_copysign (1.0, x);
-#define MASK (uint64_t) 0x7f80000000000000
+#define MASK (uint64_t) 0x7ff0000000000000 // encoding of +Inf
     if (ux > MASK)
       return x; /* NaN */
     if (ux == MASK)
@@ -657,6 +661,9 @@ erf (double x)
   /* now |x| <= 0x1.7afb48dc96626p+2 */
   if (__builtin_expect (z < 0x1p-61, 0))
   {
+    /* for x=-0 the code below returns +0 which is wrong */
+    if (x == 0)
+      return x;
     /* tiny x: erf(x) ~ 2/sqrt(pi) * x + O(x^3), where the ratio of the O(x^3)
        term to the main term is in x^2/3, thus less than 2^-123 */
     double y = CH * x; /* tentative result */
@@ -677,7 +684,7 @@ erf (double x)
   v.u ^= t.u & SIGN_MASK;
   double left = u.f + __builtin_fma (err, -u.f, v.f);
   double right = u.f + __builtin_fma (err, u.f, v.f);
-  if (left == right)
+  if (__builtin_expect (left == right, 1))
     return left;
 
   erf_accurate (&h, &l, z);

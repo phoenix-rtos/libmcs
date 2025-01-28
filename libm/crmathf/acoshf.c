@@ -40,9 +40,11 @@ typedef union {double f; uint64_t u;} b64u64_u;
 static __attribute__((noinline)) float as_special(float x){
   b32u32_u t = {.f = x};
   if(t.u==0x3f800000u) return 0.0f;
-  if((t.u<<1)>0xff000000u) return x; // nan
+  if((t.u<<1)>0xff000000u) return x + x; // nan
   if(t.u==0x7f800000u) return x; // inf
+#ifdef CORE_MATH_SUPPORT_ERRNO
   errno = EDOM;
+#endif
   return __builtin_nanf("<1");
 }
 
@@ -131,27 +133,27 @@ float acoshf(float x) {
     return r;
   } else if(__builtin_expect(t.u<0x7f800000u, 1)){
     double xd = x, x2 = xd*xd;
-    b64u64_u t = {.f = xd + __builtin_sqrt(x2 - 1)};
-    uint64_t m = t.u&(~0ul>>12);
-    int j = (m + (1l<<(52-8)))>>(52-7);
-    int e = (t.u>>52) - 0x3ff;
-    b64u64_u w = {.u = m | 0x3fful<<52};
-    double z = __builtin_fma(w.f, ix[j], -1.0);
+    b64u64_u tp = {.f = xd + __builtin_sqrt(x2 - 1)};
+    uint64_t m = tp.u&(~(uint64_t)0>>12);
+    int j = (m + ((int64_t)1<<(52-8)))>>(52-7);
+    int e = (tp.u>>52) - 0x3ff;
+    b64u64_u w = {.u = m | (uint64_t)0x3ff<<52};
+    double z = w.f * ix[j] - 1.0;
     static const double c[] = {0x1.0000000066947p+0, -0x1.00007f053d8cbp-1, 0x1.555280111d914p-2};
     double z2 = z*z;
     b64u64_u r = {.f = ((lix[128]*e + lix[j]) + z*c[0]) + z2*(c[1] + z*c[2])};
-    if(__builtin_expect(((r.u+259000)&0xfffffffl) < 260000, 0)){
-      static const double c[] =
+    if(__builtin_expect(((r.u+259000)&0xfffffffll) < 260000, 0)){ // accurate path
+      static const double cp[] =
 	{0x1p+0, -0x1p-1, 0x1.55555555030bcp-2, -0x1.ffffffff2b4e5p-3, 0x1.999b5076a42f2p-3, -0x1.55570c45a647dp-3};
-      double z2 = z*z;
-      double c0 = c[0] + z*c[1];
-      double c2 = c[2] + z*c[3];
-      double c4 = c[4] + z*c[5];
+      z2 = z*z;
+      double c0 = cp[0] + z*cp[1];
+      double c2 = cp[2] + z*cp[3];
+      double c4 = cp[4] + z*cp[5];
       c0 += z2*(c2 + z2*c4);
       const double ln2l = 0x1.7f7d1cf79abcap-20, ln2h = 0x1.62e4p-1;
       double Lh = ln2h * e, Ll = ln2l * e;
       r.f =  __builtin_fma(z, c0, Ll+lix[j]) + Lh;
-      if(__builtin_expect((r.u&0xfffffffl) == 0, 0)){
+      if(__builtin_expect((r.u&0xfffffffll) == 0, 0)){
 	double h =  __builtin_fma(z, c0, Ll+lix[j]) + (Lh-r.f);
 	r.f = r.f + 64.0*h;
       }

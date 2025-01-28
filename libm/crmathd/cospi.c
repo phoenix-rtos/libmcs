@@ -37,8 +37,6 @@ SOFTWARE.
 
 #pragma STDC FENV_ACCESS ON
 
-__float128 as_cos(__float128);
-
 typedef union {double f; uint64_t u;} b64u64_u;
 
 static void sincosn(int, double*, double*, double*, double*);
@@ -80,9 +78,7 @@ static inline double polydd(double xh, double xl, int n, const double c[][2], do
 }
 
 static double as_cospi_zero(double x){
-  __float128 X2 = x; X2 *= X2;
   double x2 = x*x, dx2 = __builtin_fma(x,x,-x2);
-  //  ./remez -n 5 -a 0 -b 7.66990393942820614859043794745972383837200e-4^2:2.44140625e-4^2 -t cos -p 5 -F dd
   static const double ch[][2] = {
     {-0x1.3bd3cc9be45dep+2, -0x1.692b71366cc04p-52}, {0x1.03c1f081b5ac4p+2, -0x1.32b33fda9113cp-52}};
   static const double cl[3] = {-0x1.55d3c7e3cbff9p+0, 0x1.e1f50604fa0ffp-3};
@@ -92,7 +88,7 @@ static double as_cospi_zero(double x){
   double y2, y1, y0 = fasttwosum(1, fh, &y1);
   y1 = fasttwosum(y1, fl, &y2);
   b64u64_u t = {.f = y1};
-  if(__builtin_expect(!(t.u&(~0ul>>12)), 0)){
+  if(__builtin_expect(!(t.u&(~0ull>>12)), 0)){
     b64u64_u w = {.f = y2};
     if((w.u^t.u)>>63)
       t.u--;
@@ -122,7 +118,7 @@ static double as_sinpi_refine(int iq, double z){
   double tsl, tsh = fasttwosum(sch, csh, &tsl); tsl += csl + scl;
   double tsl2; tsh = fasttwosum(sbh, tsh, &tsl2); tsl = sbl + tsl + tsl2;
   b64u64_u t = {.f = tsl};
-  if((t.u|(0xffful<<52)) == ~0ul || (t.u<<12) == 0){
+  if((t.u|((uint64_t)0xfff<<52)) == ~(uint64_t)0 || (t.u<<12) == 0){
     static const struct {int iq; double x, r, d;} db[] = {
       {903, -0x1.bdd02d1ad60p-2, 0x1.f72c906962631p-1,  0x1p-55},
       {1029, -0x1.a4ad070549dp-3, 0x1.fffc4d2c6ca51p-1,  0x1p-55},
@@ -145,29 +141,32 @@ double cospi(double x){
   static const double sn[] = { 0x1.921fb54442d18p-74, -0x1.4abbce625be51p-223, 0x1.466bc6044ba16p-374};
   static const double cn[] = {-0x1.3bd3cc9be45dbp-148, 0x1.03c1f00186416p-298};
   b64u64_u ix = {.f = x};
-  uint64_t ax = ix.u&(~0ul>>1);
-  if(__builtin_expect(ax==0, 0)) return x;
+  uint64_t ax = ix.u&(~0ull>>1);
+  if(__builtin_expect(ax==0, 0)) return 1.0;
   int32_t e = ax>>52;
-  int64_t m = (ix.u&(~0ul>>12))|(1ul<<52);
-  int32_t s = 1063 - e;
-  if(__builtin_expect(s<0, 0)){
+  // e is the unbiased exponent, we have 2^(e-1023) <= |x| < 2^(e-1022)
+  int64_t m = (ix.u&(~0ull>>12))|((uint64_t)1<<52);
+  int32_t s = 1063 - e; // 2^(40-s) <= |x| < 2^(41-s)
+  if(__builtin_expect(s<0, 0)){ // |x| >= 2^41
     if(__builtin_expect(e == 0x7ff, 0)){
       if(!(ix.u << 12)){
+#ifdef CORE_MATH_SUPPORT_ERRNO
 	errno = EDOM;
+#endif
 	feraiseexcept (FE_INVALID);
 	return __builtin_nan("inf");
       }
       return x;
     }
-    s = -s - 1;
-    if(s>10) return 1.0;
+    s = -s - 1; // now 2^(41+s) <= |x| < 2^(42+s)
+    if(s>11) return 1.0;
     uint64_t iq = (m<<s) + 1024;
     if(!(iq&2047)) return 0.0;
     double sh, sl, ch, cl; sincosn(iq, &sh, &sl, &ch, &cl);
     return sh + sl;
   }
-  if(__builtin_expect(ax<=0x3f30000000000000ul, 0)){
-    if(__builtin_expect(ax<=0x3e2ccf6429be6621ul, 0)) return 1.0 - 0x1p-55;
+  if(__builtin_expect(ax<=0x3f30000000000000ull, 0)){ // |x| <= 2^-12
+    if(__builtin_expect(ax<=0x3e2ccf6429be6621ull, 0)) return 1.0 - 0x1p-55;
     double x2 = x*x, x4 = x2*x2, eps = x2*0x1.ap-48;
     static const double c[] = {-0x1.3bd3cc9be45dcp+2, 0x1.03c1f081b0833p+2, -0x1.55d3c6fc9af15p+0, 0x1.e1d3ff2ae3f9ap-3};
     double p = x2*((c[0] + x2*c[1]) + x4*(c[2] + x2*c[3]));
@@ -177,7 +176,7 @@ double cospi(double x){
   }
   
   int32_t si = e-1011;
-  if(__builtin_expect(si>=0 && ((m<<si)^0x8000000000000000l)==0, 0)) return 0.0;
+  if(__builtin_expect(si>=0 && ((m<<si)^0x8000000000000000ll)==0, 0)) return 0.0;
 
   uint64_t iq = ((m>>s) + 2048)&8191;
   iq = (iq + 1)>>1;
@@ -189,7 +188,7 @@ double cospi(double x){
   double er = z*0x1p-123;
   double r = sl + sh*(z2*fc) + ch*(z*fs);
   double lb = (r - er) + sh, ub = (r + er) + sh;
-  if(lb == ub) return lb;
+  if(__builtin_expect(lb == ub, 1)) return lb;
   return as_sinpi_refine(iq, z);
 }
 
@@ -356,7 +355,7 @@ void sincosn2(int s, double *sh, double *sl, double *ch, double *cl){
   *sl = __builtin_copysign(1.0, sgn[ss])*tsl;
 }
 
-#ifndef __INTEL_CLANG_COMPILER // icx provides this function
+#ifndef SKIP_C_FUNC_REDEF // icx provides this function
 /* just to compile since glibc does not contain this function */
 double cospi(double x){
   return cos(M_PI*x);

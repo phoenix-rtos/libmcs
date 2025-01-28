@@ -40,8 +40,13 @@ SOFTWARE.
 
 /******************** code copied from dint.h and pow.[ch] *******************/
 
+#if (defined(__clang__) && __clang_major__ >= 14) || (defined(__GNUC__) && __GNUC__ >= 14 && __BITINT_MAXWIDTH__ && __BITINT_MAXWIDTH__ >= 128)
+typedef unsigned _BitInt(128) u128;
+#else
 typedef unsigned __int128 u128;
+#endif
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 typedef union {
   struct {
     u128 r;
@@ -55,7 +60,23 @@ typedef union {
     uint64_t sgn;
   };
 } dint64_t;
+#else
+typedef union {
+  struct {
+    u128 r;
+    int64_t _ex;
+    uint64_t _sgn;
+  };
+  struct {
+    uint64_t hi;
+    uint64_t lo;
+    int64_t ex;
+    uint64_t sgn;
+  };
+} dint64_t;
+#endif
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 typedef union {
   u128 r;
   struct {
@@ -63,6 +84,15 @@ typedef union {
     uint64_t h;
   };
 } uint128_t;
+#else
+typedef union {
+  u128 r;
+  struct {
+    uint64_t h;
+    uint64_t l;
+  };
+} uint128_t;
+#endif
 
 typedef union {
   double f;
@@ -74,7 +104,7 @@ static inline void fast_extract (int64_t *e, uint64_t *m, double x) {
   f64_u _x = {.f = x};
 
   *e = (_x.u >> 52) & 0x7ff;
-  *m = (_x.u & (~0ul >> 12)) + (*e ? (1ul << 52) : 0);
+  *m = (_x.u & (~0ull >> 12)) + (*e ? (1ull << 52) : 0);
   *e = *e - 0x3fe;
 }
 
@@ -85,9 +115,9 @@ dint_zero_p (const dint64_t *a)
   return a->hi == 0;
 }
 
-static inline char cmp(int64_t a, int64_t b) { return (a > b) - (a < b); }
+static inline int cmp(int64_t a, int64_t b) { return (a > b) - (a < b); }
 
-static inline char cmpu128 (u128 a, u128 b) { return (a > b) - (a < b); }
+static inline int cmpu128 (u128 a, u128 b) { return (a > b) - (a < b); }
 
 /* ZERO is a dint64_t representation of 0, which ensures that
    dint_tod(ZERO) = 0 */
@@ -173,8 +203,8 @@ add_dint (dint64_t *r, const dint64_t *a, const dint64_t *b) {
     C = A - B;
     uint64_t ch = C >> 64;
     /* We can't have C=0 here since we excluded the case |A| = |B|,
-       thus __builtin_clzl(C) is well-defined below. */
-    uint64_t ex = ch ? __builtin_clzl(ch) : 64 + __builtin_clzl(C);
+       thus __builtin_clzll(C) is well-defined below. */
+    uint64_t ex = ch ? __builtin_clzll(ch) : 64 + __builtin_clzll(C);
     /* The error from the truncated part of B (1 ulp) is multiplied by 2^ex,
        thus by 2 ulps when ex <= 1. */
     if (ex > 0)
@@ -193,7 +223,7 @@ add_dint (dint64_t *r, const dint64_t *a, const dint64_t *b) {
          one (as if no truncation); moreover in some rare cases we need to
          shift by 1 bit to the left. */
       r->ex -= ex;
-      ex = __builtin_clzl (C >> 64);
+      ex = __builtin_clzll (C >> 64);
       /* Fall through with the code for ex = 0. */
     }
     C = C << ex;
@@ -287,7 +317,7 @@ static inline void dint_fromd (dint64_t *a, double b) {
 
   /* |b| = 2^(ex-52)*hi */
 
-  uint32_t t = __builtin_clzl (a->hi);
+  uint32_t t = __builtin_clzll (a->hi);
 
   a->sgn = b < 0.0;
   a->hi = a->hi << t;
@@ -304,7 +334,7 @@ static inline void subnormalize_dint(dint64_t *a) {
 
   uint64_t hi = a->hi >> ex;
   uint64_t md = (a->hi >> (ex - 1)) & 0x1;
-  uint64_t lo = (a->hi & (~0ul >> ex)) || a->lo;
+  uint64_t lo = (a->hi & (~0ull >> ex)) || a->lo;
 
   switch (fegetround()) {
   case FE_TONEAREST:
@@ -323,7 +353,7 @@ static inline void subnormalize_dint(dint64_t *a) {
 
   if (!a->hi) {
     a->ex++;
-    a->hi = (1l << 63);
+    a->hi = (1ll << 63);
   }
 }
 
@@ -331,7 +361,7 @@ static inline void subnormalize_dint(dint64_t *a) {
 static inline double dint_tod(dint64_t *a) {
   subnormalize_dint (a);
 
-  f64_u r = {.u = (a->hi >> 11) | (0x3ffl << 52)};
+  f64_u r = {.u = (a->hi >> 11) | (0x3ffll << 52)};
 
   double rd = 0.0;
   if ((a->hi >> 10) & 0x1)
@@ -1362,7 +1392,7 @@ normalize (dint64_t *X)
   int cnt;
   if (X->hi != 0)
   {
-    cnt = __builtin_clzl (X->hi);
+    cnt = __builtin_clzll (X->hi);
     if (cnt)
     {
       X->hi = (X->hi << cnt) | (X->lo >> (64 - cnt));
@@ -1372,7 +1402,7 @@ normalize (dint64_t *X)
   }
   else if (X->lo != 0)
   {
-    cnt = __builtin_clzl (X->lo);
+    cnt = __builtin_clzll (X->lo);
     X->hi = X->lo << cnt;
     X->lo = 0;
     X->ex -= 64 + cnt;
@@ -1405,7 +1435,7 @@ reduce (dint64_t *X)
        Since X is normalized at input, hi_in >= 2^63, and since T[0] >= 2^61,
        we have hi >= 2^(63+61-64) = 2^60, thus the normalize() below
        perform a left shift by at most 3 bits */
-    int e = X->ex;
+    e = X->ex;
     normalize (X);
     e = e - X->ex;
     // put the upper e bits of tiny into X->lo
@@ -1519,7 +1549,7 @@ reduce2 (dint64_t *X)
     return 0;
   int sh = 64 - 11 - X->ex;
   int i = X->hi >> sh;
-  X->hi = X->hi & ((1ul << sh) - 1);
+  X->hi = X->hi & ((1ull << sh) - 1);
   normalize (X);
   return i;
 }
@@ -1532,7 +1562,7 @@ set_dd (double *h, double *l, uint64_t c1, uint64_t c0)
   b64u64_u t;
   if (c1)
     {
-      e = __builtin_clzl (c1);
+      e = __builtin_clzll (c1);
       if (e)
         {
           c1 = (c1 << e) | (c0 >> (64 - e));
@@ -1544,7 +1574,7 @@ set_dd (double *h, double *l, uint64_t c1, uint64_t c0)
       c0 = (c1 << 53) | (c0 >> 11);
       if (c0)
         {
-          g = __builtin_clzl (c0);
+          g = __builtin_clzll (c0);
           if (g)
             c0 = c0 << g;
           t.u = ((f - 53 - g) << 52) | ((c0 << 1) >> 12);
@@ -1555,7 +1585,7 @@ set_dd (double *h, double *l, uint64_t c1, uint64_t c0)
     }
   else if (c0)
     {
-      e = __builtin_clzl (c0);
+      e = __builtin_clzll (c0);
       f = 0x3fe - 64 - e;
       c0 = c0 << (e+1); // most significant bit shifted out
       /* put the upper 52 bits of c0 into h */
@@ -1565,7 +1595,7 @@ set_dd (double *h, double *l, uint64_t c1, uint64_t c0)
       c0 = c0 << 52;
       if (c0)
         {
-          int g = __builtin_clzl (c0);
+          g = __builtin_clzll (c0);
           c0 = c0 << (g+1);
           t.u = ((f - 64 - g) << 52) | (c0 >> 12);
           *l = t.f;
@@ -1643,7 +1673,7 @@ reduce_fast (double *h, double *l, double x, double *err1)
          Let i be the smallest integer such that 2^(e-1075)/2^(64*(i+1))
          is not an integer, i.e., e - 1139 - 64i < 0, i.e.,
          i >= (e-1138)/64. */
-      uint64_t m = (1ul << 52) | (t.u & 0xffffffffffffful);
+      uint64_t m = (1ull << 52) | (t.u & 0xfffffffffffffull);
       uint64_t c[3];
       u128 u;
       // x = m/2^53 * 2^(e-1022)
@@ -1828,6 +1858,7 @@ cos_fast (double *h, double *l, double x)
 }
 
 /* Assume x is a regular number and x > 0x1.6a09e667f3bccp-27. */
+__attribute__((cold))
 static double
 cos_accurate (double x)
 {
@@ -1973,10 +2004,10 @@ cos_accurate (double x)
         {0x1.20000000000f3p-20, 0x1.fffffffffebcp-1, 0x1.37642666666fdp-127},
         {0x1.800000000024p-20,  0x1.fffffffffdcp-1,  0x1.b5666666667ddp-125},
       };
-      for (int i = 0; i < 5; i++)
+      for (int k = 0; k < 5; k++)
         {
-          if (__builtin_fabs (x) == exceptions[i][0])
-            return exceptions[i][1] + exceptions[i][2];
+          if (__builtin_fabs (x) == exceptions[k][0])
+            return exceptions[k][1] + exceptions[k][2];
         }
       printf ("Rounding test of accurate path failed for cos(%la)\n", x);
       printf ("Please report the above to core-math@inria.fr\n");
@@ -1999,8 +2030,8 @@ cos (double x)
 
   if (__builtin_expect (e == 0x7ff, 0)) /* NaN, +Inf and -Inf. */
     {
-      t.u = ~0ul;
-      return t.f;
+      t.u = ~0ull;
+      return t.f; // return qNaN
     }
 
   /* now x is a regular number */
@@ -2018,9 +2049,9 @@ cos (double x)
      For e=-26, (1) rewrites c^2*2 < 1 which yields c <= 0x1.6a09e667f3bccp-1.
   */
   t.u &= 0x7fffffffffffffff;
-  // 0x3e46a09e667f3bcc = 0x1.6a09e667f3bccp-27
-  if (t.u <= 0x3e46a09e667f3bcc)
-    return __builtin_fma (0x1p-27, -0x1p-27, 1.0);
+  if (__builtin_expect (t.u <= 0x3e46a09e667f3bcc, 0))
+    // |x| <= 0x1.6a09e667f3bccp-27
+    return __builtin_fma (t.f, -0x1p-28, 1.0);
 
   double h, l, err;
   err = cos_fast (&h, &l, t.f);

@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 #include <stdint.h>
+#include <errno.h>
 
 // Warning: clang also defines __GNUC__
 #if defined(__GNUC__) && !defined(__clang__)
@@ -42,11 +43,18 @@ float exp2m1f(float x){
   double z = x;
   uint32_t ux = t.u, ax = ux&(~0u>>1);
   if(__builtin_expect(ux>=0xc1c80000u, 0)){ // x <= -25
-    if(ax>(0xffu<<23)) return x; // nan
-    return q[1][0] + q[1][1];
+    if(ax>(0xffu<<23)) return x + x; // nan
+    // avoid spurious inexact exception for -Inf
+    return (ux == 0xff800000) ? q[1][0] : q[1][0] + q[1][1];
   } else if(__builtin_expect(ax>=0x43000000u, 0)){  // x >= 128
-    if(ax>(0xffu<<23)) return x; // nan
-    return q[0][0] + q[0][1];
+    if(ax>(0xffu<<23)) return x + x; // nan
+#ifdef CORE_MATH_SUPPORT_ERRNO
+    // for x=128 and rounding downward or to zero, there is no overflow
+    if (!(x == 128.0f && (0x1.fffffep+127f + 0x1p+103f == 0x1.fffffep+127f)))
+      errno = ERANGE;
+#endif
+    // avoid spurious inexact exception for +Inf
+    return (ux == 0x7f800000) ? x : q[0][0] + q[0][1];
   } else if (__builtin_expect(ax<0x3df95f1fu, 0)){ // |x| < 8.44e-2/log(2)
     double z2 = z*z, r;
     if (__builtin_expect(ax<0x3d67a4ccu, 0)){ // |x| < 3.92e-2/log(2)
@@ -112,7 +120,7 @@ float exp2m1f(float x){
     int64_t i = ia, j = i&0xf, e = i - j;
     e >>= 4;
     double s = tb[j];
-    b64u64_u su = {.u = (e + 0x3fful)<<52};
+    b64u64_u su = {.u = (e + 0x3ffull)<<52};
     s *= su.f;
     double c0 = c[0] + h*c[1];
     double c2 = c[2] + h*c[3];
@@ -124,6 +132,8 @@ float exp2m1f(float x){
 }
 
 /* just to compile since glibc does not contain this function */
+#ifndef SKIP_C_FUNC_REDEF
 float exp2m1f(float x){
   return exp2m1f(x);
 }
+#endif

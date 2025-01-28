@@ -55,40 +55,35 @@ SOFTWARE.
 /* __builtin_roundeven was introduced in gcc 10:
    https://gcc.gnu.org/gcc-10/changes.html,
    and in clang 17 */
-#if (defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)
-#define HAS_BUILTIN_ROUNDEVEN
-#endif
-
-#if !defined(HAS_BUILTIN_ROUNDEVEN) && (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__))
-inline double __builtin_roundeven(double x){
-   double ix;
-#if defined __AVX__
-   __asm__("vroundsd $0x8,%1,%1,%0":"=x"(ix):"x"(x));
-#else /* __SSE4_1__ */
-   __asm__("roundsd $0x8,%1,%0":"=x"(ix):"x"(x));
-#endif
-   return ix;
-}
-#define HAS_BUILTIN_ROUNDEVEN
-#endif
-
-#ifndef HAS_BUILTIN_ROUNDEVEN
-#include <math.h>
+#if ((defined(__GNUC__) && __GNUC__ >= 10) || (defined(__clang__) && __clang_major__ >= 17)) && (defined(__aarch64__) || defined(__x86_64__) || defined(__i386__))
+# define roundeven_finite(x) __builtin_roundeven (x)
+#else
 /* round x to nearest integer, breaking ties to even */
 static double
-__builtin_roundeven (double x)
+roundeven_finite (double x)
 {
-  double y = round (x); /* nearest, away from 0 */
-  if (fabs (y - x) == 0.5)
+  double ix;
+# if (defined(__GNUC__) || defined(__clang__)) && (defined(__AVX__) || defined(__SSE4_1__) || (__ARM_ARCH >= 8))
+#  if defined __AVX__
+   __asm__("vroundsd $0x8,%1,%1,%0":"=x"(ix):"x"(x));
+#  elif __ARM_ARCH >= 8
+   __asm__ ("frintn %d0, %d1":"=w"(ix):"w"(x));
+#  else /* __SSE4_1__ */
+   __asm__("roundsd $0x8,%1,%0":"=x"(ix):"x"(x));
+#  endif
+# else
+  ix = __builtin_round (x); /* nearest, away from 0 */
+  if (__builtin_fabs (ix - x) == 0.5)
   {
-    /* if y is odd, we should return y-1 if x>0, and y+1 if x<0 */
+    /* if ix is odd, we should return ix-1 if x>0, and ix+1 if x<0 */
     union { double f; uint64_t n; } u, v;
-    u.f = y;
-    v.f = (x > 0) ? y - 1.0 : y + 1.0;
+    u.f = ix;
+    v.f = ix - __builtin_copysign (1.0, x);
     if (__builtin_ctz (v.n) > __builtin_ctz (u.n))
-      y = v.f;
+      ix = v.f;
   }
-  return y;
+# endif
+  return ix;
 }
 #endif
 
@@ -386,6 +381,7 @@ static const double C2[47][27] = {
 /* Assuming 0 <= z <= 0x1.7afb48dc96626p+2, put in h+l an accurate
    approximation of erf(z).
    Assumes z >= 2^-61, thus no underflow can occur. */
+__attribute__((cold))
 static void
 erf_accurate (double *h, double *l, double z)
 {
@@ -641,7 +637,7 @@ static inline void q_1 (double *hi, double *lo, double zh, double zl) {
 static inline void exp_1 (double *hi, double *lo, double xh, double xl) {
 
 #define INVLOG2 0x1.71547652b82fep+12 /* |INVLOG2-2^12/log(2)| < 2^-43.4 */
-  double k = __builtin_roundeven (xh * INVLOG2);
+  double k = roundeven_finite (xh * INVLOG2);
 
   double kh, kl;
 #define LOG2H 0x1.62e42fefa39efp-13
@@ -728,7 +724,7 @@ exp_accurate (double *h, double *l, int *e, double xh, double xl)
   double th, tl, yh, yl;
   /* first reduce argument: xh + xl ~ k*log(2) + yh + yl */
 #define INVLOG2acc 0x1.71547652b82fep+0 // approximates 1/log(2)
-  int k = __builtin_roundeven (xh * INVLOG2acc);
+  int k = roundeven_finite (xh * INVLOG2acc);
   /* since |xh| <= 742, |k| <= round(742/log(2)) = 1070 */
   /* subtract k*log(2), where LOG2H+LOG2L approximates log(2) */
 #define LOG2Hacc 0x1.62e42fefa39efp-1
@@ -866,10 +862,10 @@ erfc_asympt_fast (double *h, double *l, double x)
   fast_two_sum (&zh, &zl, p[9], *h);
   zl += *l;
 
-  for (int i = 15; i >= 3; i-= 2)
+  for (int j = 15; j >= 3; j-= 2)
   {
     d_mul (h, l, zh, zl, uh, ul);
-    fast_two_sum (&zh, &zl, p[(i+1)/2], *h);
+    fast_two_sum (&zh, &zl, p[(j+1)/2], *h);
     zl += *l;
   }
   /* degree 1: (zh+zl)*(uh+ul)+p[0]+p[1] */
@@ -1183,38 +1179,38 @@ erfc (double x)
   b64u64_u t = {.f = x};
   uint64_t at = t.u & 0x7fffffffffffffff;
 
-  if (t.u >= 0x8000000000000000) // x = NaN or x <= 0
+  if (t.u >= 0x8000000000000000) // x = -NaN or x <= 0 (excluding +0)
   {
     // for x <= -0x1.7744f8f74e94bp2, erfc(x) rounds to 2 (to nearest)
     if (t.u >= 0xc017744f8f74e94b) // x = NaN or x <= -0x1.7744f8f74e94bp2
     {
       if (t.u >= 0xfff0000000000000){              // -Inf or NaN
         if (t.u == 0xfff0000000000000) return 2.0; // -Inf
-        return x;                                  // NaN
+        return x + x;                              // NaN
       }
       return 2.0 - 0x1p-54;                        // rounds to 2 or below(2)
     }
 
     // for -0x1.c5bf891b4ef6ap-54 <= x <= 0, erfc(x) rounds to 1 (to nearest)
     if (-0x1.c5bf891b4ef6ap-54 <= x)
-      return 1.0 + 0x1p-53;
+      return __builtin_fma (-x, 0x1p-54, 1.0);
   }
 
-  if (t.u < 0x8000000000000000) // x = NaN or x >= 0
+  else // x = +NaN or x >= 0 (excluding -0)
   {
     // for x >= 0x1.b39dc41e48bfdp+4, erfc(x) < 2^-1075: rounds to 0 or 2^-1074
     if (at >= 0x403b39dc41e48bfd) // x = NaN or x >= 0x1.b39dc41e48bfdp+4
     {
       if (at >= 0x7ff0000000000000){               // +Inf or NaN
         if (at == 0x7ff0000000000000) return 0.0;  // +Inf
-        return x;                                  // NaN
+        return x + x;                              // NaN
       }
-      return 0x1p-1074 * 0.25;                    // 0 or 2^-1074 wrt rounding
+      return 0x1p-1074 * 0.25;                     // 0 or 2^-1074 wrt rounding
     }
 
     // for 0 <= x <= 0x1.c5bf891b4ef6ap-55, erfc(x) rounds to 1 (to nearest)
     if (x <= 0x1.c5bf891b4ef6ap-55)
-      return 1.0 - 0x1p-54;
+      return __builtin_fma (-x, 0x1p-54, 1.0);
   }
 
   /* now -0x1.7744f8f74e94bp2 < x < -0x1.c5bf891b4ef6ap-54
