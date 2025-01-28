@@ -1,7 +1,7 @@
 fdim
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/fdimd.c
+.. c:autodoc:: mathd/fdimd.c
 
 Special cases
 ^^^^^^^^^^^^^

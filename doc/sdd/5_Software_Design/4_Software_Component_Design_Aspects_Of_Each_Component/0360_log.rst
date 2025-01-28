@@ -1,7 +1,7 @@
 log
 ~~~
 
-.. c:autodoc:: ../libm/mathd/logd.c
+.. c:autodoc:: mathd/logd.c
 
 Special cases
 ^^^^^^^^^^^^^

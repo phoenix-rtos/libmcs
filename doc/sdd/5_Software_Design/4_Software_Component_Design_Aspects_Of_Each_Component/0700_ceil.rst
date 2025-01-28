@@ -1,7 +1,7 @@
 ceil
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/ceild.c
+.. c:autodoc:: mathd/ceild.c
 
 Special cases
 ^^^^^^^^^^^^^

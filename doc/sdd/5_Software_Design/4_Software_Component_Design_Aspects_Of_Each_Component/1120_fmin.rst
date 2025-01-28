@@ -1,7 +1,7 @@
 fmin
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/fmind.c
+.. c:autodoc:: mathd/fmind.c
 
 Special cases
 ^^^^^^^^^^^^^

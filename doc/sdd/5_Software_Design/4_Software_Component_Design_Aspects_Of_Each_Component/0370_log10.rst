@@ -1,7 +1,7 @@
 log10
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/log10d.c
+.. c:autodoc:: mathd/log10d.c
 
 Special cases
 ^^^^^^^^^^^^^

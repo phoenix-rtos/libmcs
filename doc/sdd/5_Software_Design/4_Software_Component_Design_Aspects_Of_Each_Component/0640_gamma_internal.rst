@@ -3,7 +3,7 @@
 Internal Gamma Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/internal/gammad.c
+.. c:autodoc:: mathd/internal/gammad.c
 
 Special cases
 ^^^^^^^^^^^^^

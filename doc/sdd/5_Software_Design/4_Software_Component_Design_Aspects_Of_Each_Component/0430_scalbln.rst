@@ -1,7 +1,7 @@
 scalbln
 ~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/scalblnd.c
+.. c:autodoc:: mathd/scalblnd.c
 
 Special cases
 ^^^^^^^^^^^^^

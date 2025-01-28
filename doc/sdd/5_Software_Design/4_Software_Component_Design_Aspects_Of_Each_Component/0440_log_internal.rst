@@ -3,7 +3,7 @@
 Internal Logarithm Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/internal/log1pmfd.h
+.. c:autodoc:: mathd/internal/log1pmfd.h
 
 .. raw:: html
 

@@ -1,7 +1,7 @@
 cacos
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/cacosd.c
+.. c:autodoc:: complexd/cacosd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 llrint
 ~~~~~~
 
-.. c:autodoc:: ../libm/mathd/llrintd.c
+.. c:autodoc:: mathd/llrintd.c
 
 Special cases
 ^^^^^^^^^^^^^

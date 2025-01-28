@@ -1,7 +1,7 @@
 floor
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/floord.c
+.. c:autodoc:: mathd/floord.c
 
 Special cases
 ^^^^^^^^^^^^^

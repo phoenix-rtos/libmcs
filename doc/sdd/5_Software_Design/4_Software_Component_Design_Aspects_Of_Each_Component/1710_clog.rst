@@ -1,7 +1,7 @@
 clog
 ~~~~
 
-.. c:autodoc:: ../libm/complexd/clogd.c
+.. c:autodoc:: complexd/clogd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

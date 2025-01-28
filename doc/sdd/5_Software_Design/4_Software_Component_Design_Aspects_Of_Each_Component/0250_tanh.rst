@@ -1,7 +1,7 @@
 tanh
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/tanhd.c
+.. c:autodoc:: mathd/tanhd.c
 
 Special cases
 ^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 nearbyint
 ~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/nearbyintd.c
+.. c:autodoc:: mathd/nearbyintd.c
 
 Special cases
 ^^^^^^^^^^^^^

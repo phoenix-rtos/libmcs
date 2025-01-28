@@ -1,7 +1,7 @@
 sqrt
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/sqrtd.c
+.. c:autodoc:: mathd/sqrtd.c
 
 Special cases
 ^^^^^^^^^^^^^

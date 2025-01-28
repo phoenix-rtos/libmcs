@@ -1,7 +1,7 @@
 expm1
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/expm1d.c
+.. c:autodoc:: mathd/expm1d.c
 
 Special cases
 ^^^^^^^^^^^^^

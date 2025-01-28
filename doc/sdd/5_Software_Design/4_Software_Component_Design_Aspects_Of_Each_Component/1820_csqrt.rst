@@ -1,7 +1,7 @@
 csqrt
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/csqrtd.c
+.. c:autodoc:: complexd/csqrtd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

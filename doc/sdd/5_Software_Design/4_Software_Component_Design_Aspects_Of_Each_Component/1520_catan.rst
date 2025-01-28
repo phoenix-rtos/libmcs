@@ -1,7 +1,7 @@
 catan
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/catand.c
+.. c:autodoc:: complexd/catand.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

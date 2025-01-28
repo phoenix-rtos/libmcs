@@ -12,32 +12,32 @@ Classification Macros
 fpclassify
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/internal/fpclassifyd.c
+.. c:autodoc:: mathd/internal/fpclassifyd.c
 
 isfinite
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isfinite.c
+.. c:autodoc:: common/isfinite.c
 
 isinf
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isinf.c
+.. c:autodoc:: common/isinf.c
 
 isnan
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isnan.c
+.. c:autodoc:: common/isnan.c
 
 isnormal
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isnormal.c
+.. c:autodoc:: common/isnormal.c
 
 signbit
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/internal/signbitd.c
+.. c:autodoc:: mathd/internal/signbitd.c
 
 Trigonometric Functions
 """""""""""""""""""""""
@@ -45,37 +45,37 @@ Trigonometric Functions
 acos
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/acosd.c
+.. c:autodoc:: mathd/acosd.c
 
 asin
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/asind.c
+.. c:autodoc:: mathd/asind.c
 
 atan
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/atand.c
+.. c:autodoc:: mathd/atand.c
 
 atan2
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/atan2d.c
+.. c:autodoc:: mathd/atan2d.c
 
 cos
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/cosd.c
+.. c:autodoc:: mathd/cosd.c
 
 sin
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/sind.c
+.. c:autodoc:: mathd/sind.c
 
 tan
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/tand.c
+.. c:autodoc:: mathd/tand.c
 
 Hyperbolic Functions
 """"""""""""""""""""
@@ -83,32 +83,32 @@ Hyperbolic Functions
 acosh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/acoshd.c
+.. c:autodoc:: mathd/acoshd.c
 
 asinh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/asinhd.c
+.. c:autodoc:: mathd/asinhd.c
 
 atanh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/atanhd.c
+.. c:autodoc:: mathd/atanhd.c
 
 cosh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/coshd.c
+.. c:autodoc:: mathd/coshd.c
 
 sinh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/sinhd.c
+.. c:autodoc:: mathd/sinhd.c
 
 tanh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/tanhd.c
+.. c:autodoc:: mathd/tanhd.c
 
 Exponential and Logarithmic Functions
 """""""""""""""""""""""""""""""""""""
@@ -116,72 +116,72 @@ Exponential and Logarithmic Functions
 exp
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/expd.c
+.. c:autodoc:: mathd/expd.c
 
 exp2
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/exp2d.c
+.. c:autodoc:: mathd/exp2d.c
 
 expm1
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/expm1d.c
+.. c:autodoc:: mathd/expm1d.c
 
 frexp
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/frexpd.c
+.. c:autodoc:: mathd/frexpd.c
 
 ilogb
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/ilogbd.c
+.. c:autodoc:: mathd/ilogbd.c
 
 ldexp
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/ldexpd.c
+.. c:autodoc:: mathd/ldexpd.c
 
 log
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/logd.c
+.. c:autodoc:: mathd/logd.c
 
 log10
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/log10d.c
+.. c:autodoc:: mathd/log10d.c
 
 log1p
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/log1pd.c
+.. c:autodoc:: mathd/log1pd.c
 
 log2
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/log2d.c
+.. c:autodoc:: mathd/log2d.c
 
 logb
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/logbd.c
+.. c:autodoc:: mathd/logbd.c
 
 modf
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/modfd.c
+.. c:autodoc:: mathd/modfd.c
 
 scalbn
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/scalbnd.c
+.. c:autodoc:: mathd/scalbnd.c
 
 scalbln
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/scalblnd.c
+.. c:autodoc:: mathd/scalblnd.c
 
 Power and Absolute-value Functions
 """"""""""""""""""""""""""""""""""
@@ -189,27 +189,27 @@ Power and Absolute-value Functions
 cbrt
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/cbrtd.c
+.. c:autodoc:: mathd/cbrtd.c
 
 fabs
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/fabsd.c
+.. c:autodoc:: mathd/fabsd.c
 
 hypot
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/hypotd.c
+.. c:autodoc:: mathd/hypotd.c
 
 pow
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/powd.c
+.. c:autodoc:: mathd/powd.c
 
 sqrt
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/sqrtd.c
+.. c:autodoc:: mathd/sqrtd.c
 
 Error and Gamma Functions
 """""""""""""""""""""""""
@@ -217,27 +217,27 @@ Error and Gamma Functions
 erf
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/erfd.c
+.. c:autodoc:: mathd/erfd.c
 
 erfc
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/erfcd.c
+.. c:autodoc:: mathd/erfcd.c
 
 lgamma
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/lgammad.c
+.. c:autodoc:: mathd/lgammad.c
 
 tgamma
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/tgammad.c
+.. c:autodoc:: mathd/tgammad.c
 
 signgam
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/signgam.c
+.. c:autodoc:: common/signgam.c
 
 Nearest Integer Functions
 """""""""""""""""""""""""
@@ -245,52 +245,52 @@ Nearest Integer Functions
 ceil
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/ceild.c
+.. c:autodoc:: mathd/ceild.c
 
 floor
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/floord.c
+.. c:autodoc:: mathd/floord.c
 
 nearbyint
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/nearbyintd.c
+.. c:autodoc:: mathd/nearbyintd.c
 
 rint
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/rintd.c
+.. c:autodoc:: mathd/rintd.c
 
 lrint
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/lrintd.c
+.. c:autodoc:: mathd/lrintd.c
 
 llrint
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/llrintd.c
+.. c:autodoc:: mathd/llrintd.c
 
 round
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/roundd.c
+.. c:autodoc:: mathd/roundd.c
 
 lround
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/lroundd.c
+.. c:autodoc:: mathd/lroundd.c
 
 llround
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/llroundd.c
+.. c:autodoc:: mathd/llroundd.c
 
 trunc
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/truncd.c
+.. c:autodoc:: mathd/truncd.c
 
 Remainder Functions
 """""""""""""""""""
@@ -298,17 +298,17 @@ Remainder Functions
 fmod
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/fmodd.c
+.. c:autodoc:: mathd/fmodd.c
 
 remainder
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/remainderd.c
+.. c:autodoc:: mathd/remainderd.c
 
 remquo
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/remquod.c
+.. c:autodoc:: mathd/remquod.c
 
 Manipulation Functions
 """"""""""""""""""""""
@@ -316,22 +316,22 @@ Manipulation Functions
 copysign
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/copysignd.c
+.. c:autodoc:: mathd/copysignd.c
 
 nan
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/nand.c
+.. c:autodoc:: mathd/nand.c
 
 nextafter
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/nextafterd.c
+.. c:autodoc:: mathd/nextafterd.c
 
 nexttoward
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/nexttowardd.c
+.. c:autodoc:: mathd/nexttowardd.c
 
 Maximum, Minimum and Positive Difference Functions
 """"""""""""""""""""""""""""""""""""""""""""""""""
@@ -339,17 +339,17 @@ Maximum, Minimum and Positive Difference Functions
 fdim
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/fdimd.c
+.. c:autodoc:: mathd/fdimd.c
 
 fmax
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/fmaxd.c
+.. c:autodoc:: mathd/fmaxd.c
 
 fmin
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/fmind.c
+.. c:autodoc:: mathd/fmind.c
 
 Floating Multiply-Add
 """""""""""""""""""""
@@ -357,7 +357,7 @@ Floating Multiply-Add
 fma
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/fmad.c
+.. c:autodoc:: mathd/fmad.c
 
 Comparison Macros
 """""""""""""""""
@@ -365,32 +365,32 @@ Comparison Macros
 isgreater
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isgreater.c
+.. c:autodoc:: common/isgreater.c
 
 isgreaterequal
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isgreaterequal.c
+.. c:autodoc:: common/isgreaterequal.c
 
 isless
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isless.c
+.. c:autodoc:: common/isless.c
 
 islessequal
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/islessequal.c
+.. c:autodoc:: common/islessequal.c
 
 islessgreater
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/islessgreater.c
+.. c:autodoc:: common/islessgreater.c
 
 isunordered
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isunordered.c
+.. c:autodoc:: common/isunordered.c
 
 Bessel Functions (POSIX)
 """"""""""""""""""""""""
@@ -398,32 +398,32 @@ Bessel Functions (POSIX)
 j0
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/j0d.c
+.. c:autodoc:: mathd/j0d.c
 
 j1
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/j1d.c
+.. c:autodoc:: mathd/j1d.c
 
 jn
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/jnd.c
+.. c:autodoc:: mathd/jnd.c
 
 y0
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/y0d.c
+.. c:autodoc:: mathd/y0d.c
 
 y1
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/y1d.c
+.. c:autodoc:: mathd/y1d.c
 
 yn
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/ynd.c
+.. c:autodoc:: mathd/ynd.c
 
 Complex Trigonometric Functions
 """""""""""""""""""""""""""""""
@@ -431,32 +431,32 @@ Complex Trigonometric Functions
 cacos
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/cacosd.c
+.. c:autodoc:: complexd/cacosd.c
 
 casin
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/casind.c
+.. c:autodoc:: complexd/casind.c
 
 catan
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/catand.c
+.. c:autodoc:: complexd/catand.c
 
 ccos
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/ccosd.c
+.. c:autodoc:: complexd/ccosd.c
 
 csin
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/csind.c
+.. c:autodoc:: complexd/csind.c
 
 ctan
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/ctand.c
+.. c:autodoc:: complexd/ctand.c
 
 Complex Hyperbolic Functions
 """"""""""""""""""""""""""""
@@ -464,32 +464,32 @@ Complex Hyperbolic Functions
 cacosh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/cacoshd.c
+.. c:autodoc:: complexd/cacoshd.c
 
 casinh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/casinhd.c
+.. c:autodoc:: complexd/casinhd.c
 
 catanh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/catanhd.c
+.. c:autodoc:: complexd/catanhd.c
 
 ccosh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/ccoshd.c
+.. c:autodoc:: complexd/ccoshd.c
 
 csinh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/csinhd.c
+.. c:autodoc:: complexd/csinhd.c
 
 ctanh
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/ctanhd.c
+.. c:autodoc:: complexd/ctanhd.c
 
 Complex Exponential and Logarithmic Functions
 """""""""""""""""""""""""""""""""""""""""""""
@@ -497,12 +497,12 @@ Complex Exponential and Logarithmic Functions
 cexp
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/cexpd.c
+.. c:autodoc:: complexd/cexpd.c
 
 clog
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/clogd.c
+.. c:autodoc:: complexd/clogd.c
 
 Complex Power and Absolute-value Functions
 """"""""""""""""""""""""""""""""""""""""""
@@ -510,17 +510,17 @@ Complex Power and Absolute-value Functions
 cabs
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/cabsd.c
+.. c:autodoc:: complexd/cabsd.c
 
 cpow
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/cpowd.c
+.. c:autodoc:: complexd/cpowd.c
 
 csqrt
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/csqrtd.c
+.. c:autodoc:: complexd/csqrtd.c
 
 Complex Manipulation Functions
 """"""""""""""""""""""""""""""
@@ -528,29 +528,29 @@ Complex Manipulation Functions
 carg
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/cargd.c
+.. c:autodoc:: complexd/cargd.c
 
 cimag
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/cimagd.c
+.. c:autodoc:: complexd/cimagd.c
 
 CMPLX
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/cmplx.c
+.. c:autodoc:: common/cmplx.c
 
 conj
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/conjd.c
+.. c:autodoc:: complexd/conjd.c
 
 cproj
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/cprojd.c
+.. c:autodoc:: complexd/cprojd.c
 
 creal
 ~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/complexd/creald.c
+.. c:autodoc:: complexd/creald.c

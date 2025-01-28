@@ -1,7 +1,7 @@
 cproj
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/cprojd.c
+.. c:autodoc:: complexd/cprojd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

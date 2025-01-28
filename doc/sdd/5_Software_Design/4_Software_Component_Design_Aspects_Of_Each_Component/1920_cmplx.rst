@@ -1,7 +1,7 @@
 CMPLX
 ~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/cmplx.c
+.. c:autodoc:: common/cmplx.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

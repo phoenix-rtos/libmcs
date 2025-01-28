@@ -1,7 +1,7 @@
 fma
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/fmad.c
+.. c:autodoc:: mathd/fmad.c
 
 Special cases
 ^^^^^^^^^^^^^

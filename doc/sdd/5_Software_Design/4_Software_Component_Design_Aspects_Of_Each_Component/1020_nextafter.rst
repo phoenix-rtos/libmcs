@@ -1,7 +1,7 @@
 nextafter
 ~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/nextafterd.c
+.. c:autodoc:: mathd/nextafterd.c
 
 Special cases
 ^^^^^^^^^^^^^

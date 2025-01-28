@@ -1,7 +1,7 @@
 ldexp
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/ldexpd.c
+.. c:autodoc:: mathd/ldexpd.c
 
 Special cases
 ^^^^^^^^^^^^^

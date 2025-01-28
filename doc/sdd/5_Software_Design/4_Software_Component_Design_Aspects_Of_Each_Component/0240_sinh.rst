@@ -1,7 +1,7 @@
 sinh
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/sinhd.c
+.. c:autodoc:: mathd/sinhd.c
 
 Special cases
 ^^^^^^^^^^^^^

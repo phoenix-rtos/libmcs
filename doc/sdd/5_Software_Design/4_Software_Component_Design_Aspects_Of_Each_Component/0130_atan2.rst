@@ -1,7 +1,7 @@
 atan2
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/atan2d.c
+.. c:autodoc:: mathd/atan2d.c
 
 Special cases
 ^^^^^^^^^^^^^

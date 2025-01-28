@@ -1,7 +1,7 @@
 fabs
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/fabsd.c
+.. c:autodoc:: mathd/fabsd.c
 
 Special cases
 ^^^^^^^^^^^^^

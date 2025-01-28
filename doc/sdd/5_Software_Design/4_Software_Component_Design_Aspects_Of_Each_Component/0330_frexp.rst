@@ -1,7 +1,7 @@
 frexp
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/frexpd.c
+.. c:autodoc:: mathd/frexpd.c
 
 Special cases
 ^^^^^^^^^^^^^

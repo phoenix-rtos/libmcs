@@ -1,7 +1,7 @@
 csinh
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/csinhd.c
+.. c:autodoc:: complexd/csinhd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

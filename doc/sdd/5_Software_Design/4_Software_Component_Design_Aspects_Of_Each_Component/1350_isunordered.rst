@@ -1,7 +1,7 @@
 isunordered
 ~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isunordered.c
+.. c:autodoc:: common/isunordered.c
 
 Special cases
 ^^^^^^^^^^^^^

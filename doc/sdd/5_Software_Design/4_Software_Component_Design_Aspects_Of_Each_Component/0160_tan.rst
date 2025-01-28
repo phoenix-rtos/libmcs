@@ -1,7 +1,7 @@
 tan
 ~~~
 
-.. c:autodoc:: ../libm/mathd/tand.c
+.. c:autodoc:: mathd/tand.c
 
 Special cases
 ^^^^^^^^^^^^^

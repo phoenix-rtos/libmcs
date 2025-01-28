@@ -1,7 +1,7 @@
 asinh
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/asinhd.c
+.. c:autodoc:: mathd/asinhd.c
 
 Special cases
 ^^^^^^^^^^^^^

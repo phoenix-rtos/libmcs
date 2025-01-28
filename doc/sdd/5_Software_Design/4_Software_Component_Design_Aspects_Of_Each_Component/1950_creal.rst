@@ -1,7 +1,7 @@
 creal
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/creald.c
+.. c:autodoc:: complexd/creald.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

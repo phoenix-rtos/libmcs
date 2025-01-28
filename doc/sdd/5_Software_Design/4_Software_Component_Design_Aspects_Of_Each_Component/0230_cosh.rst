@@ -1,7 +1,7 @@
 cosh
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/coshd.c
+.. c:autodoc:: mathd/coshd.c
 
 Special cases
 ^^^^^^^^^^^^^

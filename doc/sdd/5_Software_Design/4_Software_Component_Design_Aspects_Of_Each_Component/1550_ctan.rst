@@ -1,7 +1,7 @@
 ctan
 ~~~~
 
-.. c:autodoc:: ../libm/complexd/ctand.c
+.. c:autodoc:: complexd/ctand.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

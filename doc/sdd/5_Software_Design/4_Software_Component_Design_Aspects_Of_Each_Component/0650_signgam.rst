@@ -1,7 +1,7 @@
 signgam
 ~~~~
 
-.. c:autodoc:: ../libm/common/signgam.c
+.. c:autodoc:: common/signgam.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

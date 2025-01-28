@@ -1,7 +1,7 @@
 fmax
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/fmaxd.c
+.. c:autodoc:: mathd/fmaxd.c
 
 Special cases
 ^^^^^^^^^^^^^
