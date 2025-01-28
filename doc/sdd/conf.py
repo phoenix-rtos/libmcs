@@ -45,7 +45,7 @@ extensions = [
 numfig = True
 
 # Configuration for hawkmoth
-hawkmoth_clang = ["-Ilibm/include"]
+hawkmoth_clang = ["-Ilibm/include", "-Isw-quality/dummy_includes"]
 hawkmoth_root = os.path.abspath("../../libm")
 
 # Add any paths that contain templates here, relative to this directory.
