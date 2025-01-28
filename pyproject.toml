@@ -5,6 +5,7 @@ description = "Qualified Mathematical Library for Critical Systems, based on New
 authors = ["GTD GmbH <libmcs@gtd-gmbh.de>"]
 license = "BSD"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
