@@ -45,8 +45,8 @@ extensions = [
 numfig = True
 
 # Configuration for hawkmoth
-hawkmoth_root = "-Ilibm/include"
-hawkmoth_clang = [os.path.abspath("../../libm")]
+hawkmoth_clang = ["-Ilibm/include"]
+hawkmoth_root = os.path.abspath("../../libm")
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["../_templates"]
