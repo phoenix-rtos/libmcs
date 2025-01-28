@@ -46,7 +46,8 @@ core
 !core/
 
 lost+found
-html/
+html_sdd/
+html_sum/
 
 # SW Quality pipeline output
 sw-quality/misra-c/*
