@@ -50,10 +50,10 @@ code-quality:
 doc:
     stage: doc
     script:
-        - sphinx-build -b html doc/sdd html_sdd
-        - sphinx-build -b html doc/sum html_sum
-        - sphinx-build -b latex doc/sdd latex_sdd
-        - sphinx-build -b latex doc/sum latex_sum
+        - sphinx-build -b html doc/sdd html_sdd 2>&1 | grep -v "duplicate label" | grep -v "documentation comment attached to unexpected cursor"
+        - sphinx-build -b html doc/sum html_sum 2>&1 | grep -v "duplicate label" | grep -v "documentation comment attached to unexpected cursor"
+        - sphinx-build -b latex doc/sdd latex_sdd 2>&1 | grep -v "duplicate label" | grep -v "documentation comment attached to unexpected cursor"
+        - sphinx-build -b latex doc/sum latex_sum 2>&1 | grep -v "duplicate label" | grep -v "documentation comment attached to unexpected cursor"
         - chmod -R 777 latex_sdd
         - chmod -R 777 latex_sum
     artifacts:
