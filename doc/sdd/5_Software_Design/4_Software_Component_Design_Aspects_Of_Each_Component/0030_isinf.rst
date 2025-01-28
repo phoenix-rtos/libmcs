@@ -1,7 +1,7 @@
 isinf
 ~~~~~
 
-.. c:autodoc:: ../libm/common/isinf.c
+.. c:autodoc:: common/isinf.c
 
 Special cases
 ^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 lgamma
 ~~~~~~
 
-.. c:autodoc:: ../libm/mathd/lgammad.c
+.. c:autodoc:: mathd/lgammad.c
 
 Special cases
 ^^^^^^^^^^^^^

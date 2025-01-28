@@ -1,7 +1,7 @@
 pow
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/powd.c
+.. c:autodoc:: mathd/powd.c
 
 Special cases
 ^^^^^^^^^^^^^

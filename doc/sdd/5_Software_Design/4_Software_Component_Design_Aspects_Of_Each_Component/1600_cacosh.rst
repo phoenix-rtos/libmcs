@@ -1,7 +1,7 @@
 cacosh
 ~~~~~~
 
-.. c:autodoc:: ../libm/complexd/cacoshd.c
+.. c:autodoc:: complexd/cacoshd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

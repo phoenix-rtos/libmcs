@@ -1,7 +1,7 @@
 isfinite
 ~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isfinite.c
+.. c:autodoc:: common/isfinite.c
 
 Special cases
 ^^^^^^^^^^^^^

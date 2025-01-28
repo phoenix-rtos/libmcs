@@ -1,7 +1,7 @@
 cabs
 ~~~~
 
-.. c:autodoc:: ../libm/complexd/cabsd.c
+.. c:autodoc:: complexd/cabsd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

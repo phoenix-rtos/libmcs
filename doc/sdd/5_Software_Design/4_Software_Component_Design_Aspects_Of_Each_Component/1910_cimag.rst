@@ -1,7 +1,7 @@
 cimag
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/cimagd.c
+.. c:autodoc:: complexd/cimagd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 islessgreater
 ~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/islessgreater.c
+.. c:autodoc:: common/islessgreater.c
 
 Special cases
 ^^^^^^^^^^^^^

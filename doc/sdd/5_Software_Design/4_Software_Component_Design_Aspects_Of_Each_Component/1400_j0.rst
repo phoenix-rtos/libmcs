@@ -1,7 +1,7 @@
 j0
 ~~~
 
-.. c:autodoc:: ../libm/mathd/j0d.c
+.. c:autodoc:: mathd/j0d.c
 
 Special cases
 ^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 ccosh
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/ccoshd.c
+.. c:autodoc:: complexd/ccoshd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

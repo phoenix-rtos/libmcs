@@ -1,7 +1,7 @@
 copysign
 ~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/copysignd.c
+.. c:autodoc:: mathd/copysignd.c
 
 Special cases
 ^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 erfc
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/erfcd.c
+.. c:autodoc:: mathd/erfcd.c
 
 Special cases
 ^^^^^^^^^^^^^

@@ -46,16 +46,19 @@ The following is a depiction of the directory structure:
          complexd/
             internal/
                Internal ``.c`` files only used by procedures in the directory above.
+
             Contains all ``.c`` files for double precision complex procedures.
          complexf/
             internal/
                Internal ``.c`` files only used by procedures in the directory above.
+
             Contains all ``.c`` files for single precision complex procedures.
          complexfe/
             internal/
                .gitkeep
                   Placeholder file that only exists so that git does not remove the otherwise empty
                   directory.
+
             Placeholder directory which shall contain all ``.c`` files for single precision complex
             procedures which have been implemented using double precision.
          complexl/
@@ -63,6 +66,7 @@ The following is a depiction of the directory structure:
                .gitkeep
                   Placeholder file that only exists so that git does not remove the otherwise empty
                   directory.
+
             Placeholder directory which shall contain all ``.c`` files for long double precision
             complex procedures which do not have the same size as double.
          include/
@@ -89,6 +93,7 @@ The following is a depiction of the directory structure:
             .gitkeep
                Placeholder file that only exists so that git does not remove the otherwise empty
                directory.
+
             Placeholder directory which shall contain sub-directories for each architecture that
             needs a hardware specific implementation of a procedure. Those files are only compiled
             if the appropriate changes are made to the Makefile. Example structure if the user
@@ -103,16 +108,19 @@ The following is a depiction of the directory structure:
          mathd/
             internal/
                Internal ``.c`` files only used by procedures in the directory above.
+
             Contains all ``.c`` files for double precision procedures.
          mathf/
             internal/
                Internal ``.c`` files only used by procedures in the directory above.
+
             Contains all ``.c`` files for single precision procedures.
          mathfe/
             internal/
                .gitkeep
                   Placeholder file that only exists so that git does not remove the otherwise empty
                   directory.
+
             Placeholder directory which shall contain all ``.c`` files for single precision
             procedures which have been implemented using double precision.
          mathl/
@@ -120,6 +128,7 @@ The following is a depiction of the directory structure:
                .gitkeep
                   Placeholder file that only exists so that git does not remove the otherwise empty
                   directory.
+
             Placeholder directory which shall contain all ``.c`` files for long double precision
             procedures which do not have the same size as double.
       LICENSES/

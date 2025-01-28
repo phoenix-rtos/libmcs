@@ -1,7 +1,7 @@
 nan
 ~~~
 
-.. c:autodoc:: ../libm/mathd/nand.c
+.. c:autodoc:: mathd/nand.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

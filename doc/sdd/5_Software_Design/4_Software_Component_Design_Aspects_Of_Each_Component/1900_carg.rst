@@ -1,7 +1,7 @@
 carg
 ~~~~
 
-.. c:autodoc:: ../libm/complexd/cargd.c
+.. c:autodoc:: complexd/cargd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

@@ -2,7 +2,7 @@ Operations Environment
 ======================
 
 General
-~~~~~~~~
+~~~~~~~
 
 The software in this project is designed to be included in other software.
 
@@ -15,7 +15,7 @@ The following sections describe additional constraints which have to be consider
 .. _OperationsEnviromentHardwareConfiguration:
 
 Hardware Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 The software described here contains several mathematical procedures which execute floating point operations. For this to be possible the target platform's configuration needs to be modified, in particular the :ref:`FPU <ABBR>`:
 
@@ -27,7 +27,7 @@ As these are platform dependent actions, their procedures cannot reasonably be d
 .. _OperationsEnviromentSoftwareConfiguration:
 
 Software Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 The software configuration is confined to the configuration script and the compile switches. At runtime, there is no option to configure the library itself.
 
@@ -65,7 +65,7 @@ Remember to also add flags that alter the sizes of different types such as ``lon
 .. _OperationsEnviromentUsingHardwareInstructions:
 
 Using Hardware Instructions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To replace LibmCS procedures with custom procedures, such as hardware instruction calling procedures, several steps need to be followed:
 

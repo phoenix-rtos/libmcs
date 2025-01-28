@@ -1,7 +1,7 @@
 jn
 ~~~
 
-.. c:autodoc:: ../libm/mathd/jnd.c
+.. c:autodoc:: mathd/jnd.c
 
 Special cases
 ^^^^^^^^^^^^^

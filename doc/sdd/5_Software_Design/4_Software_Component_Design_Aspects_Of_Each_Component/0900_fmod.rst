@@ -1,7 +1,7 @@
 fmod
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/fmodd.c
+.. c:autodoc:: mathd/fmodd.c
 
 Special cases
 ^^^^^^^^^^^^^

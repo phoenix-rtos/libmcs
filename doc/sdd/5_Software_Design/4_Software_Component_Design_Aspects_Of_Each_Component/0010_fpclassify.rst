@@ -1,7 +1,7 @@
 fpclassify
 ~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/internal/fpclassifyd.c
+.. c:autodoc:: mathd/internal/fpclassifyd.c
 
 Special cases
 ^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 sin
 ~~~
 
-.. c:autodoc:: ../libm/mathd/sind.c
+.. c:autodoc:: mathd/sind.c
 
 Special cases
 ^^^^^^^^^^^^^

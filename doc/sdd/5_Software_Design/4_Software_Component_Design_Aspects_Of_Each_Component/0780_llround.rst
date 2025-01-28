@@ -1,7 +1,7 @@
 llround
 ~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/llroundd.c
+.. c:autodoc:: mathd/llroundd.c
 
 Special cases
 ^^^^^^^^^^^^^

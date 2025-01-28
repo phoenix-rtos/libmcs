@@ -28,7 +28,7 @@
  *
  * Notice that the mathematical function represented by the procedure ``y1`` is
  * not :math:`y_1` (which is the spherical version of the Bessel function) but
- * :math:`Y_1`. See `WolframAlpha
+ * :math:`Y_1`. See `WolframAlpha Y_1(x)
  * <https://www.wolframalpha.com/input/?i=Y_1%28x%29>`_ for what it looks like
  * and `Wikipedia <https://en.wikipedia.org/wiki/Bessel_function>`_ for more
  * information.

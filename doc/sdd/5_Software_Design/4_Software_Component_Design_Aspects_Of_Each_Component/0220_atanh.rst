@@ -1,7 +1,7 @@
 atanh
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/atanhd.c
+.. c:autodoc:: mathd/atanhd.c
 
 Special cases
 ^^^^^^^^^^^^^

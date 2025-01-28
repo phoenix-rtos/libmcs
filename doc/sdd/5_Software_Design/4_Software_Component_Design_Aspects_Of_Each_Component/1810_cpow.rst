@@ -1,7 +1,7 @@
 cpow
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/cpowd.c
+.. c:autodoc:: complexd/cpowd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^
