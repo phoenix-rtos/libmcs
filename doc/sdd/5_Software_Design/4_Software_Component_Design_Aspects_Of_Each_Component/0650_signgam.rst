@@ -1,5 +1,5 @@
 signgam
-~~~~
+~~~~~~~
 
 .. c:autodoc:: common/signgam.c
 

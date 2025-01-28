@@ -2,7 +2,7 @@ Operations Manual
 =================
 
 Set-up and Initialization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In short:
 
@@ -56,12 +56,12 @@ After finishing the build `make` will also create a build info file within the `
 Both of the files ``build_info.yml`` and ``user_make.mk`` provide information to MAXI while creating the final reports, as such they need to stay at the path they were generated at. The same applies to the ``libm.a`` itself.
 
 Getting Started
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 In the last section, the code of the mathematical library is prepared in a static library. To use the library, the library header files have to be included in the user's source code. The useable header files are ``math.h``, and ``complex.h``. The complex procedures however will only exist if they were chosen to during configuration.
 
 Mode Selection and Control
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After writing the project specific code, the last step to build a program which includes the library is to compile the new software. During the compilation two steps are necessary for success:
 
@@ -75,19 +75,19 @@ As an example by using :ref:`GCC <ABBR>` the following line should work::
 The user has to add a number of additional flags, beginning with those listed in :ref:`OperationsEnviromentSoftwareConfiguration`. One might also need a number of platform or hardware specific flags, e.g. the flag ``-qleon2`` when building for the Leon2 platform with Gaisler's :ref:`RTEMS <ABBR>`. Extra flags depend on the :ref:`OS <ABBR>`, the compilation toolchain, and possibly a :ref:`BSP <ABBR>`; please check the corresponding documentation for your situation. It is suggested to write a Makefile for this (or use tools for the creation of Makefiles).
 
 Normal Operations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 All accessible procedures within the library are shown in chapter :ref:`Purpose of the Software`. For detailed information on each procedure, take a look at the related subsection in :ref:`Reference Manual`.
 
 Normal Termination
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 Each procedure in the library is executed when called and computes a result. There is no software interruption foreseen during the computation and the procedure terminates by returning the result. If there is an interrupt, e.g. a context switch caused by the underlying operating system, the correct re-schedule has to be managed by the causing operating system.
 
 .. _OperationsManualErrorConditions:
 
 Error Conditions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 There is no error condition handling in the library. The ``errno`` variable proposed by the :ref:`ISO <ABBR>` C standard is not set by the library. Error states may only be caused by the used hardware and must be handled by the user's software. For example the following errors may occur:
 

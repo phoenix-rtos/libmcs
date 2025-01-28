@@ -1,5 +1,5 @@
 floor
-~~~~
+~~~~~
 
 .. c:autodoc:: mathd/floord.c
 
