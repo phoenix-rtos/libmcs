@@ -63,7 +63,6 @@ Use the following constants as calculation/return values:
 
 .. [#] This implementation of log is a variation of the algorithm proposed by W. J. Cody, JR. and W. Waite in *Software Manual for the Elementary Functions*
 .. [#] Use mantissa part of ``highword`` + ``0x95f64`` (float: integer representation + ``0x95f64 << 3``) to find :math:`k`.
-.. [#] :math:`f` is too large when ``0x6147A`` :math:`<` mantissa part of ``highword`` of :math:`x <` ``0x6B851`` (float: ``0x6147A << 3`` :math:`<` mantissa part of integer representation of :math:`x <` ``0x6B851 << 3``).
 
 Requirements
 ^^^^^^^^^^^^
