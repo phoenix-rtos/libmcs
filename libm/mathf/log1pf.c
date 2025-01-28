@@ -21,6 +21,10 @@ float log1pf(float x)
     float hfsq, f, c, R, u;
     int32_t k, hx, hu, ax;
 
+    c = NAN; /* initial value of c is never actually used */
+    f = NAN; /* initial value of f is never actually used */
+    hu = INT_MAX; /* initial value of hu is never actually used */
+
     GET_FLOAT_WORD(hx, x);
     ax = hx & 0x7fffffff;
 
