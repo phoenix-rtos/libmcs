@@ -3,7 +3,7 @@
 
 /**
  *
- * This family of functions determines the minimum value of :math:`x` and :math:`y`.
+ * This family of functions determines the minimum numerical value of :math:`x` and :math:`y`.
  *
  * Synopsis
  * ========
@@ -18,7 +18,7 @@
  * Description
  * ===========
  *
- * ``fmin`` computes the minimum value of :math:`x` and :math:`y`.
+ * ``fmin`` computes the minimum numerical value of :math:`x` and :math:`y`.
  *
  * Mathematical Function
  * =====================
@@ -30,12 +30,12 @@
  * Returns
  * =======
  *
- * ``fmin`` returns the minimum value of :math:`x` and :math:`y`.
+ * ``fmin`` returns the minimum numerical value of :math:`x` and :math:`y`.
  *
  * Exceptions
  * ==========
  *
- * Does not raise exceptions.
+ * Does raise invalid exception in case one of the parameters is :math:`sNaN`.
  *
  * Output map
  * ==========

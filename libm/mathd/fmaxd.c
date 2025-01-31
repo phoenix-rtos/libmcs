@@ -3,7 +3,7 @@
 
 /**
  *
- * This family of functions determines the maximum value of :math:`x` and :math:`y`.
+ * This family of functions determines the maximum numerical value of :math:`x` and :math:`y`.
  *
  * Synopsis
  * ========
@@ -18,7 +18,7 @@
  * Description
  * ===========
  *
- * ``fmax`` computes the maximum value of :math:`x` and :math:`y`.
+ * ``fmax`` computes the maximum numerical value of :math:`x` and :math:`y`.
  *
  * Mathematical Function
  * =====================
@@ -30,12 +30,12 @@
  * Returns
  * =======
  *
- * ``fmax`` returns the maximum value of :math:`x` and :math:`y`.
+ * ``fmax`` returns the maximum numerical value of :math:`x` and :math:`y`.
  *
  * Exceptions
  * ==========
  *
- * Does not raise exceptions.
+ * Does raise invalid exception in case one of the parameters is :math:`sNaN`.
  *
  * Output map
  * ==========
