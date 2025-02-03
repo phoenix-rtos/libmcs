@@ -1,7 +1,7 @@
 acosh
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/acoshd.c
+.. c:autodoc:: mathd/acoshd.c
 
 Special cases
 ^^^^^^^^^^^^^

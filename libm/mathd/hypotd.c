@@ -3,7 +3,7 @@
 
 /**
  *
- * This family of functions implements the hypothenuse of a rightangled triangle.
+ * This family of functions implements the hypotenuse of a right-angled triangle.
  *
  * Synopsis
  * ========
@@ -18,7 +18,7 @@
  * Description
  * ===========
  *
- * ``hypot`` computes the length of the hypothenuse of a rightangled triangle
+ * ``hypot`` computes the length of the hypotenuse of a right-angled triangle
  * where the legs have the lengths :math:`x` and :math:`y`.
  *
  * Mathematical Function
@@ -31,7 +31,7 @@
  * Returns
  * =======
  *
- * ``hypot`` returns the length of the hypothenuse of a rightangled triangle.
+ * ``hypot`` returns the length of the hypotenuse of a right-angled triangle.
  *
  * Exceptions
  * ==========
@@ -58,7 +58,7 @@
  * | :math:`NaN`              |                          | :math:`qNaN`             |                          | :math:`qNaN`             |
  * +--------------------------+--------------------------+--------------------------+--------------------------+--------------------------+
  *
- *///
+ */
 
 #include <math.h>
 #include "../common/tools.h"

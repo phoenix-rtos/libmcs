@@ -1,7 +1,7 @@
 casin
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/casind.c
+.. c:autodoc:: complexd/casind.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

@@ -36,7 +36,7 @@
  * and in the interval :math:`[-\frac{\pi}{2}, \frac{\pi}{2}]` radians along
  * the real axis.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>
@@ -62,10 +62,6 @@ double complex catan(double complex z)
 
     x2 = x * x;
     a = 1.0 - x2 - (y * y);
-
-    if (a == 0.0) {
-        goto ovrf;
-    }
 
     t = 0.5 * atan2(2.0 * x, a);
     tmp = __redupi(t);

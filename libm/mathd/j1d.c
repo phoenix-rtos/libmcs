@@ -28,7 +28,7 @@
  *
  * Notice that the mathematical function represented by the procedure ``j1`` is
  * not :math:`j_1` (which is the spherical version of the Bessel function) but
- * :math:`J_1`. See `WolframAlpha
+ * :math:`J_1`. See `WolframAlpha J1(x)
  * <https://www.wolframalpha.com/input/?i=J1%28x%29>`_ for what it looks like
  * and `Wikipedia <https://en.wikipedia.org/wiki/Bessel_function>`_ for more
  * information.
@@ -54,7 +54,7 @@
  * | **j1(x)**           | :math:`+0`   | :math:`J_{1}(x)`                                          | :math:`+0`   | :math:`qNaN` |
  * +---------------------+--------------+--------------+--------------+--------------+--------------+--------------+--------------+
  *
- *///
+ */
 
 #include <math.h>
 #include "internal/besseld.h"

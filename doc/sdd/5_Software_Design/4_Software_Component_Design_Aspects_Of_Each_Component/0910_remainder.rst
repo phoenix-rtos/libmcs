@@ -1,7 +1,7 @@
 remainder
 ~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/remainderd.c
+.. c:autodoc:: mathd/remainderd.c
 
 Special cases
 ^^^^^^^^^^^^^

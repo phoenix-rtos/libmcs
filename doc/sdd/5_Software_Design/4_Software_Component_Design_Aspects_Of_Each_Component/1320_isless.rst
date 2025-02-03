@@ -1,7 +1,7 @@
 isless
 ~~~~~~
 
-.. c:autodoc:: ../libm/common/isless.c
+.. c:autodoc:: common/isless.c
 
 Special cases
 ^^^^^^^^^^^^^

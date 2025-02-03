@@ -1,7 +1,7 @@
 acos
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/acosd.c
+.. c:autodoc:: mathd/acosd.c
 
 Special cases
 ^^^^^^^^^^^^^

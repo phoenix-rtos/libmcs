@@ -32,7 +32,7 @@
  *
  * ``cimag`` returns the imaginary part of :math:`z` as a real.
  *
- *///
+ */
 
 #include <complex.h>
 #include "../common/tools.h"
@@ -41,7 +41,8 @@
 
 double cimag(double complex z)
 {
-    double_complex w = { .z = z };
+    double_complex w;
+    w.z = z;
 
     return (IMAG_PART(w));
 }

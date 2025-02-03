@@ -1,7 +1,7 @@
 atan
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/atand.c
+.. c:autodoc:: mathd/atand.c
 
 Special cases
 ^^^^^^^^^^^^^
@@ -70,7 +70,7 @@ Use the following constants as calculation/return values:
       R(x)    = & A0 \cdot x^2 - A1 \cdot x^4 + A2 \cdot x^6 - A3 \cdot x^8 + A4 \cdot x^{10} - A5 \cdot x^{12} \\
                 &+ A6 \cdot x^{14} - A7 \cdot x^{16} + A8 \cdot x^{18} - A9 \cdot x^{20} + A10 \cdot x^{22}
 
-#. If :math:`x < \frac{11}{16}`[#]_, use the identity :math:`tan^{-1}(x) = tan^{-1}(\frac{1}{2}) + tan^{-1}(\frac{x-\frac{1}{2}}{1+\frac{x}{2}})` to modify the approximation of ``atan`` as in formula :math:numref:`formula_atan_2` to:
+#. If :math:`x < \frac{11}{16}` [#]_, use the identity :math:`tan^{-1}(x) = tan^{-1}(\frac{1}{2}) + tan^{-1}(\frac{x-\frac{1}{2}}{1+\frac{x}{2}})` to modify the approximation of ``atan`` as in formula :math:numref:`formula_atan_2` to:
 
    .. math::
       :label: formula_atan_3
@@ -79,7 +79,7 @@ Use the following constants as calculation/return values:
       atan(x) &= tan^{-1}\Big(\frac{1}{2}\Big) + (z - z \cdot R(z)) \\
               &= atan0.5_{hi} - ((z \cdot R(z) - atan0.5_{lo}) - z)
 
-#. If :math:`x < \frac{19}{16}`[#]_, use the identity :math:`tan^{-1}(x) = tan^{-1}(1) + tan^{-1}(\frac{x-1}{1+x}) = \frac{\pi}{4} + tan^{-1}(\frac{x-1}{1+x})` to modify the approximation of ``atan`` to:
+#. If :math:`x < \frac{19}{16}` [#]_, use the identity :math:`tan^{-1}(x) = tan^{-1}(1) + tan^{-1}(\frac{x-1}{1+x}) = \frac{\pi}{4} + tan^{-1}(\frac{x-1}{1+x})` to modify the approximation of ``atan`` to:
 
    .. math::
       :label: formula_atan_4
@@ -88,7 +88,7 @@ Use the following constants as calculation/return values:
       atan(x) &= \frac{\pi}{4} + (z - z \cdot R(z)) \\
               &= atan1_{hi} - ((z \cdot R(z) - atan1_{lo}) - z)
 
-#. If :math:`x < \frac{39}{16}`[#]_, use the identity :math:`tan^{-1}(x) = tan^{-1}(\frac{3}{2}) + tan^{-1}(\frac{x-\frac{3}{2}}{1+\frac{3}{2}x})` to modify the approximation of ``atan`` to:
+#. If :math:`x < \frac{39}{16}` [#]_, use the identity :math:`tan^{-1}(x) = tan^{-1}(\frac{3}{2}) + tan^{-1}(\frac{x-\frac{3}{2}}{1+\frac{3}{2}x})` to modify the approximation of ``atan`` to:
 
    .. math::
       :label: formula_atan_5

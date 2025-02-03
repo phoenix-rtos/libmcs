@@ -1,7 +1,7 @@
 cbrt
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/cbrtd.c
+.. c:autodoc:: mathd/cbrtd.c
 
 Special cases
 ^^^^^^^^^^^^^

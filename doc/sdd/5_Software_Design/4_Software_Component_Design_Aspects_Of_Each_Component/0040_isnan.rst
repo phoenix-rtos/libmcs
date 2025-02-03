@@ -1,7 +1,7 @@
 isnan
 ~~~~~
 
-.. c:autodoc:: ../libm/common/isnan.c
+.. c:autodoc:: common/isnan.c
 
 Special cases
 ^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 conj
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/conjd.c
+.. c:autodoc:: complexd/conjd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

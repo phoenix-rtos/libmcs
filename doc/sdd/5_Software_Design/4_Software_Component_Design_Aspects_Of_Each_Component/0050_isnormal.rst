@@ -1,7 +1,7 @@
 isnormal
 ~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isnormal.c
+.. c:autodoc:: common/isnormal.c
 
 Special cases
 ^^^^^^^^^^^^^

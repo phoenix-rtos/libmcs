@@ -32,7 +32,7 @@
  *
  * ``conj`` returns the complex conjugate of :math:`z`.
  *
- *///
+ */
 
 /*
 FUNCTION

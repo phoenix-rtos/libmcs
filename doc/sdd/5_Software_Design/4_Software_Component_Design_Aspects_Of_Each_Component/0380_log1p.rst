@@ -1,7 +1,7 @@
 log1p
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/log1pd.c
+.. c:autodoc:: mathd/log1pd.c
 
 Special cases
 ^^^^^^^^^^^^^

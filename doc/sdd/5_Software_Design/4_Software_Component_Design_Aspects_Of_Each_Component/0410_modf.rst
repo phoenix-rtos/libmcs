@@ -1,7 +1,7 @@
 modf
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/modfd.c
+.. c:autodoc:: mathd/modfd.c
 
 Special cases
 ^^^^^^^^^^^^^

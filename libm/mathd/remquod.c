@@ -5,7 +5,7 @@
  *
  * This family of functions implements the floating-point remainder :math:`x\
  * REM\ y` and puts the quotient (or rather its sign and 3 least significant
- * bits) into the outpointer.
+ * bits) into the out pointer.
  *
  * Synopsis
  * ========
@@ -94,7 +94,7 @@
  * | :math:`NaN`              | :math:`0`                                                                                                                                                       |                          |
  * +--------------------------+--------------------------+--------------------------+--------------------------+--------------------------+--------------------------+--------------------------+--------------------------+
  *
- *///
+ */
 
 #include <assert.h>
 #include <math.h>

@@ -1,7 +1,7 @@
 asin
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/asind.c
+.. c:autodoc:: mathd/asind.c
 
 Special cases
 ^^^^^^^^^^^^^

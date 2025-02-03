@@ -230,7 +230,9 @@ BIN_DIR = $(BUILD_ROOT)/bin
 
 OUT = $(BIN_DIR)/libm.a
 
-CFLAGS = -c -Wall -std=c99 -pedantic -Wextra -frounding-math -fsignaling-nans -g -O2 -fno-builtin $(EXTRA_CFLAGS)
+CFLAGS = -c -Wall -std=c99 -pedantic -Wextra
+CFLAGS += -Wstrict-prototypes
+CFLAGS += -frounding-math -fsignaling-nans -g3 -O2 -fno-builtin $(EXTRA_CFLAGS)
 
 ifndef COVERAGE
     COVERAGE=0
@@ -238,6 +240,10 @@ endif
 
 ifeq ($(COVERAGE),1)
     CFLAGS +=-O0 -fprofile-arcs -ftest-coverage
+    GCCVERSIONGTEQ14 := $(shell expr `$(CC) -dumpversion | cut -f1 -d.` \>= 14)
+    ifeq "$(GCCVERSIONGTEQ14)" "1"
+        CFLAGS += -fcondition-coverage
+    endif
 endif
 
 OBJ = $(addprefix $(OBJ_ROOT)/, $(SRC:.c=.o))

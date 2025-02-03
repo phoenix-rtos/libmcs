@@ -53,7 +53,7 @@
  * | **expm1(x)**        | :math:`-1`    | :math:`e^x-1` | :math:`+0`                    | :math:`e^x-1` | :math:`+Inf`  | :math:`qNaN`  |
  * +---------------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+
  *
- *///
+ */
 
 /* expm1(x)
  * Returns exp(x)-1, the exponential of x minus 1.
@@ -77,7 +77,7 @@
  *        R1(r**2) = 6/r *((exp(r)+1)/(exp(r)-1) - 2/r)
  *             = 6/r * ( 1 + 2.0*(1/(exp(r)-1) - 1/r))
  *             = 1 - r^2/60 + r^4/2520 - r^6/100800 + ...
- *      We use a special Reme algorithm on [0,0.347] to generate
+ *      We use a special Remez algorithm on [0,0.347] to generate
  *     a polynomial of degree 5 in r*r to approximate R1. The
  *    maximum error of this polynomial approximation is bounded
  *    by 2**-61. In other words,
@@ -177,6 +177,8 @@ double expm1(double x)
     double y, hi, lo, c, t, e, hxs, hfx, r1;
     int32_t k, xsb;
     uint32_t hx;
+
+    c = NAN; /* initial value of c is never actually used */
 
     GET_HIGH_WORD(hx, x);
     xsb = hx & 0x80000000U;      /* sign bit of x */

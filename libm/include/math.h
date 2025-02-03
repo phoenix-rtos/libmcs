@@ -329,21 +329,56 @@ extern int                  __signbitd(double);
                             : __signbitd(__x))
 
 /* Comparison macros */
-#define isgreater(x,y)      (__extension__                                              \
-                            ({__typeof__(x) __x = (x); __typeof__(y) __y = (y);         \
-                            !isunordered(__x,__y) && (__x > __y);}))
-#define isgreaterequal(x,y) (__extension__                                              \
-                            ({__typeof__(x) __x = (x); __typeof__(y) __y = (y);         \
-                            !isunordered(__x,__y) && (__x >= __y);}))
-#define isless(x,y)         (__extension__                                              \
-                            ({__typeof__(x) __x = (x); __typeof__(y) __y = (y);         \
-                            !isunordered(__x,__y) && (__x < __y);}))
-#define islessequal(x,y)    (__extension__                                              \
-                            ({__typeof__(x) __x = (x); __typeof__(y) __y = (y);         \
-                            !isunordered(__x,__y) && (__x <= __y);}))
-#define islessgreater(x,y)  (__extension__                                              \
-                            ({__typeof__(x) __x = (x); __typeof__(y) __y = (y);         \
-                            !isunordered(__x,__y) && (__x < __y || __x > __y);}))
+#define isgreater(x,y)      (__extension__ ({                                           \
+                              __typeof__(x) __x = (x); __typeof__(y) __y = (y);         \
+                                int __result;                                           \
+                                if (isunordered(__x, __y)) {                            \
+                                    __result = 0;                                       \
+                                } else {                                                \
+                                    __result = (__x > __y);                             \
+                                }                                                       \
+                                __result;                                               \
+                            }))
+#define isgreaterequal(x,y) (__extension__ ({                                           \
+                              __typeof__(x) __x = (x); __typeof__(y) __y = (y);         \
+                                int __result;                                           \
+                                if (isunordered(__x, __y)) {                            \
+                                    __result = 0;                                       \
+                                } else {                                                \
+                                    __result = (__x >= __y);                            \
+                                }                                                       \
+                                __result;                                               \
+                            }))
+#define isless(x,y)         (__extension__ ({                                           \
+                              __typeof__(x) __x = (x); __typeof__(y) __y = (y);         \
+                                int __result;                                           \
+                                if (isunordered(__x, __y)) {                            \
+                                    __result = 0;                                       \
+                                } else {                                                \
+                                    __result = (__x < __y);                             \
+                                }                                                       \
+                                __result;                                               \
+                            }))
+#define islessequal(x,y)    (__extension__ ({                                           \
+                              __typeof__(x) __x = (x); __typeof__(y) __y = (y);         \
+                                int __result;                                           \
+                                if (isunordered(__x, __y)) {                            \
+                                    __result = 0;                                       \
+                                } else {                                                \
+                                    __result = (__x <= __y);                            \
+                                }                                                       \
+                                __result;                                               \
+                            }))
+#define islessgreater(x,y)  (__extension__ ({                                           \
+                              __typeof__(x) __x = (x); __typeof__(y) __y = (y);         \
+                                int __result;                                           \
+                                if (isunordered(__x, __y)) {                            \
+                                    __result = 0;                                       \
+                                } else {                                                \
+                                    __result = (__x < __y) || (__x > __y);              \
+                                }                                                       \
+                                __result;                                               \
+                            }))
 #define isunordered(a,b)    (__extension__                                              \
                             ({__typeof__(a) __a = (a); __typeof__(b) __b = (b);         \
                             fpclassify(__a) == FP_NAN || fpclassify(__b) == FP_NAN;}))

@@ -1,7 +1,7 @@
 isgreaterequal
 ~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/isgreaterequal.c
+.. c:autodoc:: common/isgreaterequal.c
 
 Special cases
 ^^^^^^^^^^^^^

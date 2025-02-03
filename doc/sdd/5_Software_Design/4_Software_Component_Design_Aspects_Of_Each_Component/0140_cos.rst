@@ -1,7 +1,7 @@
 cos
 ~~~
 
-.. c:autodoc:: ../libm/mathd/cosd.c
+.. c:autodoc:: mathd/cosd.c
 
 Special cases
 ^^^^^^^^^^^^^

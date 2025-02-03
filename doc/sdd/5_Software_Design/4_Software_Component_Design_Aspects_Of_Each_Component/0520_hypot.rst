@@ -1,7 +1,7 @@
 hypot
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/hypotd.c
+.. c:autodoc:: mathd/hypotd.c
 
 Special cases
 ^^^^^^^^^^^^^

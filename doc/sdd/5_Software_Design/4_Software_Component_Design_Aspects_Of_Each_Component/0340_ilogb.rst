@@ -1,7 +1,7 @@
 ilogb
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/ilogbd.c
+.. c:autodoc:: mathd/ilogbd.c
 
 Special cases
 ^^^^^^^^^^^^^

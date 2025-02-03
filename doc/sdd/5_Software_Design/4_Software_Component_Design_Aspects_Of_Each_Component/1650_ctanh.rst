@@ -1,7 +1,7 @@
 ctanh
 ~~~~~
 
-.. c:autodoc:: ../libm/complexd/ctanhd.c
+.. c:autodoc:: complexd/ctanhd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

@@ -1,7 +1,7 @@
 casinh
 ~~~~~~
 
-.. c:autodoc:: ../libm/complexd/casinhd.c
+.. c:autodoc:: complexd/casinhd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

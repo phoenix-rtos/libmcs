@@ -6,7 +6,8 @@
 
 float crealf(float complex z)
 {
-    float_complex w = { .z = z };
+    float_complex w;
+    w.z = z;
 
     return (REAL_PART(w));
 }

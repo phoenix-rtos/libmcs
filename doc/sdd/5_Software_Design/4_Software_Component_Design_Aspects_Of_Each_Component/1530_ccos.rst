@@ -1,7 +1,7 @@
 ccos
 ~~~~
 
-.. c:autodoc:: ../libm/complexd/ccosd.c
+.. c:autodoc:: complexd/ccosd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

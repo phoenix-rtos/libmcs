@@ -1,7 +1,7 @@
 trunc
 ~~~~~
 
-.. c:autodoc:: ../libm/mathd/truncd.c
+.. c:autodoc:: mathd/truncd.c
 
 Special cases
 ^^^^^^^^^^^^^

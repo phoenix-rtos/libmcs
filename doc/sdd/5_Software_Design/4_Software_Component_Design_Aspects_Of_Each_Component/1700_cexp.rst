@@ -1,7 +1,7 @@
 cexp
 ~~~~
 
-.. c:autodoc:: ../libm/complexd/cexpd.c
+.. c:autodoc:: complexd/cexpd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

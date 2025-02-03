@@ -3,7 +3,7 @@
 Internal Trigonometric Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/mathd/internal/trigd.c
+.. c:autodoc:: mathd/internal/trigd.c
 
 Special cases
 ^^^^^^^^^^^^^

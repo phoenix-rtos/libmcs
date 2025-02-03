@@ -1,7 +1,7 @@
 remquo
 ~~~~~~
 
-.. c:autodoc:: ../libm/mathd/remquod.c
+.. c:autodoc:: mathd/remquod.c
 
 Special cases
 ^^^^^^^^^^^^^

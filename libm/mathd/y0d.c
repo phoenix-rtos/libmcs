@@ -28,7 +28,7 @@
  *
  * Notice that the mathematical function represented by the procedure ``y0`` is
  * not :math:`y_0` (which is the spherical version of the Bessel function) but
- * :math:`Y_0`. See `WolframAlpha
+ * :math:`Y_0`. See `WolframAlpha Y_0(x)
  * <https://www.wolframalpha.com/input/?i=Y_0%28x%29>`_ for what it looks like
  * and `Wikipedia <https://en.wikipedia.org/wiki/Bessel_function>`_ for more
  * information.
@@ -56,7 +56,7 @@
  * | **y0(x)**           | :math:`qNaN`                    | :math:`-Inf`                | :math:`Y_{0}(x)` | :math:`+0`   | :math:`qNaN` |
  * +---------------------+--------------+------------------+--------------+--------------+------------------+--------------+--------------+
  *
- *///
+ */
 
 #include <math.h>
 #include "internal/besseld.h"

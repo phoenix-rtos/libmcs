@@ -1,7 +1,7 @@
 catanh
 ~~~~~~
 
-.. c:autodoc:: ../libm/complexd/catanhd.c
+.. c:autodoc:: complexd/catanhd.c
 
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^

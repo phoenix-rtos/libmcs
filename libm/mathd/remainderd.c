@@ -20,7 +20,7 @@
  *
  * ``remainder`` computes the floating-point remainder :math:`r = x\ REM\ y = x
  * - n \cdot y` of their arguments :math:`x` and :math:`y`, where :math:`n` is
- *   the integral value nearest to :math:`\frac{x}{y}`.
+ * the integral value nearest to :math:`\frac{x}{y}`.
  *
  * The ``fmod`` and ``remainder`` procedures are rather similar, but not the
  * same, see examples:
@@ -88,7 +88,7 @@
  * | :math:`NaN`              | :math:`qNaN`                                                                                                                                                    |                          |
  * +--------------------------+--------------------------+--------------------------+--------------------------+--------------------------+--------------------------+--------------------------+--------------------------+
  *
- *///
+ */
 
 #include <math.h>
 #include "../common/tools.h"

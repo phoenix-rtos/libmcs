@@ -10,12 +10,12 @@ The user's experience will vary (possibly heavily) when using different hardware
 It is assumed, that the library was built as shown in the :ref:`Operations Manual`.
 
 Example 1: LEON2 with Meiko FPU
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first example is done for a LEON2 platform with a Meiko :ref:`FPU <ABBR>`. This :ref:`FPU <ABBR>` is perfectly able to work with subnormal numbers and does not throw any traps when executed with those.
 
 Getting Started
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 The first important step is to include the library part we want to use:
 
@@ -103,7 +103,7 @@ Using all those snipets we can create a small test program. Sadly :ref:`RTEMS <A
    }
 
 Using the Software on a Typical Task
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Let's build the software using a shell command::
 
@@ -126,12 +126,12 @@ After running this program on the LEON2 platform it produces the following outpu
    signbit(0.500000)             = 0
 
 Example 2: LEON4 with GRFPU
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The second example is done for a LEON4 platform with a GRFPU. This :ref:`FPU <ABBR>` has to be configured to prevent traps on subnormal numbers as described in :ref:`OperationsManualErrorConditions`.
 
 Getting Started
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 The first important step is to include the library:
 
@@ -242,7 +242,7 @@ Using all those snipets we can create a small test program. Sadly :ref:`RTEMS <A
    }
 
 Using the Software on a Typical Task
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Let's build the software using a shell command::
 

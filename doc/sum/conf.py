@@ -45,8 +45,8 @@ extensions = [
 numfig = True
 
 # Configuration for hawkmoth
-cautodoc_clang = "-Ilibm/include"
-cautodoc_root = os.path.abspath("../../libm")
+hawkmoth_clang = ["-Ilibm/include", "-Isw-quality/dummy_includes"]
+hawkmoth_root = os.path.abspath("../../libm")
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["../_templates"]
@@ -59,7 +59,6 @@ templates_path = ["../_templates"]
 html_theme = "sphinx_rtd_theme"
 
 html_theme_options = {
-    "display_version": True,
     "collapse_navigation": False,
     "logo_only": True,
 }
@@ -74,3 +73,12 @@ html_favicon = "../logo/libmcs-favicon.ico"
 html_static_path = ["../_static"]
 
 html_css_files = ["css/custom.css"]
+
+html_context = {
+    "display_gitlab": True,  # Integrate Gitlab
+    "gitlab_host": "gitlab.com",
+    "gitlab_user": "gtd-gmbh",  # Organization or User
+    "gitlab_repo": "libmcs",  # Repo name
+    "gitlab_version": "development",  # Version
+    "conf_py_path": "/doc/sum/",  # Path in the checkout to the docs root
+}

@@ -22,7 +22,7 @@ extern int fegetexceptflag(fexcept_t *, int);
 extern int fesetexceptflag(const fexcept_t *, int);
 
 /* Rounding Direction */
-extern int fegetround();
+extern int fegetround(void);
 extern int fesetround(int);
 
 /* Entire Environment */

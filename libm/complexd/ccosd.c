@@ -31,7 +31,7 @@
  *
  * ``ccos`` returns the complex cosine of the input value.
  *
- *///
+ */
 
 #include <complex.h>
 #include <math.h>

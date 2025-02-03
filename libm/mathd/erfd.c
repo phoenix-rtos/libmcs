@@ -49,7 +49,7 @@
  * | **erf(x)**          | :math:`-Inf` | :math:`\frac{2}{\sqrt{\pi}}\int_{0}^{x}e^{-t^2}dt`  | :math:`x`                   | :math:`\frac{2}{\sqrt{\pi}}\int_{0}^{x}e^{-t^2}dt`  | :math:`+Inf` | :math:`qNaN` |
  * +---------------------+--------------+-----------------------------------------------------+--------------+--------------+-----------------------------------------------------+--------------+--------------+
  *
- *///
+ */
 
 /* double erf(double x)
  * double erfc(double x)
@@ -90,7 +90,7 @@
  *             erfc(x) = (1-c)  - P1(s)/Q1(s) if x > 0
  *              1+(c+P1(s)/Q1(s))    if x < 0
  *             |P1/Q1 - (erf(|x|)-c)| <= 2**-59.06
- *       Remark: here we use the taylor series expansion at x=1.
+ *       Remark: here we use the Taylor series expansion at x=1.
  *        erf(1+s) = erf(1) + s*Poly(s)
  *             = 0.845.. + P1(s)/Q1(s)
  *       That is, we use rational approximation to approximate

@@ -45,7 +45,11 @@ TAGS.sub
 core
 !core/
 
-lint-libm/result/*
-lint-libm/lint-nt.exe
 lost+found
-html/
+html_sdd/
+html_sum/
+
+# SW Quality pipeline output
+sw-quality/misra-c/*
+report.json
+*.log

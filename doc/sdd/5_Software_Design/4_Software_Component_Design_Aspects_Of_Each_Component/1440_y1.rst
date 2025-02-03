@@ -1,7 +1,7 @@
 y1
 ~~~
 
-.. c:autodoc:: ../libm/mathd/y1d.c
+.. c:autodoc:: mathd/y1d.c
 
 Special cases
 ^^^^^^^^^^^^^

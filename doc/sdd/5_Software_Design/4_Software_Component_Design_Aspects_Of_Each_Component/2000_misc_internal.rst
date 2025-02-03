@@ -3,7 +3,7 @@
 Exception Raising And Floating-Point/Integer Conversion Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/tools.h
+.. c:autodoc:: common/tools.h
 
 Special cases
 ^^^^^^^^^^^^^

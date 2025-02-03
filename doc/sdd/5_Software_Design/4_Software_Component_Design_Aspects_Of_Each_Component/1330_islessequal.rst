@@ -1,7 +1,7 @@
 islessequal
 ~~~~~~~~~~~
 
-.. c:autodoc:: ../libm/common/islessequal.c
+.. c:autodoc:: common/islessequal.c
 
 Special cases
 ^^^^^^^^^^^^^

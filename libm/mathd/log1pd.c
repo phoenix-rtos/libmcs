@@ -50,7 +50,7 @@
  * | **log1p(x)**        | :math:`qNaN`  | :math:`qNaN`  | :math:`-Inf`  | :math:`ln(1 + x)` | :math:`x`                     | :math:`ln(1 + x)` | :math:`+Inf`  | :math:`qNaN`  |
  * +---------------------+---------------+---------------+---------------+-------------------+---------------+---------------+-------------------+---------------+---------------+
  *
- *///
+ */
 
 /* double log1p(double x)
  *
@@ -70,7 +70,7 @@
  *    Let s = f/(2+f) ; based on log(1+f) = log(1+s) - log(1-s)
  *         = 2s + 2/3 s**3 + 2/5 s**5 + .....,
  *              = 2s + s*R
- *      We use a special Reme algorithm on [0,0.1716] to generate
+ *      We use a special Remez algorithm on [0,0.1716] to generate
  *     a polynomial of degree 14 to approximate R The maximum error
  *    of this polynomial approximation is bounded by 2**-58.45. In
  *    other words,
@@ -137,6 +137,10 @@ double log1p(double x)
 
     double hfsq, f, c, R, u;
     int32_t k, hx, hu, ax;
+
+    c = NAN; /* initial value of c is never actually used */
+    f = NAN; /* initial value of f is never actually used */
+    hu = INT_MAX; /* initial value of hu is never actually used */
 
     GET_HIGH_WORD(hx, x);
     ax = hx & 0x7fffffff;

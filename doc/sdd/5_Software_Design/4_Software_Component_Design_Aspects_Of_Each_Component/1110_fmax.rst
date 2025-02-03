@@ -1,7 +1,7 @@
 fmax
 ~~~~
 
-.. c:autodoc:: ../libm/mathd/fmaxd.c
+.. c:autodoc:: mathd/fmaxd.c
 
 Special cases
 ^^^^^^^^^^^^^
@@ -25,7 +25,7 @@ Special cases
 Mathematical Approach
 ^^^^^^^^^^^^^^^^^^^^^
 
-The approach is to first check for :math:`NaN`s and then compare the inputs to return the maximum:
+The approach is to first check the arguments for any :math:`NaN` values and then compare the inputs to return the maximum:
 
 #. Return :math:`NaN` if both input values are :math:`NaN`.
 #. Return the remaining value if one of the input values is :math:`NaN`.
