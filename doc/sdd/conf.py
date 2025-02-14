@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information ----------------------------------------------
 
 project = "LibmCS - SDD"
-copyright = "2021, GTD GmbH"
+copyright = "2025, GTD GmbH"
 author = "GTD GmbH"
 
 
