@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GTDGmbH */
-/* Copyright 2020-2021 by GTD GmbH. */
+/* Copyright 2020-2025 by GTD GmbH. */
 
 #ifndef LIBMCS_TRIGF_H
 #define LIBMCS_TRIGF_H
