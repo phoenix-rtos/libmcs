@@ -33,6 +33,7 @@ float expf(float x)    /* default IEEE float exp */
     float y, c, t;
     float hi = 0.0;
     float lo = 0.0;
+    float twopk = 0.0;
     int32_t k = 0;
     int32_t xsb, sx;
     uint32_t hx;
@@ -85,7 +86,12 @@ float expf(float x)    /* default IEEE float exp */
     /* x is now in primary range */
     t  = x * x;
     c  = x - t * (P1 + t * P2);
-
+    
+    if(k >= -125) {
+        SET_FLOAT_WORD(twopk, 0x3f800000U + (k << 23));
+    } else {
+        SET_FLOAT_WORD(twopk, 0x3f800000U + ((k + 100) << 23));
+    }
     if (k == 0) {
         return one - ((x * c) / (c - 2.0f) - x);
     } else {
@@ -93,15 +99,13 @@ float expf(float x)    /* default IEEE float exp */
     }
 
     if (k >= -125) {
-        uint32_t hy;
-        GET_FLOAT_WORD(hy, y);
-        SET_FLOAT_WORD(y, hy + (((uint32_t)k) << 23)); /* add k to y's exponent */
-        return y;
+        if(k == 128) {
+            return y * 2.0f * 0x1p127f;
+        } else {
+            return y * twopk;
+        }
     } else {
-        uint32_t hy;
-        GET_FLOAT_WORD(hy, y);
-        SET_FLOAT_WORD(y, hy + (((uint32_t)k + 100U) << 23)); /* add k to y's exponent */
-        return y * twom100;
+        return y * twopk *twom100;
     }
 }
 
