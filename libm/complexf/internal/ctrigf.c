@@ -30,9 +30,9 @@ void __ccoshsinhf(float x, float *c, float *s)
 /* Program to subtract nearest integer multiple of PI */
 
 /* extended precision value of PI: */
-static const float DP1 =  3.140625;
-static const float DP2 =  9.67502593994140625E-4;
-static const float DP3 =  1.509957990978376432E-7;
+static const float DP1 =  3.140625f;
+static const float DP2 =  9.67502593994140625E-4f;
+static const float DP3 =  1.509957990978376432E-7f;
 
 float __redupif(float x)
 {

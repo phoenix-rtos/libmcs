@@ -30,8 +30,8 @@ float expf(float x)    /* default IEEE float exp */
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float y, c, t;
-    float hi = 0.0;
-    float lo = 0.0;
+    float hi = 0.0f;
+    float lo = 0.0f;
     int32_t k = 0;
     int32_t xsb, sx;
     uint32_t hx;

@@ -42,7 +42,7 @@ float remquof(float x, float y, int *quo)
     }
 
     if (hy <= 0x7dffffff) {
-        x = fmodf(x, 8 * y);    /* now x < 8y */
+        x = fmodf(x, 8.0f * y);    /* now x < 8y */
     }
 
     if ((hx - hy) == 0) {
@@ -54,12 +54,12 @@ float remquof(float x, float y, int *quo)
     y  = fabsf(y);
     _quo = 0;
 
-    if (x >= 4 * y) {
-        x -= 4 * y;
+    if (x >= 4.0f * y) {
+        x -= 4.0f * y;
         _quo += 4;
     }
-    if (x >= 2 * y) {
-        x -= 2 * y;
+    if (x >= 2.0f * y) {
+        x -= 2.0f * y;
         _quo += 2;
     }
 
