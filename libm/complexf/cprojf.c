@@ -11,7 +11,7 @@ float complex cprojf(float complex z)
 
     if (isinf(REAL_PART(w)) || isinf(IMAG_PART(w))) {
         REAL_PART(w) = INFINITY;
-        IMAG_PART(w) = copysignf(0.0, cimagf(z));
+        IMAG_PART(w) = copysignf(0.0f, cimagf(z));
     }
 
     return (w.z);

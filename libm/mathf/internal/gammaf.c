@@ -139,7 +139,7 @@ static float __sin_pif(float x)
 
 float __lgammaf(float x, int *signgamp)
 {
-    float t, y, z, nadj = 0.0f, p, p1, p2, p3, q, r, w;
+    float t, y, z, nadj = zero, p, p1, p2, p3, q, r, w;
     int32_t i, hx, ix;
 
     GET_FLOAT_WORD(hx, x);
@@ -190,7 +190,7 @@ float __lgammaf(float x, int *signgamp)
 
     /* purge off 1 and 2 */
     if (ix == 0x3f800000 || ix == 0x40000000) {
-        r = 0;
+        r = zero;
     }
     /* for x < 2.0 */
     else if (ix < 0x40000000) {
