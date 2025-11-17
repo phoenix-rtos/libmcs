@@ -103,8 +103,10 @@ double sqrt(double x)
         }
 
         m -= i - 1;
-        ix0 |= (ix1 >> (32 - i));
-        ix1 <<= i;
+        if (i != 0) {
+            ix0 |= (ix1 >> (32 - i));
+            ix1 <<= i;
+        }
     }
 
     m -= 1023;    /* unbias exponent */
