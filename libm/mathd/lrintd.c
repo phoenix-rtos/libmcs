@@ -97,7 +97,7 @@ long int lrint(double x)
 
             /* Detect the all-zeros representation of plus and
                minus zero, which fails the calculation below. */
-            if ((_i0 & ~(1U << 31)) == 0) {
+            if ((_i0 & 0x7fffffffU) == 0) {
                 return 0;
             }
 
