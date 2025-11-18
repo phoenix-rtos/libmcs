@@ -19,16 +19,9 @@ extern "C" {
    expands to a complicated conditional expression that uses special
    funtions that Lint does not know about by default.  For linting
    purposes, we can simplify things a bit by forcing assert() to expand to
-   a call to a special function that has the appropriate 'assert'
-   semantics.
+   a void cast.
  */
-//lint -function( __assert, __lint_assert )
-void __lint_assert( int );
-//lint ++d"assert(e)=__lint_assert(!!(e))"
-//(++d makes this definition permanently immutable for the Lint run.)
-//Now that we've made our own 'assert', we need to keep people from being
-//punished when the marco in 'assert.h' appears not to be used:
-//lint  -efile(766,*assert.h)
+//lint ++d"assert(e)=(void)(e)"
 
 typedef char            *__builtin_va_list;
 
