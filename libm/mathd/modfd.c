@@ -121,7 +121,11 @@ double modf(double x, double *iptr)
 
 long double modfl(long double x, long double *iptr)
 {
-    return (long double) modf((double) x, (double *) iptr);
+    double i;
+    double f = modf((double)x, &i);
+
+    *iptr = (long double)i;
+    return (long double)f;
 }
 
 #endif /* #ifdef __LIBMCS_LONG_DOUBLE_IS_64BITS */
