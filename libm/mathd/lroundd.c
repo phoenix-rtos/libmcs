@@ -120,10 +120,10 @@ long int lround(double x)
     } else {   /* Result is too large to be represented by a long int. */
         (void) __raise_invalid();
         if (sign == -1) {
-            return __MIN_LONG;
+            return LONG_MIN;
         }
         else {
-            return __MAX_LONG;
+            return LONG_MAX;
         }
     }
 
