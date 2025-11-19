@@ -19,8 +19,8 @@
  *     INSERT_WORDS(d,ix0,ix1);                 // this macro has no return value, the inputs are expected to be (double, int, int)
  *     SET_HIGH_WORD(d,v);                      // this macro has no return value, the inputs are expected to be (double, int)
  *     SET_LOW_WORD(d,v);                       // this macro has no return value, the inputs are expected to be (double, int)
- *     GET_FLOAT_WORD(i,d);                     // this macro has no return value, the inputs are expected to be (int, float)
- *     SET_FLOAT_WORD(d,i);                     // this macro has no return value, the inputs are expected to be (float, int)
+ *     GET_FLOAT_WORD(i,f);                     // this macro has no return value, the inputs are expected to be (int, float)
+ *     SET_FLOAT_WORD(f,i);                     // this macro has no return value, the inputs are expected to be (float, int)
  *     SAFE_RIGHT_SHIFT(op,amt);                // this macros return value has the same type as input `op`, the inputs are expected to be integer types
  *     double __forced_calculation(double x);
  *     float __forced_calculationf(float x);
@@ -155,7 +155,7 @@
  * into the parameter ``i``.
  *
  * ``SET_FLOAT_WORD`` has no return value. It places the created single
- * floating-point datum into the parameter ``d``.
+ * floating-point datum into the parameter ``f``.
  *
  * ``SAFE_RIGHT_SHIFT`` returns the value ``op`` right shifted by ``amt`` if
  * ``amt`` is smaller than the size of ``op``, otherwise it returns zero.
@@ -304,20 +304,20 @@ typedef union {
 
 /* Get a 32 bit int from a float.  */
 
-#define GET_FLOAT_WORD(i,d)                             \
+#define GET_FLOAT_WORD(i,f)                             \
     do {                                                \
         ieee_float_shape_type gf_u;                     \
-        gf_u.value = (d);                               \
+        gf_u.value = (f);                               \
         (i) = gf_u.word;                                \
     } while (0 == 1)
 
 /* Set a float from a 32 bit int.  */
 
-#define SET_FLOAT_WORD(d,i)                             \
+#define SET_FLOAT_WORD(f,i)                             \
     do {                                                \
         ieee_float_shape_type sf_u;                     \
         sf_u.word = (i);                                \
-        (d) = sf_u.value;                               \
+        (f) = sf_u.value;                               \
     } while (0 == 1)
 
 /* Macros to avoid undefined behaviour that can arise if the amount
