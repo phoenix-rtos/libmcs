@@ -138,10 +138,10 @@ long int lrint(double x)
     } else {
         (void) __raise_invalid();
         if (sx != 0) {
-            return __MIN_LONG;
+            return LONG_MIN;
         }
         else {
-            return __MAX_LONG;
+            return LONG_MAX;
         }
     }
 

@@ -29,9 +29,9 @@ long int lroundf(float x)
     } else {
         (void) __raise_invalidf();
         if (sign == -1) {
-            return __MIN_LONG;
+            return LONG_MIN;
         } else {
-            return __MAX_LONG;
+            return LONG_MAX;
         }
     }
 

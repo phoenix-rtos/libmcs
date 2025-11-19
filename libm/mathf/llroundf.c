@@ -30,10 +30,10 @@ long long int llroundf(float x)
     } else {
         (void) __raise_invalidf();
         if (sign == -1) {
-            return __MIN_LONG_LONG;
+            return LLONG_MIN;
         }
         else {
-            return __MAX_LONG_LONG;
+            return LLONG_MAX;
         }
     }
 

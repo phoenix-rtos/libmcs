@@ -65,10 +65,10 @@ long long int llrintf(float x)
     } else {
         (void) __raise_invalidf();
         if (sx != 0) {
-            return __MIN_LONG_LONG;
+            return LLONG_MIN;
         }
         else {
-            return __MAX_LONG_LONG;
+            return LLONG_MAX;
         }
     }
 
