@@ -11,3 +11,11 @@
 -width(0)   // don't insert line breaks (unlimited output width).
 -"format= %t %n$ %f%($%l%)%($%c$%) %m"
 -h1
+
+// Mark certain functions as pure to prevent warnings when they are used on the
+// right hand side of binary operators
+-sem(fabsf, pure)
+-sem(fabs, pure)
+-sem(__issignaling, pure)
+-sem(__fpclassifyf, pure)
+-sem(__fpclassifyd, pure)
