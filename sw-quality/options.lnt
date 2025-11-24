@@ -11,3 +11,17 @@
 -width(0)   // don't insert line breaks (unlimited output width).
 -"format= %t %n$ %f%($%l%)%($%c$%) %m"
 -h1
+
+// Supress false possitives of rule 2.1 regarding potential unreachable code
+// because of constant value boolean
+-emacro(506, GET_HIGH_WORD)
+-emacro(506, GET_LOW_WORD)
+-emacro(506, SET_HIGH_WORD)
+-emacro(506, SET_LOW_WORD)
+-emacro(506, INSERT_WORDS)
+-emacro(506, EXTRACT_WORDS)
+-emacro(506, GET_FLOAT_WORD)
+-emacro(506, SET_FLOAT_WORD)
+-emacro(506, isnan)
+-emacro(506, signbit)
+-emacro(506, isinf)
