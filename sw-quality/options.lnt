@@ -39,3 +39,8 @@
 -sem(csqrt, pure)
 -sem(creal, pure)
 -sem(cimag, pure)
+
+// Supress false possitives of rule 2.1 regarding constant boolean values
+-emacro(506, signbit)
+-emacro(506, isnan)
+-emacro(506, isinf)
