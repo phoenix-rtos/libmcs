@@ -244,7 +244,7 @@ typedef union {
         ew_u.value = (d);                               \
         (ix0) = ew_u.parts.msw;                         \
         (ix1) = ew_u.parts.lsw;                         \
-    } while (0 == 1)
+    } while (false)
 
 /* Get the more significant 32 bit int from a double.  */
 
@@ -253,7 +253,7 @@ typedef union {
         ieee_double_shape_type gh_u;                    \
         gh_u.value = (d);                               \
         (i) = gh_u.parts.msw;                           \
-    } while (0 == 1)
+    } while (false)
 
 /* Get the less significant 32 bit int from a double.  */
 
@@ -262,7 +262,7 @@ typedef union {
         ieee_double_shape_type gl_u;                    \
         gl_u.value = (d);                               \
         (i) = gl_u.parts.lsw;                           \
-    } while (0 == 1)
+    } while (false)
 
 /* Set a double from two 32 bit ints.  */
 
@@ -272,7 +272,7 @@ typedef union {
         iw_u.parts.msw = (ix0);                         \
         iw_u.parts.lsw = (ix1);                         \
         (d) = iw_u.value;                               \
-    } while (0 == 1)
+    } while (false)
 
 /* Set the more significant 32 bits of a double from an int.  */
 
@@ -282,7 +282,7 @@ typedef union {
         sh_u.value = (d);                               \
         sh_u.parts.msw = (v);                           \
         (d) = sh_u.value;                               \
-    } while (0 == 1)
+    } while (false)
 
 /* Set the less significant 32 bits of a double from an int.  */
 
@@ -292,7 +292,7 @@ typedef union {
         sl_u.value = (d);                               \
         sl_u.parts.lsw = (v);                           \
         (d) = sl_u.value;                               \
-    } while (0 == 1)
+    } while (false)
 
 /* A union which permits us to convert between a float and a 32 bit
    int.  */
@@ -309,7 +309,7 @@ typedef union {
         ieee_float_shape_type gf_u;                     \
         gf_u.value = (f);                               \
         (i) = gf_u.word;                                \
-    } while (0 == 1)
+    } while (false)
 
 /* Set a float from a 32 bit int.  */
 
@@ -318,7 +318,7 @@ typedef union {
         ieee_float_shape_type sf_u;                     \
         sf_u.word = (i);                                \
         (f) = sf_u.value;                               \
-    } while (0 == 1)
+    } while (false)
 
 /* Macros to avoid undefined behaviour that can arise if the amount
    of a shift is exactly equal to the size of the shifted operand.  */
