@@ -82,7 +82,7 @@ float sqrtf(float x)
     }
 
     ix = (q >> 1) + 0x3f000000;
-    ix += (m << 23);
+    ix += m * 0x00800000;
     SET_FLOAT_WORD(z, ix);
     return z;
 }

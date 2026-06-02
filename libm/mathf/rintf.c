@@ -16,13 +16,13 @@ float rintf(float x)
     x *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t _i0, _j0, sx;
-    uint32_t i, _i1, ix;
+    int32_t _i0, _j0;
+    uint32_t i, _i1, ix, sx;
     float t;
     volatile float w;
 
     GET_FLOAT_WORD(_i0, x);
-    sx = (_i0 >> 31) & 1;
+    sx = ((uint32_t)_i0 >> 31) & 1;
     ix = (_i0 & 0x7fffffff);
     _j0 = (ix >> 23) - 0x7f;
 

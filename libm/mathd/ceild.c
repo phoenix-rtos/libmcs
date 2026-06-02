@@ -114,7 +114,7 @@ double ceil(double x)
             if (_j0 == 20) {
                 _i0 += 1;
             } else {
-                j = _i1 + (1 << (52 - _j0));
+                j = _i1 + (1U << (52 - _j0));
 
                 if (j < (uint32_t)_i1) {
                     _i0 += 1;    /* got a carry */
