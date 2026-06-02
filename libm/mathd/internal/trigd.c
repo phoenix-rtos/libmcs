@@ -19,8 +19,8 @@
  *     double __sin(double x, double y, int iy)
  *     int32_t __rem_pio2f(float x, float *y)
  *     int32_t __rem_pio2(double x, double *y)
- *     int __rem_pio2_internalf(float *x, float *y, int e0, int nx)
- *     int __rem_pio2_internal(double *x, double *y, int e0, int nx)
+ *     int __rem_pio2_internalf(const float *x, float *y, int e0, int nx)
+ *     int __rem_pio2_internal(const double *x, double *y, int e0, int nx)
  *
  * Description
  * ===========
@@ -88,12 +88,12 @@
  *
  * ``__sin`` returns the sine of :math:`x + y`.
  *
- * ``__rem_pio2`` returns the quadrant the input angle lies in, and place the
+ * ``__rem_pio2`` returns the quadrant the input angle lies in, and places the
  * remainder of :math:`x` divided by :math:`\frac{\pi}{4}` in the output array
  * :math:`*y`. See description above.
  *
  * ``__rem_pio2_internal`` returns the quadrant the input angle lies in, and
- * place the remainder of :math:`x` divided by :math:`\frac{\pi}{4}` in the
+ * places the remainder of :math:`x` divided by :math:`\frac{\pi}{4}` in the
  * output array :math:`*y`. See description above.
  *
  * Exceptions
@@ -164,7 +164,7 @@ static const double one     =  1.0;
 static const double two24   =  0x1p+24; /* 1.6777216000000000000e+07    0x41700000, 0x00000000 */
 static const double twon24  =  0x1p-24; /* 5.9604644775390625000e-08    0x3E700000, 0x00000000 */
 
-static inline int __rem_pio2_internal(double *x, double *y, int e0, int nx)
+static inline int __rem_pio2_internal(const double *x, double *y, int e0, int nx)
 {
     int32_t jk = 4;     /* precision setting:
                            2 for up to 32 bits single precision
