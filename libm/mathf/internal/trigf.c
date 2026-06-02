@@ -74,7 +74,7 @@ static const float one    = 1.0f;
 static const float two8   = 0x1p+08f; /* 2.5600000000e+02f    0x43800000 */
 static const float twon8  = 0x1p-08f; /* 3.9062500000e-03f    0x3b800000 */
 
-static inline int __rem_pio2f_internal(float *x, float *y, int e0, int nx)
+static inline int __rem_pio2f_internal(const float *x, float *y, int e0, int nx)
 {
     int32_t jk = 7;     /* precision setting
                            jk+1 is the initial number of terms of ipio2[] needed in the computation. */
