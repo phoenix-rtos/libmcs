@@ -83,7 +83,8 @@ int ilogb(double x)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t hx, lx, ix;
+    int32_t ix;
+    uint32_t hx, lx;
 
     EXTRACT_WORDS(hx, lx, x);
     hx &= 0x7fffffff;
@@ -94,11 +95,11 @@ int ilogb(double x)
             return FP_ILOGB0;    /* ilogb(0) = special case error */
         } else {         /* subnormal x */
             if (hx == 0) {
-                for (ix = -1043; lx > 0; lx <<= 1) {
+                for (ix = -1043; lx < 0x80000000U; lx <<= 1) {
                     ix -= 1;
                 }
             } else {
-                for (ix = -1022, hx <<= 11; hx > 0; hx <<= 1) {
+                for (ix = -1022, hx <<= 11; hx < 0x80000000U; hx <<= 1) {
                     ix -= 1;
                 }
             }
@@ -106,7 +107,7 @@ int ilogb(double x)
 
         return ix;
     } else if (hx < 0x7ff00000) {
-        return (hx >> 20) - 1023;
+        return (int32_t)(hx >> 20) - 1023;
     } else if (hx > 0x7ff00000) {
         (void) __raise_invalid();
         return FP_ILOGBNAN;     /* NAN */
