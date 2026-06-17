@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GTDGmbH
-# Copyright 2020-2025 by GTD GmbH.
+# Copyright 2020-2026 by GTD GmbH.
 
 # Filenames
 sizecheck=sizeoftypes.c
