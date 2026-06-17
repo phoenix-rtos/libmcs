@@ -104,7 +104,8 @@ double fmod(double x, double y)
     y *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t n, hx, hy, hz, ix, iy, sx, i;
+    int32_t n, hx, hy, hz, ix, iy, sx;
+    uint32_t i;
     uint32_t lx, ly, lz;
 
     EXTRACT_WORDS(hx, lx, x);
@@ -141,11 +142,11 @@ double fmod(double x, double y)
     /* determine ix = ilogb(x) */
     if (hx < 0x00100000) { /* subnormal x */
         if (hx == 0) {
-            for (ix = -1043, i = lx; i > 0; i <<= 1) {
+            for (ix = -1043, i = (uint32_t)lx; i < 0x80000000U; i <<= 1) {
                 ix -= 1;
             }
         } else {
-            for (ix = -1022, i = (hx << 11); i > 0; i <<= 1) {
+            for (ix = -1022, i = (uint32_t)hx << 11; i < 0x80000000U; i <<= 1) {
                 ix -= 1;
             }
         }
@@ -156,11 +157,11 @@ double fmod(double x, double y)
     /* determine iy = ilogb(y) */
     if (hy < 0x00100000) { /* subnormal y */
         if (hy == 0) {
-            for (iy = -1043, i = ly; i > 0; i <<= 1) {
+            for (iy = -1043, i = (uint32_t)ly; i < 0x80000000U; i <<= 1) {
                 iy -= 1;
             }
         } else {
-            for (iy = -1022, i = (hy << 11); i > 0; i <<= 1) {
+            for (iy = -1022, i = (uint32_t)hy << 11; i < 0x80000000U; i <<= 1) {
                 iy -= 1;
             }
         }

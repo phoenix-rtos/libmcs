@@ -42,11 +42,12 @@ float sqrtf(float x)
     m = (ix >> 23);
 
     if (FLT_UWORD_IS_SUBNORMAL(hx)) {       /* subnormal x */
-        for (i = 0; (ix & 0x00800000) == 0; i++) {
-            ix <<= 1;
+        for (i = 0; (hx & 0x00800000U) == 0; i++) {
+            hx <<= 1;
         }
 
         m -= i - 1;
+        ix = (int32_t)hx;
     }
 
     m -= 127;    /* unbias exponent */
@@ -82,7 +83,7 @@ float sqrtf(float x)
     }
 
     ix = (q >> 1) + 0x3f000000;
-    ix += (m << 23);
+    ix += m * 0x00800000;
     SET_FLOAT_WORD(z, ix);
     return z;
 }

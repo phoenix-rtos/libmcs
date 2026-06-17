@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GTDGmbH */
-/* Copyright 2020-2025 by GTD GmbH. */
+/* Copyright 2020-2026 by GTD GmbH. */
 
 #ifndef LIBMCS_INTERNAL_CONFIG_H
 #define LIBMCS_INTERNAL_CONFIG_H
@@ -37,18 +37,6 @@
         #error Cannot define both LIBMCS_DOUBLE_IS_32BITS and LIBMCS_LONG_DOUBLE_IS_64BITS at once.
     #endif /* LIBMCS_DOUBLE_IS_32BITS */
 #endif /* LIBMCS_LONG_DOUBLE_IS_64BITS */
-
-/* Define to tell the libm to be built for 32bit long int. */
-#define __MAX_LONG_LONG 0x7FFFFFFFFFFFFFFFLL
-#define __MIN_LONG_LONG 0x8000000000000000LL
-#ifdef LIBMCS_LONG_IS_32BITS
-    #define __LIBMCS_LONG_IS_32BITS
-    #define __MAX_LONG 0x7FFFFFFFL
-    #define __MIN_LONG 0x80000000L
-#else
-    #define __MAX_LONG 0x7FFFFFFFFFFFFFFFL
-    #define __MIN_LONG 0x8000000000000000L
-#endif /* LIBMCS_LONG_IS_32BITS */
 
 /* Most routines need to check whether a float is finite, infinite, or not a
    number, and many need to know whether the result of an operation will
@@ -121,8 +109,8 @@
     The bitmask of |log(REAL_FLT_MIN)|, rounding down.
 
    FLT_SMALLEST_EXP
-    REAL_FLT_MIN's exponent - EXP_BIAS (1 if denormals are not supported,
-    -22 if they are).
+    REAL_FLT_MIN's exponent + EXP_BIAS - 1 (0 if denormals are not
+    supported, -23 if they are).
 */
 
 #ifdef __LIBMCS_FPU_DAZ
@@ -131,14 +119,14 @@
     #define FLT_UWORD_MIN 0x00800000
     #define FLT_UWORD_EXP_MIN 0x42fc0000
     #define FLT_UWORD_LOG_MIN 0x42aeac50
-    #define FLT_SMALLEST_EXP 1
+    #define FLT_SMALLEST_EXP 0
 #else
     #define FLT_UWORD_IS_ZERO(x) ((x)==0)
     #define FLT_UWORD_IS_SUBNORMAL(x) ((x)<0x00800000L)
     #define FLT_UWORD_MIN 0x00000001
     #define FLT_UWORD_EXP_MIN 0x43160000
     #define FLT_UWORD_LOG_MIN 0x42cff1b5
-    #define FLT_SMALLEST_EXP -22
+    #define FLT_SMALLEST_EXP -23
 #endif
 
 #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__

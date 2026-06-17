@@ -74,7 +74,7 @@ double cos(double x)
             if (x == 0.0) {          /* return 1 inexact except 0 */
                 return 1.0;
             } else {
-                return __raise_inexactf(1.0);
+                return __raise_inexact(1.0);
             }
         }
 

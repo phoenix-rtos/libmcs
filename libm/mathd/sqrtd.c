@@ -92,19 +92,27 @@ double sqrt(double x)
     m = (ix0 >> 20);
 
     if (m == 0) {             /* subnormal x */
-        while (ix0 == 0) {
+        uint32_t ux0 = (uint32_t)ix0;
+        uint32_t ux1 = (uint32_t)ix1;
+
+        while (ux0 == 0U) {
             m -= 21;
-            ix0 |= (ix1 >> 11);
-            ix1 <<= 21;
+            ux0 |= ux1 >> 11;
+            ux1 <<= 21;
         }
 
-        for (i = 0; (ix0 & 0x00100000) == 0; i++) {
-            ix0 <<= 1;
+        for (i = 0; (ux0 & 0x00100000U) == 0; i++) {
+            ux0 <<= 1;
         }
 
         m -= i - 1;
-        ix0 |= (ix1 >> (32 - i));
-        ix1 <<= i;
+        if (i != 0) {
+            ux0 |= ux1 >> (32 - i);
+            ux1 <<= i;
+        }
+
+        ix0 = (int32_t)ux0;
+        ix1 = (int32_t)ux1;
     }
 
     m -= 1023;    /* unbias exponent */

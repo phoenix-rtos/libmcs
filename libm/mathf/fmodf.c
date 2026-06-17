@@ -20,7 +20,8 @@ float fmodf(float x, float y)
     y *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t n, hx, hy, hz, ix, iy, sx, i;
+    int32_t n, hx, hy, hz, ix, iy, sx;
+    uint32_t i;
 
     GET_FLOAT_WORD(hx, x);
     GET_FLOAT_WORD(hy, y);
@@ -55,7 +56,7 @@ float fmodf(float x, float y)
 
     /* determine ix = ilogb(x) */
     if (FLT_UWORD_IS_SUBNORMAL(hx)) {   /* subnormal x */
-        for (ix = -126, i = (hx << 8); i > 0; i <<= 1) {
+        for (ix = -126, i = (uint32_t)hx << 8; i < 0x80000000U; i <<= 1) {
             ix -= 1;
         }
     } else {
@@ -64,7 +65,7 @@ float fmodf(float x, float y)
 
     /* determine iy = ilogb(y) */
     if (FLT_UWORD_IS_SUBNORMAL(hy)) {   /* subnormal y */
-        for (iy = -126, i = (hy << 8); i >= 0; i <<= 1) {
+        for (iy = -126, i = (uint32_t)hy << 8; i < 0x80000000U; i <<= 1) {
             iy -= 1;
         }
     } else {

@@ -53,7 +53,7 @@ long long int llrintf(float x)
 
             /* Detect the all-zeros representation of plus and
                minus zero, which fails the calculation below. */
-            if ((_i0 & ~((uint32_t)1 << 31)) == 0) {
+            if ((_i0 & 0x7fffffffU) == 0) {
                 return 0;
             }
 
@@ -65,10 +65,10 @@ long long int llrintf(float x)
     } else {
         (void) __raise_invalidf();
         if (sx != 0) {
-            return __MIN_LONG_LONG;
+            return LLONG_MIN;
         }
         else {
-            return __MAX_LONG_LONG;
+            return LLONG_MAX;
         }
     }
 

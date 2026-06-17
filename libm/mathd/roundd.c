@@ -104,7 +104,7 @@ double round(double x)
             return x;
         }
 
-        tmp = lsw + (1 << (51 - exponent_less_1023));
+        tmp = lsw + (1U << (51 - exponent_less_1023));
 
         if (tmp < lsw) {
             msw += 1;

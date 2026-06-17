@@ -19,8 +19,8 @@
  *     INSERT_WORDS(d,ix0,ix1);                 // this macro has no return value, the inputs are expected to be (double, int, int)
  *     SET_HIGH_WORD(d,v);                      // this macro has no return value, the inputs are expected to be (double, int)
  *     SET_LOW_WORD(d,v);                       // this macro has no return value, the inputs are expected to be (double, int)
- *     GET_FLOAT_WORD(i,d);                     // this macro has no return value, the inputs are expected to be (int, float)
- *     SET_FLOAT_WORD(d,i);                     // this macro has no return value, the inputs are expected to be (float, int)
+ *     GET_FLOAT_WORD(i,f);                     // this macro has no return value, the inputs are expected to be (int, float)
+ *     SET_FLOAT_WORD(f,i);                     // this macro has no return value, the inputs are expected to be (float, int)
  *     SAFE_RIGHT_SHIFT(op,amt);                // this macros return value has the same type as input `op`, the inputs are expected to be integer types
  *     double __forced_calculation(double x);
  *     float __forced_calculationf(float x);
@@ -155,7 +155,7 @@
  * into the parameter ``i``.
  *
  * ``SET_FLOAT_WORD`` has no return value. It places the created single
- * floating-point datum into the parameter ``d``.
+ * floating-point datum into the parameter ``f``.
  *
  * ``SAFE_RIGHT_SHIFT`` returns the value ``op`` right shifted by ``amt`` if
  * ``amt`` is smaller than the size of ``op``, otherwise it returns zero.
@@ -244,7 +244,7 @@ typedef union {
         ew_u.value = (d);                               \
         (ix0) = ew_u.parts.msw;                         \
         (ix1) = ew_u.parts.lsw;                         \
-    } while (0 == 1)
+    } while (false)
 
 /* Get the more significant 32 bit int from a double.  */
 
@@ -253,7 +253,7 @@ typedef union {
         ieee_double_shape_type gh_u;                    \
         gh_u.value = (d);                               \
         (i) = gh_u.parts.msw;                           \
-    } while (0 == 1)
+    } while (false)
 
 /* Get the less significant 32 bit int from a double.  */
 
@@ -262,7 +262,7 @@ typedef union {
         ieee_double_shape_type gl_u;                    \
         gl_u.value = (d);                               \
         (i) = gl_u.parts.lsw;                           \
-    } while (0 == 1)
+    } while (false)
 
 /* Set a double from two 32 bit ints.  */
 
@@ -272,7 +272,7 @@ typedef union {
         iw_u.parts.msw = (ix0);                         \
         iw_u.parts.lsw = (ix1);                         \
         (d) = iw_u.value;                               \
-    } while (0 == 1)
+    } while (false)
 
 /* Set the more significant 32 bits of a double from an int.  */
 
@@ -282,7 +282,7 @@ typedef union {
         sh_u.value = (d);                               \
         sh_u.parts.msw = (v);                           \
         (d) = sh_u.value;                               \
-    } while (0 == 1)
+    } while (false)
 
 /* Set the less significant 32 bits of a double from an int.  */
 
@@ -292,7 +292,7 @@ typedef union {
         sl_u.value = (d);                               \
         sl_u.parts.lsw = (v);                           \
         (d) = sl_u.value;                               \
-    } while (0 == 1)
+    } while (false)
 
 /* A union which permits us to convert between a float and a 32 bit
    int.  */
@@ -304,21 +304,21 @@ typedef union {
 
 /* Get a 32 bit int from a float.  */
 
-#define GET_FLOAT_WORD(i,d)                             \
+#define GET_FLOAT_WORD(i,f)                             \
     do {                                                \
         ieee_float_shape_type gf_u;                     \
-        gf_u.value = (d);                               \
+        gf_u.value = (f);                               \
         (i) = gf_u.word;                                \
-    } while (0 == 1)
+    } while (false)
 
 /* Set a float from a 32 bit int.  */
 
-#define SET_FLOAT_WORD(d,i)                             \
+#define SET_FLOAT_WORD(f,i)                             \
     do {                                                \
         ieee_float_shape_type sf_u;                     \
         sf_u.word = (i);                                \
-        (d) = sf_u.value;                               \
-    } while (0 == 1)
+        (f) = sf_u.value;                               \
+    } while (false)
 
 /* Macros to avoid undefined behaviour that can arise if the amount
    of a shift is exactly equal to the size of the shifted operand.  */
