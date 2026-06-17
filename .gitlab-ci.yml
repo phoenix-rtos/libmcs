@@ -47,6 +47,35 @@ code-quality:
             - sw-quality/misra-c/
     needs: []
 
+unit-tests:
+  stage: check
+  image: local.gtd-gmbh.de:4567/e1356-mathematical-library-qualification/maxi-toolbox/debian-forky
+  parallel:
+    matrix:
+      - QUAL_FLAVOR: ["normal", "daz-ftz"]
+  script:
+    - |
+      if [ "$QUAL_FLAVOR" = "normal" ]; then
+        export MAXI_CONFIG="/maxi/configs/qualification-runner/libmcs-x86_64.yml"
+        export MAXI_WORKSPACE=".maxi/qualification/x86_64"
+        export DENORMAL_SWITCH="--disable-denormal-handling"
+      else
+        export MAXI_CONFIG="/maxi/configs/qualification-runner/libmcs-x86_64-daz-ftz.yml"
+        export MAXI_WORKSPACE=".maxi/qualification/x86_64-daz-ftz"
+        export DENORMAL_SWITCH="--enable-denormal-handling"
+      fi
+    # Build the x86_64 libm.a used by validation qualification.
+    - make distclean
+    - ./configure --cross-compile "" --compilation-flags "-mlong-double-64" "$DENORMAL_SWITCH" --enable-long-double-procedures --enable-complex-procedures
+    - make -j"$(nproc)"
+    # Run qualification from the libmcs root, but execute MAXI from /maxi.
+    - poetry --directory /maxi run qualification-runner --mode unit --config "$MAXI_CONFIG" --workspace "$MAXI_WORKSPACE"
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths:
+      - .maxi/
+
 doc:
     stage: doc
     script:
