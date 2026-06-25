@@ -91,49 +91,49 @@ double atan2(double y, double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double z;
-    int32_t k, m, hx, hy, ix, iy;
-    uint32_t lx, ly;
+    int32_t k;
+    uint32_t m, lx, ly, ix, hx, iy, hy;
 
     EXTRACT_WORDS(hx, lx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
     EXTRACT_WORDS(hy, ly, y);
-    iy = hy & 0x7fffffff;
-
-    if (((ix | ((lx | -lx) >> 31)) > 0x7ff00000) ||
-        ((iy | ((ly | -ly) >> 31)) > 0x7ff00000)) { /* x or y is NaN */
+    iy = hy & 0x7fffffffU;
+    
+    if (((ix | ((lx | -lx) >> 31U)) > 0x7ff00000U) ||
+        ((iy | ((ly | -ly) >> 31U)) > 0x7ff00000U)) {    /* x or y is NaN */
         return x + y;
     }
 
-    if (hx == 0x3ff00000 && lx == 0) {
-        return atan(y);    /* x=1.0 */
+    if (hx == 0x3ff00000U && lx == 0U) {
+        return atan(y);                                 /* x=1.0 */
     }
 
-    m = ((hy >> 31) & 1) | ((hx >> 30) & 2); /* 2*sign(x)+sign(y) */
+    m = ((hy >> 31U) & 1U) | ((hx >> 30U) & 2U);            /* 2*sign(x)+sign(y) */
 
     /* when y = 0 */
-    if ((iy | ly) == 0) {
+    if ((iy | ly) == 0U) {
         switch (m) {
-        default:    /* FALLTHRU */
-        case 0:     /* FALLTHRU */
+        default:                                        /* FALLTHRU */
+        case 0:                                         /* FALLTHRU */
         case 1:
-            return y;          /* atan(+-0,+anything)=+-0 */
+            return y;                                   /* atan(+-0,+anything)=+-0 */
 
         case 2:
-            return __raise_inexact(pi); /* atan(+0,-anything) = pi */
+            return __raise_inexact(pi);                 /* atan(+0,-anything) = pi */
 
         case 3:
-            return -__raise_inexact(pi); /* atan(-0,-anything) =-pi */
+            return -__raise_inexact(pi);                /* atan(-0,-anything) =-pi */
         }
     }
 
     /* when x = 0 */
-    if ((ix | lx) == 0) {
-        return (hy < 0) ? -__raise_inexact(pi_o_2) : __raise_inexact(pi_o_2);
+    if ((ix | lx) == 0U) {
+        return ((int32_t)hy < 0) ? -__raise_inexact(pi_o_2) : __raise_inexact(pi_o_2);
     }
 
     /* when x is INF */
-    if (ix == 0x7ff00000) {
-        if (iy == 0x7ff00000) {
+    if (ix == 0x7ff00000U) {
+        if (iy == 0x7ff00000U) {
             switch (m) {
             default:    /* FALLTHRU */
             case 0:
@@ -167,17 +167,18 @@ double atan2(double y, double x)
     }
 
     /* when y is INF */
-    if (iy == 0x7ff00000) {
-        return (hy < 0) ? -__raise_inexact(pi_o_2) : __raise_inexact(pi_o_2);
+    if (iy == 0x7ff00000U) {
+        return ((int32_t)hy < 0) ? -__raise_inexact(pi_o_2) : __raise_inexact(pi_o_2);
     }
 
     /* compute y/x */
-    k = (iy - ix) >> 20;
+    /* Computation based on 2-complement arithmetic shift, is in C standard implementation defined. */
+    k = ((int32_t)iy - (int32_t)ix) >> 20;
 
     if (k > 60) {
         z = __raise_inexact(pi_o_2);    /* |y/x| >  2**60 */
-        m &= 1;
-    } else if (hx < 0 && k < -60) {
+        m &= 1U;
+    } else if ((int32_t)hx < 0 && k < -60) {
         z = 0.0;                        /* 0 > |y|/x > -2**60 */
     } else {
         z = atan(fabs(y / x));          /* safe to do y/x */

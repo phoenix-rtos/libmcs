@@ -60,9 +60,9 @@
 
 double fabs(double x)
 {
-    uint32_t high;
-    GET_HIGH_WORD(high, x);
-    SET_HIGH_WORD(x, high & 0x7fffffff);
+    uint32_t hx;
+    GET_HIGH_WORD(hx, x);
+    SET_HIGH_WORD(x, hx & 0x7fffffffU);
     return x;
 }
 

@@ -63,17 +63,17 @@ double sin(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double y[2], z = 0.0;
-    int32_t n, ix;
+    uint32_t n, ix;
 
     /* High word of x. */
     GET_HIGH_WORD(ix, x);
 
     /* |x| ~< pi/4 */
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix <= 0x3fe921fb) {
-        if(ix < 0x3e500000) {      /* |x| < 2**-26 */
-            if (x == 0.0) {        /* return x inexact except 0 */
+    if (ix <= 0x3fe921fbU) {
+        if (ix < 0x3e500000U) {     /* |x| < 2**-26 */
+            if (x == 0.0) {         /* return x inexact except 0 */
                 return x;
             } else {
                 return __raise_inexact(x);
@@ -84,7 +84,7 @@ double sin(double x)
     }
 
     /* sin(Inf or NaN) is NaN */
-    else if (ix >= 0x7ff00000) {
+    else if (ix >= 0x7ff00000U) {
         if (isnan(x)) {
             return x + x;
         } else {
@@ -94,9 +94,9 @@ double sin(double x)
 
     /* argument reduction needed */
     else {
-        n = __rem_pio2(x, y);
+        n = (uint32_t)__rem_pio2(x, y);
 
-        switch (n & 3) {
+        switch (n & 3U) {
         case 0:
             return  __sin(y[0], y[1], 1);
 

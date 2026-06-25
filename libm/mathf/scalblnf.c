@@ -15,18 +15,19 @@ float scalblnf(float x, long int n)
     x *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t k, ix;
+    int32_t k; 
+    uint32_t ix;
     GET_FLOAT_WORD(ix, x);
-    k = (ix & 0x7f800000) >> 23;    /* extract exponent */
+    k = (int32_t)((ix & 0x7f800000U) >> 23U);    /* extract exponent */
 
     if (k == 0) {              /* 0 or subnormal x */
-        if ((ix & 0x7fffffff) == 0) {
+        if ((ix & 0x7fffffffU) == 0U) {
             return x;    /* +-0 */
         }
 
         x *= two25;
         GET_FLOAT_WORD(ix, x);
-        k = ((ix & 0x7f800000) >> 23) - 25;
+        k = (int32_t)((ix & 0x7f800000U) >> 23U) - 25;
     }
 
     if (k == 0xff) {
@@ -48,7 +49,7 @@ float scalblnf(float x, long int n)
     }
 
     if (k > 0) {               /* normal result */
-        SET_FLOAT_WORD(x, (ix & 0x807fffffU) | (k << 23U));
+        SET_FLOAT_WORD(x, (ix & 0x807fffffU) | ((uint32_t)k << 23U));
         return x;
     }
 
@@ -57,7 +58,7 @@ float scalblnf(float x, long int n)
     }
 
     k += 25;                /* subnormal result */
-    SET_FLOAT_WORD(x, (ix & 0x807fffffU) | (k << 23U));
+    SET_FLOAT_WORD(x, ((ix & 0x807fffffU) | ((uint32_t)k << 23U)));
     return x * twom25;
 }
 

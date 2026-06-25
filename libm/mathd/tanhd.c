@@ -64,17 +64,17 @@ double tanh(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double t, z;
-    int32_t jx, ix;
+    uint32_t hx, ix;
 
     /* High word of |x|. */
-    GET_HIGH_WORD(jx, x);
-    ix = jx & 0x7fffffff;
+    GET_HIGH_WORD(hx, x);
+    ix = hx & 0x7fffffffU;
 
     /* x is INF or NaN */
-    if (ix >= 0x7ff00000) {
+    if (ix >= 0x7ff00000U) {
         if (isnan(x)) {             /* tanh(NaN) = NaN */
             return x + x;
-        } else if (jx >= 0) {
+        } else if ((int32_t)hx >= 0) {
             return one;             /* tanh(+inf)=+1 */
         } else {
             return -one;            /* tanh(-inf)=-1 */
@@ -82,16 +82,16 @@ double tanh(double x)
     }
 
     /* |x| < 22 */
-    if (ix < 0x40360000) {          /* |x|<22 */
-        if (ix < 0x3c800000) {      /* |x|<2**-55 */
-            if (x == 0.0) {         /* return x inexact except 0 */
+    if (ix < 0x40360000U) {          /* |x|<22 */
+        if (ix < 0x3c800000U) {      /* |x|<2**-55 */
+            if (x == 0.0) {          /* return x inexact except 0 */
                 return x;
             } else {
                 return __raise_inexact(x);
             }
         }
 
-        if (ix >= 0x3ff00000) {     /* |x|>=1  */
+        if (ix >= 0x3ff00000U) {     /* |x|>=1  */
             t = expm1(two * fabs(x));
             z = one - two / (t + two);
         } else {
@@ -104,7 +104,7 @@ double tanh(double x)
         z = __raise_inexact(one);               /* raised inexact flag */
     }
 
-    return (jx >= 0) ? z : -z;
+    return ((int32_t)hx >= 0) ? z : -z;
 }
 
 #ifdef __LIBMCS_LONG_DOUBLE_IS_64BITS

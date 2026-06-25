@@ -25,10 +25,8 @@ float cbrtf(float x)
     x *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t    hx;
     float r, s, t;
-    uint32_t sign;
-    uint32_t high;
+    uint32_t hx, sign, high;
 
     GET_FLOAT_WORD(hx, x);
     sign = hx & 0x80000000U;     /* sign= sign(x) */
@@ -46,12 +44,12 @@ float cbrtf(float x)
 
     /* rough cbrt to 5 bits */
     if (FLT_UWORD_IS_SUBNORMAL(hx)) {      /* subnormal number */
-        SET_FLOAT_WORD(t, 0x4b800000); /* set t= 2**24 */
+        SET_FLOAT_WORD(t, 0x4b800000U); /* set t= 2**24 */
         t *= x;
         GET_FLOAT_WORD(high, t);
-        SET_FLOAT_WORD(t, high / 3 + B2);
+        SET_FLOAT_WORD(t, high / 3U + B2);
     } else {
-        SET_FLOAT_WORD(t, hx / 3 + B1);
+        SET_FLOAT_WORD(t, hx / 3U + B1);
     }
 
 

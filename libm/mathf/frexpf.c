@@ -16,15 +16,15 @@ float frexpf(float x, int *eptr)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     int _xexp = 0;
-    int32_t hx, ix;
+    uint32_t hx, ix;
 
-    assert(eptr != (void*)0);
-    if(eptr == (void*)0) {
+    assert(eptr != (void*)0U);
+    if (eptr == (void*)0U) {
         eptr = &_xexp;
     }
 
     GET_FLOAT_WORD(hx, x);
-    ix = 0x7fffffff & hx;
+    ix = 0x7fffffffU & hx;
     *eptr = 0;
 
     if (!FLT_UWORD_IS_FINITE(ix) || FLT_UWORD_IS_ZERO(ix)) {
@@ -34,11 +34,11 @@ float frexpf(float x, int *eptr)
     if (FLT_UWORD_IS_SUBNORMAL(ix)) {        /* subnormal */
         x *= two25;
         GET_FLOAT_WORD(hx, x);
-        ix = hx & 0x7fffffff;
+        ix = hx & 0x7fffffffU;
         *eptr = -25;
     }
 
-    *eptr += (ix >> 23) - 126;
+    *eptr += (int32_t)(ix >> 23U) - 126;
     hx = (hx & 0x807fffffU) | 0x3f000000U;
     SET_FLOAT_WORD(x, hx);
     return x;

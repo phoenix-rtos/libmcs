@@ -175,27 +175,26 @@ double expm1(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double y, hi, lo, c, t, e, hxs, hfx, r1;
-    int32_t k, xsb;
-    uint32_t hx;
+    int32_t k;
+    uint32_t hx, xsb, high, low;
 
     c = NAN; /* initial value of c is never actually used */
 
     GET_HIGH_WORD(hx, x);
     xsb = hx & 0x80000000U;      /* sign bit of x */
 
-    hx &= 0x7fffffff;        /* high word of |x| */
+    hx &= 0x7fffffffU;        /* high word of |x| */
 
     /* filter out huge and non-finite argument */
-    if (hx >= 0x4043687A) {           /* if |x|>=56*ln2 */
-        if (hx >= 0x40862E42) {       /* if |x|>=709.78... */
-            if (hx >= 0x7ff00000) {
-                uint32_t low;
+    if (hx >= 0x4043687AU) {           /* if |x|>=56*ln2 */
+        if (hx >= 0x40862E42U) {       /* if |x|>=709.78... */
+            if (hx >= 0x7ff00000U) {
                 GET_LOW_WORD(low, x);
 
-                if (((hx & 0xfffff) | low) != 0) {
+                if (((hx & 0xfffffU) | low) != 0U) {
                     return x + x;    /* NaN */
                 } else { /* exp(+-inf)={inf,-1} */
-                    return (xsb == 0) ? x : -1.0;
+                    return (xsb == 0U) ? x : -1.0;
                 }
             }
 
@@ -204,15 +203,15 @@ double expm1(double x)
             }
         }
 
-        if (xsb != 0) { /* x < -56*ln2, return -1.0 with inexact */
+        if (xsb != 0U) { /* x < -56*ln2, return -1.0 with inexact */
             return -__raise_inexact(one);    /* return -1 */
         }
     }
 
     /* argument reduction */
-    if (hx > 0x3fd62e42) {       /* if  |x| > 0.5 ln2 */
-        if (hx < 0x3FF0A2B2) {   /* and |x| < 1.5 ln2 */
-            if (xsb == 0) {
+    if (hx > 0x3fd62e42U) {       /* if  |x| > 0.5 ln2 */
+        if (hx < 0x3FF0A2B2U) {   /* and |x| < 1.5 ln2 */
+            if (xsb == 0U) {
                 hi = x - ln2_hi;
                 lo =  ln2_lo;
                 k =  1;
@@ -222,7 +221,7 @@ double expm1(double x)
                 k = -1;
             }
         } else {
-            k  = invln2 * x + ((xsb == 0) ? 0.5 : -0.5);
+            k  = invln2 * x + ((xsb == 0U) ? 0.5 : -0.5);
             t  = k;
             hi = x - t * ln2_hi;  /* t*ln2_hi is exact here */
             lo = t * ln2_lo;
@@ -230,7 +229,7 @@ double expm1(double x)
 
         x  = hi - lo;
         c  = (hi - x) - lo;
-    } else if (hx < 0x3c900000) {   /* when |x|<2**-54, return x */
+    } else if (hx < 0x3c900000U) {   /* when |x|<2**-54, return x */
         if (x == 0.0) {
             return x;
         } else { /* return x with inexact flags when x!=0 */
@@ -266,7 +265,6 @@ double expm1(double x)
         }
 
         if (k <= -2 || k > 56) { /* suffice to return exp(x)-1 */
-            uint32_t high;
             y = one - (e - x);
             GET_HIGH_WORD(high, y);
             SET_HIGH_WORD(y, high + (((uint32_t)k) << 20)); /* add k to y's exponent */
@@ -275,19 +273,17 @@ double expm1(double x)
 
         t = one;
 
-        if (k < 20) {
-            uint32_t high;
-            SET_HIGH_WORD(t, 0x3ff00000 - (0x200000 >> k)); /* t=1-2^-k */
+        if (k < 20) {   /* k in [0:19] */
+            SET_HIGH_WORD(t, (0x3ff00000U - (0x200000U >> (uint32_t)k))); /* t=1-2^-k */
             y = t - (e - x);
             GET_HIGH_WORD(high, y);
-            SET_HIGH_WORD(y, high + (k << 20)); /* add k to y's exponent */
-        } else {
-            uint32_t high;
-            SET_HIGH_WORD(t, ((0x3ff - k) << 20)); /* 2^-k */
+            SET_HIGH_WORD(y, high + ((uint32_t)k << 20U)); /* add k to y's exponent */
+        } else {        /* k in [20:56] */
+            SET_HIGH_WORD(t, (uint32_t)(0x3ff - k) << 20U); /* 2^-k */
             y = x - (e + t);
             y += one;
             GET_HIGH_WORD(high, y);
-            SET_HIGH_WORD(y, high + (k << 20)); /* add k to y's exponent */
+            SET_HIGH_WORD(y, high + ((uint32_t)k << 20U)); /* add k to y's exponent */
         }
     }
 

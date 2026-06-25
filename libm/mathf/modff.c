@@ -13,25 +13,25 @@ float modff(float x, float *iptr)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float _xi = 0.0f;
-    int32_t _i0, _j0;
-    uint32_t i;
+    int32_t _j0;
+    uint32_t i, _i0;
 
-    assert(iptr != (void*)0);
-    if(iptr == (void*)0) {
+    assert(iptr != (void*)0U);
+    if (iptr == (void*)0U) {
         iptr = &_xi;
     }
 
     GET_FLOAT_WORD(_i0, x);
-    _j0 = ((_i0 >> 23) & 0xff) - 0x7f; /* exponent of x */
-
+    _j0 = (int32_t)((_i0 >> 23U) & 0xffU) - 0x7f; /* exponent of x */
+    
     if (_j0 < 23) {         /* integer part in x */
         if (_j0 < 0) {         /* |x|<1 */
             SET_FLOAT_WORD(*iptr, _i0 & 0x80000000U); /* *iptr = +-0 */
             return x;
         } else {
-            i = (0x007fffff) >> _j0;
+            i = 0x007fffffU >> (uint32_t)_j0;
 
-            if ((_i0 & i) == 0) {       /* x is integral */
+            if ((_i0 & i) == 0U) {       /* x is integral */
                 *iptr = x;
                 SET_FLOAT_WORD(x, _i0 & 0x80000000U); /* return +-0 */
                 return x;

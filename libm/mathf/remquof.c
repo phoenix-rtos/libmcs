@@ -15,12 +15,11 @@ float remquof(float x, float y, int *quo)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     int _quo = 0;
-    int32_t hx, hy;
-    uint32_t sx, sq;
+    uint32_t sx, sq, hx, hy;
     float y_half;
 
-    assert(quo != (void*)0);
-    if(quo == (void*)0) {
+    assert(quo != (void*)0U);
+    if (quo == (void*)0U) {
         quo = &_quo;
     }
     *quo = 0;
@@ -29,8 +28,8 @@ float remquof(float x, float y, int *quo)
     GET_FLOAT_WORD(hy, y);
     sx = hx & 0x80000000U;
     sq = sx ^ (hy & 0x80000000U);
-    hy &= 0x7fffffff;
-    hx &= 0x7fffffff;
+    hy &= 0x7fffffffU;
+    hx &= 0x7fffffffU;
 
     /* purge off exception values */
     if (FLT_UWORD_IS_NAN(hx) || FLT_UWORD_IS_NAN(hy)) {                 /* x or y is NaN */
@@ -41,12 +40,12 @@ float remquof(float x, float y, int *quo)
         /* No action required */
     }
 
-    if (hy <= 0x7dffffff) {
+    if (hy <= 0x7dffffffU) {
         x = fmodf(x, 8.0f * y);    /* now x < 8y */
     }
 
-    if ((hx - hy) == 0) {
-        *quo = sq ? -1 : 1;
+    if ((hx - hy) == 0U) {
+        *quo = (sq != 0U) ? -1 : 1;
         return zero * x;
     }
 
@@ -63,7 +62,7 @@ float remquof(float x, float y, int *quo)
         _quo += 2;
     }
 
-    if (hy < 0x01000000) {
+    if (hy < 0x01000000U) {
         if (x + x > y) {
             x -= y;
             _quo++;
@@ -89,7 +88,7 @@ float remquof(float x, float y, int *quo)
 
     _quo &= 0x7;
 
-    *quo = sq ? -_quo : _quo;
+    *quo = (sq != 0U) ? -_quo : _quo;
 
     GET_FLOAT_WORD(hx, x);
     SET_FLOAT_WORD(x, hx ^ sx);
