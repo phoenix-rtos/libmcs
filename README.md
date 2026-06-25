@@ -2,17 +2,20 @@
 
 This is the mathematical library for critical systems (LibmCS).
 
-It has been developed in compliance with the European Cooperation for Space Standardization (ECSS) standards E-ST-40 and Q-ST-80 to criticality Category B and it is also compliant to the standards:
+When combined with the corresponding ECSS documentation* and a qualification test run on target, this library is compliant with the European Cooperation for Space Standardization (ECSS) standards E-ST-40 and Q-ST-80 to criticality Category B and it is also compliant to the standards:
 
 - IEEE-754,
 - C18,
 - POSIX, and
 - MISRA C
 
+The latest qualifiable version of the LibmCS can be found on the [Releases page](https://gitlab.com/gtd-gmbh/libmcs/-/releases). __No other versions, tags, branches or commits are qualifiable.__
+
 The library has been developed by GTD GmbH under the ESA Contract No. 4000130278/20/NL/AS.
 
 The copyright and licensing condition of the library can be found in the COPYING.md file.
 
+\* The ECSS documentation has to be acquired separately from GTD GmbH by sending an e-mail to libmcs@gtd-gmbh.de.
 
 ## Getting Started
 
