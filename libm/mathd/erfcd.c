@@ -163,29 +163,29 @@ double erfc(double x)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t hx, ix;
+    uint32_t hx, lx, ix;
     double R, S, P, Q, s, y, z, r;
-    GET_HIGH_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    EXTRACT_WORDS(hx, lx, x);
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x7ff00000) {
-        if (isnan(x)) {         /* erfc(nan) = nan */
+    if (ix >= 0x7ff00000U) {
+        if (DBL_WORDS_IS_NAN(hx, lx)) {  /* erfc(nan) = nan */
             return x + x;
-        } else if (hx > 0) {    /* erfc(+inf) = 0 */
+        } else if ((int32_t)hx > 0) {    /* erfc(+inf) = 0 */
             return 0.0;
         } else {                /* erfc(-inf) = 2 */
             return two;
         }
     }
 
-    if (ix < 0x3feb0000) {         /* |x|<0.84375 */
-        if (ix < 0x3c700000) {     /* |x|<2**-56 */
+    if (ix < 0x3feb0000U) {         /* |x|<0.84375 */
+        if (ix < 0x3c700000U) {     /* |x|<2**-56 */
             return __raise_inexact(one);
         }
 
         y = __erf_y(x);
 
-        if (hx < 0x3fd00000) {     /* x<1/4 */
+        if ((int32_t)hx < 0x3fd00000) {     /* x<1/4 */
             return one - (x + x * y);
         } else {
             r = x * y;
@@ -194,12 +194,12 @@ double erfc(double x)
         }
     }
 
-    if (ix < 0x3ff40000) {         /* 0.84375 <= |x| < 1.25 */
+    if (ix < 0x3ff40000U) {         /* 0.84375 <= |x| < 1.25 */
         s = fabs(x) - one;
         P = __erf_P(s);
         Q = __erf_Q(s);
 
-        if (hx >= 0) {
+        if ((int32_t)hx >= 0) {
             z  = one - erx;
             return z - P / Q;
         } else {
@@ -208,15 +208,15 @@ double erfc(double x)
         }
     }
 
-    if (ix < 0x403c0000) {         /* |x|<28 */
+    if (ix < 0x403c0000U) {         /* |x|<28 */
         x = fabs(x);
         s = one / (x * x);
 
-        if (ix < 0x4006DB6D) {     /* |x| < 1/.35 ~ 2.857143*/
+        if (ix < 0x4006DB6DU) {     /* |x| < 1/.35 ~ 2.857143*/
             R = __erf_Ra(s);
             S = __erf_Sa(s);
         } else {                   /* |x| >= 1/.35 ~ 2.857143 */
-            if (hx < 0 && ix >= 0x40180000) {
+            if ((int32_t)hx < 0 && ix >= 0x40180000U) {
                 return __raise_inexact(two); /* x < -6 */
             }
 
@@ -225,16 +225,16 @@ double erfc(double x)
         }
 
         z  = x;
-        SET_LOW_WORD(z, 0);
+        SET_LOW_WORD(z, 0U);
         r  =  exp(-z * z - 0.5625) * exp((z - x) * (z + x) + R / S);
 
-        if (hx > 0) {
+        if ((int32_t)hx > 0) {
             return r / x;
         } else {
             return two - r / x;
         }
     } else {
-        if (hx > 0) {
+        if ((int32_t)hx > 0) {
             return __raise_underflow(0.0);
         } else {
             return __raise_inexact(two);

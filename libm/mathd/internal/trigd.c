@@ -258,7 +258,7 @@ static inline int __rem_pio2_internal(const double *x, double *y, int e0, int nx
         }
 
         /* compute n */
-        z  = scalbn(z, (int32_t)q0);       /* actual value of z */
+        z  = scalbn(z, q0);       /* actual value of z */
         z -= 8.0 * floor(z * 0.125);       /* trim off integer >= 8 */
         n  = (int32_t) z;
         z -= (double)n;
@@ -314,7 +314,7 @@ static inline int __rem_pio2_internal(const double *x, double *y, int e0, int nx
                 /* in case that iq[] does have a contribution, subtract the order of magnitude
                    of this contribution from the complement of z so that z + iq can be computed. */
                 if (carry != 0) {
-                    z -= scalbn(one, (int32_t)q0);
+                    z -= scalbn(one, q0);
                     /* Given the following decimal example of: z = 0.7 and iq = 0.01 for the angle z + iq = 0.71
                        the complements would be z = 1 - z = 0.3 and iq = 0.1 - iq = 0.09
                        now, z needs to be decremented by 0.1; z = z - 0.1 so that z + iq = 0.2 + 0.09 = 0.29
@@ -373,7 +373,7 @@ static inline int __rem_pio2_internal(const double *x, double *y, int e0, int nx
             q0 -= 24;
         }
     } else { /* break z into 24-bit if necessary */
-        z = scalbn(z, -(int32_t)q0);
+        z = scalbn(z, -q0);
 
         if (z >= two24) {
             fw = (double)((int32_t)(twon24 * z));
@@ -387,7 +387,7 @@ static inline int __rem_pio2_internal(const double *x, double *y, int e0, int nx
     }
 
     /* convert integer "bit" chunk to floating-point value */
-    fw = scalbn(one, (int32_t)q0);
+    fw = scalbn(one, q0);
 
     for (i = jz; i >= 0; i--) {
         q[i] = fw * (double)iq[i];
@@ -451,24 +451,22 @@ int32_t __rem_pio2(double x, double *y)
 {
     double z = 0.0, w, t, r, fn;
     double tx[3];
-    int32_t i, j, n, ix, hx;
-    int32_t e0, nx;
-    uint32_t low;
+    uint32_t low, ix, hx, nx, i, j, n, e0;
 
-    GET_HIGH_WORD(hx, x);       /* high word of x */
-    ix = hx & 0x7fffffff;
+    EXTRACT_WORDS(hx, low, x);       /* high word of x */
+    ix = hx & 0x7fffffffU;
 
-    if (ix <= 0x3fe921fb) { /* |x| ~<= pi/4 , no need for reduction */
+    if (ix <= 0x3fe921fbU) { /* |x| ~<= pi/4 , no need for reduction */
         y[0] = x;
         y[1] = 0;
         return 0;
     }
 
-    if (ix < 0x4002d97c) { /* |x| < 3pi/4, special case with n=+-1 */
-        if (hx > 0) {
+    if (ix < 0x4002d97cU) { /* |x| < 3pi/4, special case with n=+-1 */
+      if ((int32_t)hx > 0) {
             z = x - pio2_1;
 
-            if (ix != 0x3ff921fb) {  /* 33+53 bit pi is good enough */
+            if (ix != 0x3ff921fbU) {  /* 33+53 bit pi is good enough */
                 y[0] = z - pio2_1t;
                 y[1] = (z - y[0]) - pio2_1t;
             } else {        /* near pi/2, use 33+33+53 bit pi */
@@ -481,7 +479,7 @@ int32_t __rem_pio2(double x, double *y)
         } else {    /* negative x */
             z = x + pio2_1;
 
-            if (ix != 0x3ff921fb) {  /* 33+53 bit pi is good enough */
+            if (ix != 0x3ff921fbU) {  /* 33+53 bit pi is good enough */
                 y[0] = z + pio2_1t;
                 y[1] = (z - y[0]) + pio2_1t;
             } else {        /* near pi/2, use 33+33+53 bit pi */
@@ -494,9 +492,9 @@ int32_t __rem_pio2(double x, double *y)
         }
     }
 
-    if (ix <= 0x413921fb) { /* |x| ~<= 2^19*(pi/2), medium size */
+    if (ix <= 0x413921fbU) { /* |x| ~<= 2^19*(pi/2), medium size */
         t  = fabs(x);
-        n  = (int32_t)(t * invpio2 + half);
+        n  = (uint32_t)(t * invpio2 + half);
         fn = (double)n;
         r  = t - fn * pio2_1;
         w  = fn * pio2_1t;  /* 1st round good to 85 bit */
@@ -506,18 +504,18 @@ int32_t __rem_pio2(double x, double *y)
             j  = ix >> 20;
             y[0] = r - w;
             GET_HIGH_WORD(high, y[0]);
-            i = j - ((high >> 20) & 0x7ff);
+            i = j - ((high >> 20U) & 0x7ffU);
 
-            if (i > 16) { /* 2nd iteration needed, good to 118 */
+            if (i > 16U) { /* 2nd iteration needed, good to 118 */
                 t  = r;
                 w  = fn * pio2_2;
                 r  = t - w;
                 w  = fn * pio2_2t - ((t - r) - w);
                 y[0] = r - w;
                 GET_HIGH_WORD(high, y[0]);
-                i = j - ((high >> 20) & 0x7ff);
+                i = j - ((high >> 20U) & 0x7ffU);
 
-                if (i > 49)  { /* 3rd iteration need, 151 bits acc */
+                if (i > 49U)  { /* 3rd iteration need, 151 bits acc */
                     t  = r;    /* will cover all possible cases */
                     w  = fn * pio2_3;
                     r  = t - w;
@@ -529,20 +527,20 @@ int32_t __rem_pio2(double x, double *y)
 
         y[1] = (r - y[0]) - w;
 
-        if (hx < 0)     {
+        if ((int32_t)hx < 0)     {
             y[0] = -y[0];
             y[1] = -y[1];
-            return -n;
+            return -(int32_t)n;
         } else {
-            return n;
+            return (int32_t)n;
         }
     }
 
     /*
      * all other (large) arguments
      */
-    if (ix >= 0x7ff00000) {     /* x is inf or NaN */
-        if (isnan(x)) {
+    if (ix >= 0x7ff00000U) {     /* x is inf or NaN */
+        if (DBL_WORDS_IS_NAN(hx, low)) {
             y[1] = x - x;
             y[0] = y[1];
         } else {
@@ -553,12 +551,11 @@ int32_t __rem_pio2(double x, double *y)
     }
 
     /* set z = scalbn(|x|,ilogb(x)-23) */
-    GET_LOW_WORD(low, x);
     SET_LOW_WORD(z, low);
-    e0 = (int32_t)((ix >> 20) - 1046); /* e0 = ilogb(z)-23; */
-    SET_HIGH_WORD(z, ix - ((int32_t)e0 << 20));
+    e0 = (ix >> 20U) - 1046; /* e0 = ilogb(z)-23; */
+    SET_HIGH_WORD(z, ix - (e0 << 20U));
 
-    for (i = 0; i < 2; i++) {
+    for (i = 0U; i < 2U; i++) {
         tx[i] = (double)((int32_t)(z));
         z     = (z - tx[i]) * two24;
     }
@@ -571,15 +568,15 @@ int32_t __rem_pio2(double x, double *y)
         }
     }
 
-    n  =  __rem_pio2_internal(tx, y, e0, nx);
+    n  =  (uint32_t)__rem_pio2_internal(tx, y, (int32_t)e0, (int32_t)nx);
 
-    if (hx < 0) {
+    if ((int32_t)hx < 0) {
         y[0] = -y[0];
         y[1] = -y[1];
-        return -n;
+        return -(int32_t)n;
     }
 
-    return n;
+    return (int32_t)n;
 }
 
 static const double

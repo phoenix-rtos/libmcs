@@ -15,19 +15,19 @@ int ilogbf(float x)
     uint32_t hx;
 
     GET_FLOAT_WORD(hx, x);
-    hx &= 0x7fffffff;
+    hx &= 0x7fffffffU;
 
     if (FLT_UWORD_IS_ZERO(hx)) {
         (void) __raise_invalidf();
-        return FP_ILOGB0;    /* ilogb(0) = special case error */
+        return FP_ILOGB0;                          /* ilogb(0) = special case error */
     } else if (FLT_UWORD_IS_SUBNORMAL(hx)) {
-        for (ix = -126, hx <<= 8; hx < 0x80000000U; hx <<= 1) {
+        for (ix = -126, hx <<= 8U; hx < 0x80000000U; hx <<= 1U) {
             ix -= 1;
         }
 
         return ix;
     } else if (FLT_UWORD_IS_FINITE(hx)) {
-        return (int32_t)(hx >> 23) - 127;
+      return (int32_t)(hx >> 23U) - 127;
     } else if (FLT_UWORD_IS_NAN(hx)) {
         (void) __raise_invalidf();
         return FP_ILOGBNAN;     /* NAN */

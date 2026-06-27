@@ -16,15 +16,15 @@ float asinhf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float t, w;
-    int32_t hx, ix;
+    uint32_t hx, ix;
     GET_FLOAT_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
     if (!FLT_UWORD_IS_FINITE(ix)) {
         return x + x;    /* x is inf or NaN */
     }
 
-    if (ix < 0x31800000) {  /* |x|<2**-28 */
+    if (ix < 0x31800000U) {  /* |x|<2**-28 */
         if (FLT_UWORD_IS_ZERO(ix)) {    /* return x inexact except 0 */
             return x;
         } else {
@@ -32,9 +32,9 @@ float asinhf(float x)
         }
     }
 
-    if (ix > 0x4d800000) { /* |x| > 2**28 */
+    if (ix > 0x4d800000U) { /* |x| > 2**28 */
         w = logf(fabsf(x)) + ln2;
-    } else if (ix > 0x40000000) {  /* 2**28 > |x| > 2.0 */
+    } else if (ix > 0x40000000U) {  /* 2**28 > |x| > 2.0 */
         t = fabsf(x);
         w = logf(2.0f * t + one / (sqrtf(x * x + one) + t));
     } else {        /* 2.0 > |x| > 2**-28 */
@@ -42,7 +42,7 @@ float asinhf(float x)
         w = log1pf(fabsf(x) + t / (one + sqrtf(one + t)));
     }
 
-    if (hx > 0) {
+    if ((int32_t)hx > 0) {
         return w;
     } else {
         return -w;

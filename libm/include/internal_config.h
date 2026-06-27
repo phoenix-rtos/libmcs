@@ -75,16 +75,16 @@
     (255 if the largest exponent is used for finite numbers, 254
     otherwise) */
 
-#define FLT_UWORD_IS_FINITE(x) ((x)<0x7f800000L)
-#define FLT_UWORD_IS_NAN(x) ((x)>0x7f800000L)
-#define FLT_UWORD_IS_INFINITE(x) ((x)==0x7f800000L)
-#define FLT_UWORD_MAX 0x7f7fffffL
-#define FLT_UWORD_EXP_MAX 0x43000000
-#define FLT_UWORD_LOG_MAX 0x42b17217
-#define FLT_UWORD_LOG_2MAX 0x42b2d4fc
+#define FLT_UWORD_IS_FINITE(x) ((x)<0x7f800000U)
+#define FLT_UWORD_IS_NAN(x) ((x)>0x7f800000U)
+#define FLT_UWORD_IS_INFINITE(x) ((x)==0x7f800000U)
+#define FLT_UWORD_MAX 0x7f7fffffU
+#define FLT_UWORD_EXP_MAX 0x43000000U
+#define FLT_UWORD_LOG_MAX 0x42b17217U
+#define FLT_UWORD_LOG_2MAX 0x42b2d4fcU
 #define HUGE ((float)3.40282346638528860e+38)
-#define FLT_UWORD_HALF_MAX (FLT_UWORD_MAX-(1L<<23))
-#define FLT_LARGEST_EXP (FLT_UWORD_MAX>>23)
+#define FLT_UWORD_HALF_MAX (FLT_UWORD_MAX-((uint32_t)1U<<23U))
+#define FLT_LARGEST_EXP (FLT_UWORD_MAX>>23U)
 
 /* Many routines check for zero and subnormal numbers.  Such things depend
    on whether the target supports denormals or not:
@@ -114,20 +114,30 @@
 */
 
 #ifdef __LIBMCS_FPU_DAZ
-    #define FLT_UWORD_IS_ZERO(x) ((x)<0x00800000L)
+    #define FLT_UWORD_IS_ZERO(x) ((x)<0x00800000U)
     #define FLT_UWORD_IS_SUBNORMAL(x) 0
-    #define FLT_UWORD_MIN 0x00800000
-    #define FLT_UWORD_EXP_MIN 0x42fc0000
-    #define FLT_UWORD_LOG_MIN 0x42aeac50
+    #define FLT_UWORD_MIN 0x00800000U
+    #define FLT_UWORD_EXP_MIN 0x42fc0000U
+    #define FLT_UWORD_LOG_MIN 0x42aeac50U
     #define FLT_SMALLEST_EXP 0
 #else
-    #define FLT_UWORD_IS_ZERO(x) ((x)==0)
-    #define FLT_UWORD_IS_SUBNORMAL(x) ((x)<0x00800000L)
-    #define FLT_UWORD_MIN 0x00000001
-    #define FLT_UWORD_EXP_MIN 0x43160000
-    #define FLT_UWORD_LOG_MIN 0x42cff1b5
+    #define FLT_UWORD_IS_ZERO(x) ((x)==0U)
+    #define FLT_UWORD_IS_SUBNORMAL(x) ((x)<0x00800000U)
+    #define FLT_UWORD_MIN 0x00000001U
+    #define FLT_UWORD_EXP_MIN 0x43160000U
+    #define FLT_UWORD_LOG_MIN 0x42cff1b5U
     #define FLT_SMALLEST_EXP -23
 #endif
+
+/* Most routines need to check whether a double is a NaN. 
+   The macro below wraps up that kind of information:
+
+   DBL_WORDS_IS_NAN(X)
+    True if a double concatenated by both words represents a NaN.
+*/
+#define DBL_WORDS_IS_NAN(ix0,ix1)              \
+    ((((ix0) & 0x7FF00000U) >= 0x7FF00000U) && \
+     (((ix0) & 0x000FFFFFU) | (ix1)) > 0U)
 
 #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     #define __IEEE_BIG_ENDIAN

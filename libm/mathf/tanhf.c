@@ -14,25 +14,25 @@ float tanhf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float t, z;
-    int32_t jx, ix;
+    uint32_t jx, ix;
 
     GET_FLOAT_WORD(jx, x);
-    ix = jx & 0x7fffffff;
+    ix = jx & 0x7fffffffU;
 
     /* x is INF or NaN */
     if (!FLT_UWORD_IS_FINITE(ix)) {
-        if (isnan(x)) {             /* tanh(NaN) = NaN */
+        if (FLT_UWORD_IS_NAN(ix)) {         /* tanh(NaN) = NaN */
             return x + x;
-        } else if (jx >= 0) {
-            return one;             /* tanh(+inf)=+1 */
+        } else if ((int32_t)jx >= 0) {
+            return one;                     /* tanh(+inf)=+1 */
         } else {
-            return -one;            /* tanh(-inf)=-1 */
+            return -one;                    /* tanh(-inf)=-1 */
         }
     }
 
     /* |x| < 22 */
-    if (ix < 0x41b00000) {          /* |x|<22 */
-        if (ix < 0x24000000) {      /* |x|<2**-55 */
+    if (ix < 0x41b00000U) {                 /* |x|<22 */
+        if (ix < 0x24000000U) {             /* |x|<2**-55 */
             if (FLT_UWORD_IS_ZERO(ix)) {    /* return x inexact except 0 */
                 return x;
             } else {
@@ -40,7 +40,7 @@ float tanhf(float x)
             }
         }
 
-        if (ix >= 0x3f800000) {     /* |x|>=1  */
+        if (ix >= 0x3f800000U) {     /* |x|>=1  */
             t = expm1f(two * fabsf(x));
             z = one - two / (t + two);
         } else {
@@ -53,7 +53,7 @@ float tanhf(float x)
         z = __raise_inexactf(one);              /* raised inexact flag */
     }
 
-    return (jx >= 0) ? z : -z;
+    return ((int32_t)jx >= 0) ? z : -z;
 }
 
 #ifdef __LIBMCS_DOUBLE_IS_32BITS

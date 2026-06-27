@@ -29,20 +29,20 @@ float asinf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float t, w, p, q, c, r, s;
-    int32_t hx, ix;
+    uint32_t hx, ix, iw;
     GET_FLOAT_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix == 0x3f800000) { /* asin(1)=+-pi/2 with inexact */
+    if (ix == 0x3f800000U) { /* asin(1)=+-pi/2 with inexact */
         return x * pio2_hi + x * pio2_lo;
-    } else if (ix > 0x3f800000) {  /* |x|>= 1 */
-        if (isnan(x)) {
+    } else if (ix > 0x3f800000U) {  /* |x|>= 1 */
+        if (FLT_UWORD_IS_NAN(ix)) {
             return x + x;
         }
 
         return __raise_invalidf();  /* asin(|x|>1) is NaN */
-    } else if (ix < 0x3f000000) {  /* |x|<0.5 */
-        if (ix < 0x32000000) {     /* if |x| < 2**-27 */
+    } else if (ix < 0x3f000000U) {  /* |x|<0.5 */
+        if (ix < 0x32000000U) {     /* if |x| < 2**-27 */
             if (FLT_UWORD_IS_ZERO(ix)) {    /* return x inexact except 0 */
                 return x;
             } else {
@@ -66,11 +66,10 @@ float asinf(float x)
     q = one + t * (qS1 + t * (qS2 + t * (qS3 + t * qS4)));
     s = sqrtf(t);
 
-    if (ix >= 0x3F79999A) {  /* if |x| > 0.975 */
+    if (ix >= 0x3F79999AU) {  /* if |x| > 0.975 */
         w = p / q;
         t = pio2_hi - (2.0f * (s + s * w) - pio2_lo);
     } else {
-        int32_t iw;
         w  = s;
         GET_FLOAT_WORD(iw, w);
         SET_FLOAT_WORD(w, iw & 0xfffff000U);
@@ -81,7 +80,7 @@ float asinf(float x)
         t  = pio4_hi - (p - q);
     }
 
-    if (hx > 0) {
+    if ((int32_t)hx > 0) {
         return t;
     } else {
         return -t;

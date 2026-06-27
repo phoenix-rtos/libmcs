@@ -67,46 +67,46 @@ double modf(double x, double *iptr)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double _xi = 0.0;
-    int32_t _i0, _i1, _j0;
-    uint32_t i;
+    int32_t _j0;
+    uint32_t _i0, _i1, i;
 
-    assert(iptr != (void*)0);
-    if(iptr == (void*)0) {
+    assert(iptr != (void*)0U);
+    if (iptr == (void*)0U) {
         iptr = &_xi;
     }
 
     EXTRACT_WORDS(_i0, _i1, x);
-    _j0 = ((_i0 >> 20) & 0x7ff) - 0x3ff;                 /* exponent of x */
+    _j0 = (int32_t)((_i0 >> 20U) & 0x7ffU) - 0x3ff;      /* exponent of x */
 
     if (_j0 < 20) {                                     /* integer part in high x */
         if (_j0 < 0) {                                  /* |x|<1 */
             INSERT_WORDS(*iptr, _i0 & 0x80000000U, 0U); /* *iptr = +-0 */
             return x;
         } else {
-            i = (0x000fffff) >> _j0;
+            i = 0x000fffffU >> (uint32_t)_j0;
 
-            if (((_i0 & i) | _i1) == 0) {                /* x is integral */
+            if (((_i0 & i) | _i1) == 0U) {              /* x is integral */
                 *iptr = x;
                 INSERT_WORDS(x, _i0 & 0x80000000U, 0U); /* return +-0 */
                 return x;
             } else {
-                INSERT_WORDS(*iptr, _i0 & (~i), 0);
+                INSERT_WORDS(*iptr, _i0 & (~i), 0U);
                 return x - *iptr;
             }
         }
     } else if (_j0 > 51) {                              /* no fraction part */
         *iptr = x;
 
-        if (isnan(x)) {
+        if (DBL_WORDS_IS_NAN(_i0, _i1)) {
             return *iptr = x + x;                      /* x is NaN, return NaN */
         }
 
         INSERT_WORDS(x, _i0 & 0x80000000U, 0U);         /* return +-0 */
         return x;
     } else {                                           /* fraction part in low x */
-        i = ((uint32_t)(0xffffffffU)) >> (_j0 - 20);
+        i = 0xffffffffU >> (uint32_t)(_j0 - 20);
 
-        if ((_i1 & i) == 0) {                           /* x is integral */
+        if ((_i1 & i) == 0U) {                           /* x is integral */
             *iptr = x;
             INSERT_WORDS(x, _i0 & 0x80000000U, 0U);     /* return +-0 */
             return x;

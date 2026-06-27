@@ -20,31 +20,32 @@ float atan2f(float y, float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float z;
-    int32_t k, m, hx, hy, ix, iy;
+    int32_t k;
+    uint32_t m, hx, hy, ix, iy;
 
     GET_FLOAT_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
     GET_FLOAT_WORD(hy, y);
-    iy = hy & 0x7fffffff;
+    iy = hy & 0x7fffffffU;
 
     if (FLT_UWORD_IS_NAN(ix) ||
-        FLT_UWORD_IS_NAN(iy)) {  /* x or y is NaN */
+        FLT_UWORD_IS_NAN(iy)) {                         /* x or y is NaN */
         return x + y;
     }
 
-    if (hx == 0x3f800000) {
-        return atanf(y);    /* x=1.0 */
+    if (hx == 0x3f800000U) {
+        return atanf(y);                                /* x=1.0 */
     }
 
-    m = ((hy >> 31) & 1) | ((hx >> 30) & 2); /* 2*sign(x)+sign(y) */
+    m = ((hy >> 31U) & 1U) | ((hx >> 30U) & 2U);            /* 2*sign(x)+sign(y) */
 
     /* when y = 0 */
     if (FLT_UWORD_IS_ZERO(iy)) {
         switch (m) {
-        default:    /* FALLTHRU */
-        case 0:     /* FALLTHRU */
+        default:                                        /* FALLTHRU */
+        case 0:                                         /* FALLTHRU */
         case 1:
-            return y;                       /* atan(+-0,+anything)=+-0 */
+            return y;                                   /* atan(+-0,+anything)=+-0 */
 
         case 2:
             return  __raise_inexactf(pi);    /* atan(+0,-anything) = pi */
@@ -56,7 +57,7 @@ float atan2f(float y, float x)
 
     /* when x = 0 */
     if (FLT_UWORD_IS_ZERO(ix)) {
-        return (hy < 0) ? -__raise_inexactf(pi_o_2) : __raise_inexactf(pi_o_2);
+        return ((int32_t)hy < 0) ? -__raise_inexactf(pi_o_2) : __raise_inexactf(pi_o_2);
     }
 
     /* when x is INF */
@@ -96,33 +97,34 @@ float atan2f(float y, float x)
 
     /* when y is INF */
     if (FLT_UWORD_IS_INFINITE(iy)) {
-        return (hy < 0) ? -__raise_inexactf(pi_o_2) : __raise_inexactf(pi_o_2);
+        return ((int32_t)hy < 0) ? -__raise_inexactf(pi_o_2) : __raise_inexactf(pi_o_2);
     }
 
     /* compute y/x */
-    k = (iy - ix) >> 23;
+    /* Computation based on 2-complement arithmetic shift, is in C standard implementation defined. */
+    k = ((int32_t)iy - (int32_t)ix) >> 23;
 
     if (k > 26) {
         z = __raise_inexactf(pi_o_2);    /* |y/x| >  2**26 */
-        m &= 1;
-    } else if (hx < 0 && k < -26) {
-        z = 0.0f;    /* 0 > |y|/x > -2**26 */
+        m &= 1U;
+    } else if ((int32_t)hx < 0 && k < -26) {
+        z = 0.0f;                              /* 0 > |y|/x > -2**26 */
     } else {
-        z = atanf(fabsf(y / x));        /* safe to do y/x */
+        z = atanf(fabsf(y / x));               /* safe to do y/x */
     }
 
     switch (m) {
     case 0:
-        return       z  ;         /* atan(+,+) */
+        return       z  ;                      /* atan(+,+) */
 
     case 1:
-        return      -z  ;         /* atan(-,+) */
+        return      -z  ;                      /* atan(-,+) */
 
     case 2:
-        return  pi - (z - pi_lo); /* atan(+,-) */
+        return  pi - (z - pi_lo);              /* atan(+,-) */
 
     default: /* case 3 */
-        return (z - pi_lo) - pi;  /* atan(-,-) */
+        return (z - pi_lo) - pi;               /* atan(-,-) */
     }
 }
 

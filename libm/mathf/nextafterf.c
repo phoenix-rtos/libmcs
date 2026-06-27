@@ -12,18 +12,18 @@ float nextafterf(float x, float y)
     y *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t hx, hy, ix, iy;
+    uint32_t hx, hy, ix, iy;
 
     GET_FLOAT_WORD(hx, x);
     GET_FLOAT_WORD(hy, y);
-    ix = hx & 0x7fffffff;      /* |x| */
-    iy = hy & 0x7fffffff;      /* |y| */
+    ix = hx & 0x7fffffffU;      /* |x| */
+    iy = hy & 0x7fffffffU;      /* |y| */
 
     if (FLT_UWORD_IS_NAN(ix) || FLT_UWORD_IS_NAN(iy)) {
         return x + y;
     } else if (hx == hy) {
-        return y;                      /* x == y, return y */
-    } else if (ix == 0) {              /* x == 0 */
+        return y;                      /* x=y, return x */
+    } else if (ix == 0U) {              /* x == 0 */
         if (ix == iy) {
             return y;                  /* x == y, return y */
         }
@@ -34,27 +34,27 @@ float nextafterf(float x, float y)
         (void) __raise_underflowf(x);
 #endif /* defined(__LIBMCS_FPU_DAZ) */
         return x;
-    } else if (hx >= 0) {              /* x > 0 */
-        if (hx > hy) {                 /* x > y, x -= ulp */
-            hx -= 1;
+    } else if ((int32_t)hx >= 0) {              /* x > 0 */
+        if ((int32_t)hx > (int32_t)hy) {                 /* x > y, x -= ulp */
+            hx -= 1U;
         } else {                       /* x < y, x += ulp */
-            hx += 1;
+            hx += 1U;
         }
     } else {                           /* x < 0 */
-        if (hy >= 0 || hx > hy) {      /* x < y, x -= ulp */
-            hx -= 1;
+        if ((int32_t)hy >= 0 || (int32_t)hx > (int32_t)hy) {      /* x < y, x -= ulp */
+            hx -= 1U;
         } else {                       /* x > y, x += ulp */
-            hx += 1;
+            hx += 1U;
         }
     }
 
-    hy = hx & 0x7f800000;
+    hy = hx & 0x7f800000U;
 
     if (hy > FLT_UWORD_MAX) {
         return __raise_overflowf(x);  /* overflow if x is finite */
     }
 
-    if (hy < 0x00800000) {            /* underflow */
+    if (hy < 0x00800000U) {            /* underflow */
 #ifdef __LIBMCS_FPU_DAZ
         SET_FLOAT_WORD(x, hx & 0x80000000U);    /* return +-0.0 */
         return x;

@@ -87,7 +87,7 @@ double jn(int n, double x)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t i, hx, ix, lx, sgn;
+    uint32_t hx, lx, ix, i, sgn;
     double a, b, temp, di;
     double z, w;
 
@@ -95,10 +95,10 @@ double jn(int n, double x)
      * Thus, J(-n,x) = J(n,-x)
      */
     EXTRACT_WORDS(hx, lx, x);
-    ix = 0x7fffffff & hx;
+    ix = 0x7fffffffU & hx;
 
     /* if J(n,NaN) is NaN */
-    if ((ix | ((uint32_t)(lx | -lx)) >> 31) > 0x7ff00000) {
+    if (DBL_WORDS_IS_NAN(hx, lx)) {
         return x + x;
     }
 
@@ -116,14 +116,14 @@ double jn(int n, double x)
         return (j1(x));
     }
 
-    sgn = (n & 1) & (hx >> 31); /* even n -- 0, odd n -- sign(x) */
+    sgn = ((uint32_t)n & 1U) & (hx >> 31U); /* even n -- 0, odd n -- sign(x) */
     x = fabs(x);
 
-    if ((ix | lx) == 0 || ix >= 0x7ff00000) { /* if x is 0 or inf */
+    if ((ix | lx) == 0U || ix >= 0x7ff00000U) { /* if x is 0 or inf */
         b = zero;
     } else if ((double)n <= x) {
         /* Safe to use J(n+1,x)=2n/x *J(n,x)-J(n-1,x) */
-        if (ix >= 0x52D00000) { /* x > 2**302 */
+        if (ix >= 0x52D00000U) { /* x > 2**302 */
             /* (x >> n**2)
              *        Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
              *        Yn(x) = sin(x-(2n+1)*pi/4)*sqrt(2/x*pi)
@@ -137,7 +137,7 @@ double jn(int n, double x)
              *           2    -s+c        -c-s
              *           3     s+c         c-s
              */
-            switch (n & 3) {
+            switch ((uint32_t)n & 3U) {
             default:    /* FALLTHRU */
             case 0:
                 temp =  cos(x) + sin(x);
@@ -161,14 +161,14 @@ double jn(int n, double x)
             a = j0(x);
             b = j1(x);
 
-            for (i = 1; i < n; i++) {
+            for (i = 1U; i < (uint32_t)n; i++) {
                 temp = b;
                 b = b * ((double)(i + i) / x) - a; /* avoid underflow */
                 a = temp;
             }
         }
     } else {
-        if (ix < 0x3e100000) { /* x < 2**-29 */
+        if (ix < 0x3e100000U) { /* x < 2**-29 */
             /* x is tiny, return the first Taylor expansion of J(n,x)
              * J(n,x) = 1/n!*(x/2)^n  - ...
              */
@@ -178,7 +178,7 @@ double jn(int n, double x)
                 temp = x * 0.5;
                 b = temp;
 
-                for (a = one, i = 2; i <= n; i++) {
+                for (a = 1.0, i = 2U; i <= (uint32_t)n; i++) {
                     a *= (double)i;        /* a = n! */
                     b *= temp;        /* b = (x/2)^n */
                 }
@@ -217,8 +217,8 @@ double jn(int n, double x)
             /* determine k */
             double t, v;
             double q0, q1, h, tmp;
-            int32_t k, m;
-            w  = (n + n) / (double)x;
+            uint32_t k, m;
+            w  = (double)(n + n) / (double)x;
             h = 2.0 / (double)x;
             q0 = w;
             z = w + h;
@@ -226,21 +226,21 @@ double jn(int n, double x)
             k = 1;
 
             while (q1 < 1.0e9) {
-                k += 1;
+                k += 1U;
                 z += h;
                 tmp = z * q1 - q0;
                 q0 = q1;
                 q1 = tmp;
             }
 
-            m = n + n;
+            m = (uint32_t)(n + n);
 
-            for (t = zero, i = 2 * (n + k); i >= m; i -= 2) {
-                t = one / (i / x - t);
+            for (t = zero, i = 2U * ((uint32_t)n + k); i >= m; i -= 2U) {
+                t = 1.0 / ((double)i / x - t);
             }
 
             a = t;
-            b = one;
+            b = 1.0;
             /*  estimate log((2/x)^n*n!) = n*log(2/x)+n*ln(n)
              *  Hence, if n*(log(2n/x)) > ...
              *  single 8.8722839355e+01
@@ -254,7 +254,7 @@ double jn(int n, double x)
             tmp = tmp * log(fabs(v * tmp));
 
             if (tmp < 7.09782712893383973096e+02) {
-                for (i = n - 1, di = (double)(i + i); i > 0; i--) {
+                for (i = (uint32_t)(n - 1), di = (double)(i + i); i > 0U; i--) {
                     temp = b;
                     b *= di;
                     b  = b / x - a;
@@ -262,7 +262,7 @@ double jn(int n, double x)
                     di -= two;
                 }
             } else {
-                for (i = n - 1, di = (double)(i + i); i > 0; i--) {
+                for (i = (uint32_t)(n - 1), di = (double)(i + i); i > 0U; i--) {
                     temp = b;
                     b *= di;
                     b  = b / x - a;
@@ -273,7 +273,7 @@ double jn(int n, double x)
                     if (b > 1e100) {
                         a /= b;
                         t /= b;
-                        b  = one;
+                        b  = 1.0;
                     }
                 }
             }
@@ -282,7 +282,7 @@ double jn(int n, double x)
         }
     }
 
-    if (sgn != 0) {
+    if (sgn != 0U) {
         return -b;
     } else {
         return b;

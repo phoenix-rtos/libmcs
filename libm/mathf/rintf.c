@@ -16,15 +16,15 @@ float rintf(float x)
     x *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t _i0, _j0;
-    uint32_t i, _i1, ix, sx;
+    int32_t _j0;
+    uint32_t i, _i0, _i1, sx, ix;
     float t;
     volatile float w;
 
     GET_FLOAT_WORD(_i0, x);
     sx = ((uint32_t)_i0 >> 31) & 1;
     ix = (_i0 & 0x7fffffff);
-    _j0 = (ix >> 23) - 0x7f;
+    _j0 = (int32_t)(ix >> 23) - 0x7f;
 
     if (_j0 < 23) {
         if (FLT_UWORD_IS_ZERO(ix)) {
@@ -32,26 +32,26 @@ float rintf(float x)
         }
 
         if (_j0 < 0) {
-            _i1 = (_i0 & 0x07fffff);
+            _i1 = _i0 & 0x07fffffU;
             _i0 &= 0xfff00000U;
-            _i0 |= ((_i1 | -_i1) >> 9) & 0x400000;
+            _i0 |= ((_i1 | -_i1) >> 9U) & 0x400000U;
             SET_FLOAT_WORD(x, _i0);
             w = TWO23[sx] + x;
             t =  w - TWO23[sx];
             GET_FLOAT_WORD(_i0, t);
-            SET_FLOAT_WORD(t, (_i0 & 0x7fffffff) | (sx << 31));
+            SET_FLOAT_WORD(t, (_i0 & 0x7fffffffU) | (sx << 31U));
             return t;
         } else {
-            i = (0x007fffff) >> _j0;
+            i = 0x007fffffU >> (uint32_t)_j0;
 
-            if ((_i0 & i) == 0) {
+            if ((_i0 & i) == 0U) {
                 return x;    /* x is integral */
             }
 
-            i >>= 1;
+            i >>= 1U;
 
-            if ((_i0 & i) != 0) {
-                _i0 = (_i0 & (~i)) | ((0x200000) >> _j0);
+            if ((_i0 & i) != 0U) {
+                _i0 = (_i0 & (~i)) | (0x200000U >> (uint32_t)_j0);
             }
         }
     } else {

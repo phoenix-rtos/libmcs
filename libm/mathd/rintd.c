@@ -64,47 +64,48 @@ double rint(double x)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t _i0, _j0, sx;
-    uint32_t i, _i1;
+    int32_t _j0;
+    uint32_t i, _i1, _i0, sx;
     double t;
     volatile double w;
+
     EXTRACT_WORDS(_i0, _i1, x);
-    sx = (_i0 >> 31) & 1;               /* sign */
-    _j0 = ((_i0 >> 20) & 0x7ff) - 0x3ff; /* exponent */
+    sx = (_i0 >> 31U) & 1U;               /* sign */
+    _j0 = (int32_t)((_i0 >> 20U) & 0x7ffU) - 0x3ff; /* exponent */
 
     if (_j0 < 20) {                     /* no integral bits in LS part */
         if (_j0 < 0) {                  /* x is fractional or 0 */
-            if (((_i0 & 0x7fffffff) | _i1) == 0) {
+            if (((_i0 & 0x7fffffffU) | _i1) == 0U) {
                 return x;              /* x == 0 */
             }
 
-            _i1 |= (_i0 & 0x0fffff);
+            _i1 |= (_i0 & 0x0fffffU);
             _i0 &= 0xfffe0000U;
-            _i0 |= ((_i1 | -_i1) >> 12) & 0x80000;
+            _i0 |= (((_i1 | -_i1) >> 12U) & 0x80000U);
             SET_HIGH_WORD(x, _i0);
             w = TWO52[sx] + x;
             t =  w - TWO52[sx];
             GET_HIGH_WORD(_i0, t);
-            SET_HIGH_WORD(t, (_i0 & 0x7fffffff) | (sx << 31));
+            SET_HIGH_WORD(t, (_i0 & 0x7fffffffU) | (sx << 31U));
             return t;
         } else {                       /* x has integer and maybe fraction */
-            i = (0x000fffff) >> _j0;
+            i = 0x000fffffU >> (uint32_t)_j0;
 
-            if (((_i0 & i) | _i1) == 0) {
+            if (((_i0 & i) | _i1) == 0U) {
                 return x;              /* x is integral */
             }
 
-            i >>= 1;
+            i >>= 1U;
 
-            if (((_i0 & i) | _i1) != 0) {
+            if (((_i0 & i) | _i1) != 0U) {
                 /* 2nd or any later bit after radix is set */
                 if (_j0 == 19) {
                     _i1 = 0x80000000U;
                 } else {
-                    _i1 = 0;
+                    _i1 = 0U;
                 }
 
-                _i0 = (_i0 & (~i)) | ((0x40000) >> _j0);
+                _i0 = (_i0 & (~i)) | (0x40000U >> (uint32_t)_j0);
             }
         }
     } else if (_j0 > 51) {
@@ -114,16 +115,16 @@ double rint(double x)
             return x;                  /* x is integral */
         }
     } else {
-        i = ((uint32_t)0xffffffffU) >> (_j0 - 20);
+        i = 0xffffffffU >> ((uint32_t)_j0 - 20U);
 
-        if ((_i1 & i) == 0) {
+        if ((_i1 & i) == 0U) {
             return x;                  /* x is integral */
         }
 
-        i >>= 1;
+        i >>= 1U;
 
-        if ((_i1 & i) != 0) {
-            _i1 = (_i1 & (~i)) | ((0x40000000) >> (_j0 - 20));
+        if ((_i1 & i) != 0U) {
+            _i1 = (_i1 & (~i)) | (0x40000000U >> ((uint32_t)_j0 - 20U));
         }
     }
 

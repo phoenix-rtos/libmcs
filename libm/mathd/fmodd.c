@@ -104,26 +104,25 @@ double fmod(double x, double y)
     y *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t n, hx, hy, hz, ix, iy, sx;
-    uint32_t i;
-    uint32_t lx, ly, lz;
+    int32_t n, ix, iy;
+    uint32_t hx, hy, hz, lx, ly, lz, sx, i;
 
     EXTRACT_WORDS(hx, lx, x);
     EXTRACT_WORDS(hy, ly, y);
     sx = hx & 0x80000000U;     /* sign of x */
     hx ^= sx;                  /* |x| */
-    hy &= 0x7fffffff;          /* |y| */
+    hy &= 0x7fffffffU;         /* |y| */
 
     /* purge off exception values */
-    if (hx >= 0x7ff00000 || hy >= 0x7ff00000) { /* x or y is +-Inf/NaN */
-        if (hx == 0x7ff00000 && lx == 0) {      /* x is +-Inf */
+    if (hx >= 0x7ff00000U || hy >= 0x7ff00000U) { /* x or y is +-Inf/NaN */
+        if (hx == 0x7ff00000U && lx == 0U) {      /* x is +-Inf */
             return __raise_invalid();
-        } else if (isnan(x) || isnan(y)) {      /* x or y is NaN */
+        } else if (DBL_WORDS_IS_NAN(hx, lx) || DBL_WORDS_IS_NAN(hy, ly)) {  /* x or y is NaN */
             return x + y;
         } else {
             /* No action required */
         }
-    } else if ((hy | ly) == 0) {                /* y is +-0 */
+    } else if ((hy | ly) == 0U) {                  /* y is +-0 */
         return __raise_invalid();
     } else {
         /* No action required */
@@ -135,66 +134,66 @@ double fmod(double x, double y)
         }
 
         if (lx == ly) {
-            return Zero[(uint32_t)sx >> 31];    /* |x|=|y| return x*0*/
+            return Zero[sx >> 31U];               /* |x|=|y| return x*0*/
         }
     }
 
     /* determine ix = ilogb(x) */
     if (hx < 0x00100000) { /* subnormal x */
         if (hx == 0) {
-            for (ix = -1043, i = (uint32_t)lx; i < 0x80000000U; i <<= 1) {
+            for (ix = -1043, i = lx; i < 0x80000000U; i <<= 1) {
                 ix -= 1;
             }
         } else {
-            for (ix = -1022, i = (uint32_t)hx << 11; i < 0x80000000U; i <<= 1) {
+            for (ix = -1022, i = hx << 11; i < 0x80000000U; i <<= 1) {
                 ix -= 1;
             }
         }
     } else {
-        ix = (hx >> 20) - 1023;
+        ix = (int32_t)(hx >> 20U) - 1023;
     }
 
     /* determine iy = ilogb(y) */
     if (hy < 0x00100000) { /* subnormal y */
         if (hy == 0) {
-            for (iy = -1043, i = (uint32_t)ly; i < 0x80000000U; i <<= 1) {
+            for (iy = -1043, i = ly; i < 0x80000000U; i <<= 1) {
                 iy -= 1;
             }
         } else {
-            for (iy = -1022, i = (uint32_t)hy << 11; i < 0x80000000U; i <<= 1) {
+            for (iy = -1022, i = hy << 11; i < 0x80000000U; i <<= 1) {
                 iy -= 1;
             }
         }
     } else {
-        iy = (hy >> 20) - 1023;
+        iy = (int32_t)(hy >> 20U) - 1023;
     }
 
     /* set up {hx,lx}, {hy,ly} and align y to x */
     if (ix >= -1022) {
-        hx = 0x00100000 | (0x000fffff & hx);
+        hx = 0x00100000U | (0x000fffffU & hx);
     } else {      /* subnormal x, shift x to normal */
         n = -1022 - ix;
 
         if (n <= 31) {
-            hx = (hx << n) | (lx >> (32 - n));
-            lx <<= n;
+            hx = (hx << (uint32_t)n) | (lx >> (uint32_t)(32 - n));
+            lx <<= (uint32_t)n;
         } else {
-            hx = lx << (n - 32);
-            lx = 0;
+            hx = lx << (uint32_t)(n - 32);
+            lx = 0U;
         }
     }
 
     if (iy >= -1022) {
-        hy = 0x00100000 | (0x000fffff & hy);
+        hy = 0x00100000U | (0x000fffffU & hy);
     } else {      /* subnormal y, shift y to normal */
         n = -1022 - iy;
 
         if (n <= 31) {
-            hy = (hy << n) | (ly >> (32 - n));
-            ly <<= n;
+            hy = (hy << (uint32_t)n) | (ly >> (uint32_t)(32 - n));
+            ly <<= (uint32_t)n;
         } else {
-            hy = ly << (n - 32);
-            ly = 0;
+            hy = ly << (uint32_t)(n - 32);
+            ly = 0U;
         }
     }
 
@@ -206,18 +205,18 @@ double fmod(double x, double y)
         lz = lx - ly;
 
         if (lx < ly) {
-            hz -= 1;
+            hz -= 1U;
         }
 
-        if (hz < 0) {
-            hx = hx + hx + (lx >> 31);
+        if ((int32_t)hz < 0) {
+            hx = hx + hx + (lx >> 31U);
             lx = lx + lx;
         } else {
-            if ((hz | lz) == 0) {  /* return sign(x)*0 */
-                return Zero[(uint32_t)sx >> 31];
+            if ((hz | lz) == 0U) {  /* return sign(x)*0 */
+                return Zero[sx >> 31U];
             }
 
-            hx = hz + hz + (lz >> 31);
+            hx = hz + hz + (lz >> 31U);
             lx = lz + lz;
         }
     }
@@ -226,39 +225,39 @@ double fmod(double x, double y)
     lz = lx - ly;
 
     if (lx < ly) {
-        hz -= 1;
+        hz -= 1U;
     }
 
-    if (hz >= 0) {
+    if ((int32_t)hz >= 0) {
         hx = hz;
         lx = lz;
     }
 
     /* convert back to floating value and restore the sign */
-    if ((hx | lx) == 0) {      /* return sign(x)*0 */
-        return Zero[(uint32_t)sx >> 31];
+    if ((hx | lx) == 0U) {      /* return sign(x)*0 */
+        return Zero[sx >> 31U];
     }
 
-    while (hx < 0x00100000) {     /* normalize x */
-        hx = hx + hx + (lx >> 31);
+    while (hx < 0x00100000U) {     /* normalize x */
+        hx = hx + hx + (lx >> 31U);
         lx = lx + lx;
         iy -= 1;
     }
 
     if (iy >= -1022) {  /* normalize output */
-        hx = ((hx - 0x00100000) | ((iy + 1023) << 20));
+        hx = ((hx - 0x00100000U) | ((uint32_t)(iy + 1023) << 20U));
         INSERT_WORDS(x, hx | sx, lx);
     } else {        /* subnormal output */
         n = -1022 - iy;
 
         if (n <= 20) {
-            lx = (lx >> n) | ((uint32_t)hx << (32 - n));
-            hx >>= n;
+            lx = (lx >> (uint32_t)n) | (hx << (32U - (uint32_t)n));
+            hx >>= (uint32_t)n;
         } else if (n <= 31) {
-            lx = (hx << (32 - n)) | (lx >> n);
+            lx = (hx << (uint32_t)(32 - n)) | (lx >> (uint32_t)n);
             hx = sx;
         } else {
-            lx = hx >> (n - 32);
+            lx = hx >> (uint32_t)(n - 32);
             hx = sx;
         }
 

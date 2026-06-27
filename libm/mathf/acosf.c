@@ -28,18 +28,18 @@ float acosf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float z, p, q, r, w, s, c, df;
-    int32_t hx, ix;
+    uint32_t hx, ix;
     GET_FLOAT_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix == 0x3f800000) {     /* |x|==1 */
-        if (hx > 0) {
+    if (ix == 0x3f800000U) {     /* |x|==1 */
+        if ((int32_t)hx > 0) {
             return 0.0f;    /* acos(1) = 0  */
         } else {
             return pi + 2.0f * pio2_lo;    /* acos(-1)= pi */
         }
-    } else if (ix > 0x3f800000) { /* |x| >= 1 */
-        if (isnan(x)) {
+    } else if (ix > 0x3f800000U) { /* |x| >= 1 */
+        if (FLT_UWORD_IS_NAN(ix)) {
             return x + x;
         }
 
@@ -48,8 +48,8 @@ float acosf(float x)
         /* No action required */
     }
 
-    if (ix < 0x3f000000) { /* |x| < 0.5 */
-        if (ix <= 0x23000000) {
+    if (ix < 0x3f000000U) { /* |x| < 0.5 */
+        if (ix <= 0x23000000U) {
             return pio2_hi + pio2_lo;    /*if|x|<2**-57*/
         }
 
@@ -58,7 +58,7 @@ float acosf(float x)
         q = one + z * (qS1 + z * (qS2 + z * (qS3 + z * qS4)));
         r = p / q;
         return pio2_hi - (x - (pio2_lo - x * r));
-    } else if (hx < 0) {      /* x < -0.5 */
+    } else if ((int32_t)hx < 0) {      /* x < -0.5 */
         z = (one + x) * 0.5f;
         p = z * (pS0 + z * (pS1 + z * (pS2 + z * (pS3 + z * (pS4 + z * pS5)))));
         q = one + z * (qS1 + z * (qS2 + z * (qS3 + z * qS4)));
@@ -67,7 +67,7 @@ float acosf(float x)
         w = r * s - pio2_lo;
         return pi - 2.0f * (s + w);
     } else {            /* x > 0.5 */
-        int32_t idf;
+        uint32_t idf;
         z = (one - x) * 0.5f;
         s = sqrtf(z);
         df = s;

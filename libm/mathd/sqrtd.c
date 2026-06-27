@@ -60,17 +60,16 @@ double sqrt(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double z;
-    int32_t sign = 0x80000000U;
-    uint32_t r, t1, s1, ix1, q1;
-    int32_t ix0, s0, q, m, t, i;
+    uint32_t sign = 0x80000000U;
+    uint32_t r, t1, s1, ix1, q1, ix0, s0, q, m, t, i;
 
     EXTRACT_WORDS(ix0, ix1, x);
 
     /* take care of Inf and NaN */
-    if ((ix0 & 0x7ff00000) == 0x7ff00000) {
-        if (isnan(x)) {         /* sqrt(NaN)=NaN */
+    if ((ix0 & 0x7ff00000U) == 0x7ff00000U) {
+        if (DBL_WORDS_IS_NAN(ix0, ix1)) {   /* sqrt(NaN)=NaN */
             return x + x;
-        } else if (ix0 > 0) {   /* sqrt(+inf)=+inf */
+        } else if ((int32_t)ix0 > 0) {   /* sqrt(+inf)=+inf */
             return x;
         } else {                /* sqrt(-inf)=sNaN */
             return __raise_invalid();
@@ -78,10 +77,10 @@ double sqrt(double x)
     }
 
     /* take care of zero and negative values */
-    if (ix0 <= 0) {
-        if (((ix0 & (~sign)) | ix1) == 0) {
+    if ((int32_t)ix0 <= 0) {
+        if (((ix0 & (~sign)) | ix1) == 0U) {
             return x;    /* sqrt(+-0) = +-0 */
-        } else if (ix0 < 0) {
+        } else if ((int32_t)ix0 < 0) {
             return __raise_invalid();    /* sqrt(-ve) = sNaN */
         } else {
             /* No action required */
@@ -89,25 +88,25 @@ double sqrt(double x)
     }
 
     /* normalize x */
-    m = (ix0 >> 20);
+    m = (ix0 >> 20U);
 
-    if (m == 0) {             /* subnormal x */
+    if (m == 0U) {             /* subnormal x */
         uint32_t ux0 = (uint32_t)ix0;
         uint32_t ux1 = (uint32_t)ix1;
 
         while (ux0 == 0U) {
-            m -= 21;
-            ux0 |= ux1 >> 11;
-            ux1 <<= 21;
+            m -= 21U;
+            ux0 |= ux1 >> 11U;
+            ux1 <<= 21U;
         }
 
-        for (i = 0; (ux0 & 0x00100000U) == 0; i++) {
-            ux0 <<= 1;
+        for (i = 0U; (ux0 & 0x00100000U) == 0U; i++) {
+            ux0 <<= 1U;
         }
 
-        m -= i - 1;
-        if (i != 0) {
-            ux0 |= ux1 >> (32 - i);
+        m -= i - 1U;
+        if (i != 0U) {
+            ux0 |= ux1 >> (32U - i);
             ux1 <<= i;
         }
 
@@ -115,23 +114,23 @@ double sqrt(double x)
         ix1 = (int32_t)ux1;
     }
 
-    m -= 1023;    /* unbias exponent */
-    ix0 = (ix0 & 0x000fffff) | 0x00100000;
+    m -= 1023U;    /* unbias exponent */
+    ix0 = (ix0 & 0x000fffffU) | 0x00100000U;
 
-    if (0 < (m & 1)) { /* odd m, double x to make it even */
-        ix0 += ix0 + (int32_t)((ix1 & (uint32_t)sign) >> 31U);
+    if (0U < (m & 1U)) { /* odd m, double x to make it even */
+        ix0 += ix0 + ((ix1 & sign) >> 31U);
         ix1 += ix1;
     }
 
-    m >>= 1;    /* m = [m/2] */
+    m >>= 1U;    /* m = [m/2] */
 
     /* generate sqrt(x) bit by bit */
-    ix0 += ix0 + (int32_t)((ix1 & (uint32_t)sign) >> 31U);
+    ix0 += ix0 + ((ix1 & sign) >> 31U);
     ix1 += ix1;
-    q = q1 = s0 = s1 = 0;    /* [q,q1] = sqrt(x) */
-    r = 0x00200000;        /* r = moving bit from right to left */
+    q = q1 = s0 = s1 = 0U;    /* [q,q1] = sqrt(x) */
+    r = 0x00200000U;          /* r = moving bit from right to left */
 
-    while (r != 0) {
+    while (r != 0U) {
         t = s0 + r;
 
         if (t <= ix0) {
@@ -140,58 +139,58 @@ double sqrt(double x)
             q   += r;
         }
 
-        ix0 += ix0 + (int32_t)((ix1 & (uint32_t)sign) >> 31U);
+        ix0 += ix0 + ((ix1 & sign) >> 31U);
         ix1 += ix1;
-        r >>= 1;
+        r >>= 1U;
     }
 
     r = sign;
 
-    while (r != 0) {
+    while (r != 0U) {
         t1 = s1 + r;
         t  = s0;
 
         if ((t < ix0) || ((t == ix0) && (t1 <= ix1))) {
             s1  = t1 + r;
 
-            if ((((int32_t)t1 & sign) == sign) && ((int32_t)s1 & sign) == 0) {
-                s0 += 1;
+            if (((t1 & sign) == sign) && (s1 & sign) == 0U) {
+                s0 += 1U;
             }
 
             ix0 -= t;
 
             if (ix1 < t1) {
-                ix0 -= 1;
+                ix0 -= 1U;
             }
 
             ix1 -= t1;
             q1  += r;
         }
 
-        ix0 += ix0 + (int32_t)((ix1 & (uint32_t)sign) >> 31U);
+        ix0 += ix0 + ((ix1 & sign) >> 31U);
         ix1 += ix1;
-        r >>= 1;
+        r >>= 1U;
     }
 
     /* use floating add to find out rounding direction */
-    if ((ix0 | ix1) != 0) {
+    if ((ix0 | ix1) != 0U) {
         (void) __raise_inexact(x);
-        if (q1 == (uint32_t)0xffffffffU) {
-            q1 = 0;
-            q += 1;
+        if (q1 == 0xffffffffU) {
+            q1 = 0U;
+            q += 1U;
         } else {
-            q1 += (q1 & 1);
+            q1 += (q1 & 1U);
         }
     }
 
-    ix0 = (q >> 1) + 0x3fe00000;
-    ix1 =  q1 >> 1;
+    ix0 = (q >> 1U) + 0x3fe00000U;
+    ix1 =  q1 >> 1U;
 
-    if ((q & 1) != 0) {
+    if ((q & 1U) != 0U) {
         ix1 |= sign;
     }
 
-    ix0 += (m << 20);
+    ix0 += (m << 20U);
     INSERT_WORDS(z, ix0, ix1);
     return z;
 }

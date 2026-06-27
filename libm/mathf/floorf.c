@@ -20,36 +20,36 @@ float floorf(float x)
     x *= __volatile_onef;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t _i0, _j0;
+    uint32_t _i0, _j0;
     uint32_t i, ix;
     GET_FLOAT_WORD(_i0, x);
-    ix = (_i0 & 0x7fffffff);
-    _j0 = (ix >> 23) - 0x7f;
+    ix = (_i0 & 0x7fffffffU);
+    _j0 = (ix >> 23U) - 0x0000007fU;
 
-    if (_j0 < 23) {
-        if (_j0 < 0) {  /* raise inexact if x != 0 */
+    if ((int32_t)_j0 < 23) {
+        if ((int32_t)_j0 < 0) {  /* raise inexact if x != 0 */
             if (FLT_UWORD_IS_ZERO(ix)) {
                 return x;
             }
 
             (void) __raise_inexactf(x);
 
-            if (_i0 >= 0) {
-                _i0 = 0;
+            if ((int32_t)_i0 >= 0) {
+                _i0 = 0U;
             } else {
-                _i0 = (int32_t)0xbf800000U;
+                _i0 = 0xbf800000U;
             }
         } else {
-            i = (0x007fffff) >> _j0;
+            i = (0x007fffffU) >> _j0;
 
-            if ((_i0 & i) == 0) {    /* x is integral */
+            if ((_i0 & i) == 0U) {    /* x is integral */
                 return x;
             }
 
             (void) __raise_inexactf(x);
 
-            if (_i0 < 0) {
-                _i0 += (0x00800000) >> _j0;
+            if ((int32_t)_i0 < 0) {
+                _i0 += (0x00800000U) >> _j0;
             }
 
             _i0 &= (~i);

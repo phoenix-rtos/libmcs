@@ -65,27 +65,26 @@ double sinh(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double t, w, h;
-    int32_t ix, jx;
-    uint32_t lx;
+    uint32_t hx, lx, ix;
 
     /* High word of |x|. */
-    GET_HIGH_WORD(jx, x);
-    ix = jx & 0x7fffffff;
+    GET_HIGH_WORD(hx, x);
+    ix = hx & 0x7fffffffU;
 
     /* x is INF or NaN */
-    if (ix >= 0x7ff00000) {
+    if (ix >= 0x7ff00000U) {
         return x + x;
     }
 
     h = 0.5;
 
-    if (jx < 0) {
+    if ((int32_t)hx < 0) {
         h = -h;
     }
 
     /* |x| in [0,22], return sign(x)*0.5*(E+E/(E+1))) */
-    if (ix < 0x40360000) {          /* |x|<22 */
-        if (ix < 0x3e300000) {      /* |x|<2**-28 */
+    if (ix < 0x40360000U) {          /* |x|<22 */
+        if (ix < 0x3e300000U) {      /* |x|<2**-28 */
             if (x == 0.0) {         /* return x inexact except 0 */
                 return x;
             } else {
@@ -95,7 +94,7 @@ double sinh(double x)
 
         t = expm1(fabs(x));
 
-        if (ix < 0x3ff00000) {
+        if (ix < 0x3ff00000U) {
             return h * (2.0 * t - t * t / (t + one));
         }
 
@@ -103,14 +102,14 @@ double sinh(double x)
     }
 
     /* |x| in [22, log(maxdouble)] return 0.5*exp(|x|) */
-    if (ix < 0x40862E42) {
+    if (ix < 0x40862E42U) {
         return h * exp(fabs(x));
     }
 
     /* |x| in [log(maxdouble), overflowthresold] */
     GET_LOW_WORD(lx, x);
 
-    if (ix < 0x408633CE || (ix == 0x408633ce && lx <= (uint32_t)0x8fb9f87dU)) {
+    if (ix < 0x408633CEU || (ix == 0x408633ceU && lx <= 0x8fb9f87dU)) {
         w = exp(0.5 * fabs(x));
         t = h * w;
         return t * w;

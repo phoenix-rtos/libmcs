@@ -112,12 +112,11 @@ double remquo(double x, double y, int *quo)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     int _quo = 0;
-    int32_t hx, hy;
-    uint32_t sx, sq, lx, ly;
+    uint32_t hx, lx, hy, ly, sx, sq;
     double y_half;
 
-    assert(quo != (void*)0);
-    if(quo == (void*)0) {
+    assert(quo != (void*)0U);
+    if (quo == (void*)0U) {
         quo = &_quo;
     }
     *quo = 0;
@@ -126,30 +125,30 @@ double remquo(double x, double y, int *quo)
     EXTRACT_WORDS(hy, ly, y);
     sx = hx & 0x80000000U;
     sq = sx ^ (hy & 0x80000000U);
-    hy &= 0x7fffffff;
-    hx &= 0x7fffffff;
+    hy &= 0x7fffffffU;
+    hx &= 0x7fffffffU;
 
     /* purge off exception values */
-    if ((hx >= 0x7ff00000) || (hy >= 0x7ff00000)) { /* x or y not finite */
-        if (isnan(x) || isnan(y)) {                 /* x or y is NaN */
+    if ((hx >= 0x7ff00000U) || (hy >= 0x7ff00000U)) { /* x or y not finite */
+        if (DBL_WORDS_IS_NAN(hx, lx) || DBL_WORDS_IS_NAN(hy, ly)) {  /* x or y is NaN */
             return x + y;
-        } else if (hx == 0x7ff00000) {              /* x is infinite */
+        } else if (hx == 0x7ff00000U) {              /* x is infinite */
             return __raise_invalid();
         } else {
             /* No action required */
         }
-    } else if ((hy | ly) == 0) {                    /* y = 0 */
+    } else if ((hy | ly) == 0U) {                    /* y = 0 */
         return __raise_invalid();
     } else {
         /* No action required */
     }
 
-    if (hy <= 0x7fbfffff) {
-        x = fmod(x, 8 * y);                         /* now x < 8y */
+    if (hy <= 0x7fbfffffU) {
+        x = fmod(x, 8.0 * y);                         /* now x < 8y */
     }
 
-    if (((hx - hy) | (lx - ly)) == 0) {             /* x equals y */
-        *quo = sq ? -1 : 1;
+    if (((hx - hy) | (lx - ly)) == 0U) {             /* x equals y */
+        *quo = (sq != 0U) ? -1 : 1;
         return zero * x;
     }
 
@@ -157,16 +156,16 @@ double remquo(double x, double y, int *quo)
     y  = fabs(y);
     _quo = 0;
 
-    if (x >= 4 * y) {
-        x -= 4 * y;
+    if (x >= 4.0 * y) {
+        x -= 4.0 * y;
         _quo += 4;
     }
-    if (x >= 2 * y) {
-        x -= 2 * y;
+    if (x >= 2.0 * y) {
+        x -= 2.0 * y;
         _quo += 2;
     }
 
-    if (hy < 0x00200000) {
+    if (hy < 0x00200000U) {
         if (x + x > y) {
             x -= y;
             _quo++;
@@ -192,7 +191,7 @@ double remquo(double x, double y, int *quo)
 
     _quo &= 0x7;
 
-    *quo = sq ? -_quo : _quo;
+    *quo = (sq != 0U) ? -_quo : _quo;
 
     GET_HIGH_WORD(hx, x);
     SET_HIGH_WORD(x, hx ^ sx);

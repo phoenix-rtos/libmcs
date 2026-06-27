@@ -67,15 +67,15 @@ double asinh(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double t, w;
-    int32_t hx, ix;
+    uint32_t hx, ix;
     GET_HIGH_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x7ff00000) {
+    if (ix >= 0x7ff00000U) {
         return x + x;    /* x is inf or NaN */
     }
 
-    if (ix < 0x3e300000) {  /* |x|<2**-28 */
+    if (ix < 0x3e300000U) {  /* |x|<2**-28 */
         if (x == 0.0) {     /* return x inexact except 0 */
             return x;
         } else {
@@ -83,9 +83,9 @@ double asinh(double x)
         }
     }
 
-    if (ix > 0x41b00000) { /* |x| > 2**28 */
+    if (ix > 0x41b00000U) { /* |x| > 2**28 */
         w = log(fabs(x)) + ln2;
-    } else if (ix > 0x40000000) {  /* 2**28 > |x| > 2.0 */
+    } else if (ix > 0x40000000U) {  /* 2**28 > |x| > 2.0 */
         t = fabs(x);
         w = log(2.0 * t + one / (sqrt(x * x + one) + t));
     } else {        /* 2.0 > |x| > 2**-28 */
@@ -93,7 +93,7 @@ double asinh(double x)
         w = log1p(fabs(x) + t / (one + sqrt(one + t)));
     }
 
-    if (hx > 0) {
+    if ((int32_t)hx > 0) {
         return w;
     } else {
         return -w;

@@ -24,8 +24,8 @@ float expm1f(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float y, hi, lo, c, t, e, hxs, hfx, r1;
-    int32_t k, xsb;
-    uint32_t hx;
+    int32_t k;
+    uint32_t hx, xsb, i;
 
     c = NAN; /* initial value of c is never actually used */
 
@@ -35,28 +35,28 @@ float expm1f(float x)
     hx &= 0x7fffffffU;          /* high word of |x| */
 
     /* filter out huge and non-finite argument */
-    if (hx >= 0x4195b844) {           /* if |x|>=27*ln2 */
+    if (hx >= 0x4195b844U) {           /* if |x|>=27*ln2 */
         if (FLT_UWORD_IS_NAN(hx)) {
             return x + x;
         }
 
         if (FLT_UWORD_IS_INFINITE(hx)) {
-            return (xsb == 0) ? x : -one;
+            return (xsb == 0U) ? x : -one;
         }/* exp(+-inf)={inf,-1} */
 
-        if (xsb == 0 && hx > FLT_UWORD_LOG_MAX) { /* if x>=o_threshold */
+        if (xsb == 0U && hx > FLT_UWORD_LOG_MAX) { /* if x>=o_threshold */
             return __raise_overflowf(one);    /* overflow */
         }
 
-        if (xsb != 0) { /* x < -27*ln2, return -1.0 with inexact */
+        if (xsb != 0U) { /* x < -27*ln2, return -1.0 with inexact */
             return -__raise_inexactf(one);
         }
     }
 
     /* argument reduction */
-    if (hx > 0x3eb17218) {       /* if  |x| > 0.5 ln2 */
-        if (hx < 0x3F851592) {   /* and |x| < 1.5 ln2 */
-            if (xsb == 0) {
+    if (hx > 0x3eb17218U) {       /* if  |x| > 0.5 ln2 */
+        if (hx < 0x3F851592U) {   /* and |x| < 1.5 ln2 */
+            if (xsb == 0U) {
                 hi = x - ln2_hi;
                 lo =  ln2_lo;
                 k =  1;
@@ -66,7 +66,7 @@ float expm1f(float x)
                 k = -1;
             }
         } else {
-            k  = invln2 * x + ((xsb == 0) ? 0.5f : -0.5f);
+            k  = invln2 * x + ((xsb == 0U) ? 0.5f : -0.5f);
             t  = k;
             hi = x - t * ln2_hi;  /* t*ln2_hi is exact here */
             lo = t * ln2_lo;
@@ -74,7 +74,7 @@ float expm1f(float x)
 
         x  = hi - lo;
         c  = (hi - x) - lo;
-    } else if (hx < 0x33000000) {   /* when |x|<2**-25, return x */
+    } else if (hx < 0x33000000U) {   /* when |x|<2**-25, return x */
         if (x == 0.0f) {
             return x;
         } else { /* return x with inexact flags when x!=0 */
@@ -110,28 +110,25 @@ float expm1f(float x)
         }
 
         if (k <= -2 || k > 56) { /* suffice to return exp(x)-1 */
-            int32_t i;
             y = one - (e - x);
             GET_FLOAT_WORD(i, y);
-            SET_FLOAT_WORD(y, i + (((uint32_t)k) << 23)); /* add k to y's exponent */
+            SET_FLOAT_WORD(y, i + (((uint32_t)k) << 23U)); /* add k to y's exponent */
             return y - one;
         }
 
         t = one;
 
         if (k < 23) {
-            int32_t i;
-            SET_FLOAT_WORD(t, 0x3f800000 - (0x1000000 >> k)); /* t=1-2^-k */
+            SET_FLOAT_WORD(t, 0x3f800000U - (0x1000000U >> (uint32_t)k)); /* t=1-2^-k */
             y = t - (e - x);
             GET_FLOAT_WORD(i, y);
-            SET_FLOAT_WORD(y, i + (k << 23)); /* add k to y's exponent */
+            SET_FLOAT_WORD(y, i + ((uint32_t)k << 23U)); /* add k to y's exponent */
         } else {
-            int32_t i;
-            SET_FLOAT_WORD(t, ((0x7f - k) << 23)); /* 2^-k */
+            SET_FLOAT_WORD(t, (uint32_t)(0x7f - k) << 23U); /* 2^-k */
             y = x - (e + t);
             y += one;
             GET_FLOAT_WORD(i, y);
-            SET_FLOAT_WORD(y, i + (k << 23)); /* add k to y's exponent */
+            SET_FLOAT_WORD(y, i + ((uint32_t)k << 23U)); /* add k to y's exponent */
         }
     }
 

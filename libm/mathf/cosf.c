@@ -13,16 +13,16 @@ float cosf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float y[2], z = 0.0f;
-    int32_t n, ix;
+    uint32_t n, ix;
 
     GET_FLOAT_WORD(ix, x);
 
     /* |x| ~< pi/4 */
-    ix &= 0x7fffffff;
+    ix &= 0x7fffffffU;
 
-    if (ix <= 0x3f490fd8) {
-        if(ix < 0x39800000) {        /* if x < 2**-12 */
-            if (x == 0.0f) {         /* return 1 inexact except 0 */
+    if (ix <= 0x3f490fd8U) {
+        if (ix < 0x39800000U) {       /* if x < 2**-12 */
+            if (x == 0.0f) {          /* return 1 inexact except 0 */
                 return 1.0f;
             } else {
                 return __raise_inexactf(1.0f);
@@ -33,7 +33,7 @@ float cosf(float x)
 
     /* cos(Inf or NaN) is NaN */
     else if (!FLT_UWORD_IS_FINITE(ix)) {
-        if (isnan(x)) {
+        if (FLT_UWORD_IS_NAN(ix)) {
             return x + x;
         } else {
             return __raise_invalidf();
@@ -42,9 +42,9 @@ float cosf(float x)
 
     /* argument reduction needed */
     else {
-        n = __rem_pio2f(x, y);
+        n = (uint32_t)__rem_pio2f(x, y);
 
-        switch (n & 3) {
+        switch (n & 3U) {
         case 0:
             return  __cosf(y[0], y[1]);
 

@@ -20,12 +20,16 @@ float tgammaf(float x)
 
     int signgam_local = 0;
     float y = 0.0f;
+    uint32_t ix;
 
-    if (isnan(x) != 0) {                        /* tgamma(NaN) = NaN */
+    GET_FLOAT_WORD(ix, x);
+    ix &= 0x7fffffffU;
+
+    if (FLT_UWORD_IS_NAN(ix)) {      /* tgamma(NaN) = NaN */
         return x + x;
     } else if (x == 0.0f) {                     /* tgamma(+-0) = +-Inf */
         return __raise_div_by_zerof(x);
-    } else if (floorf(x) == x && x < 0.0f) {    /* tgamma(negative integer, -Inf) = NaN */
+    } else if (floorf(x) == x && x < 0.0f) { 
         return __raise_invalidf();
     } else {
         /* No action required */

@@ -42,25 +42,26 @@ float atanf(float x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     float w, s1, s2, z;
-    int32_t ix, hx, id;
+    uint32_t ix, hx;
+    int32_t id;
 
     GET_FLOAT_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x50800000) { /* if |x| >= 2^34 */
+    if (ix >= 0x50800000U) {               /* if |x| >= 2^34 */
         if (FLT_UWORD_IS_NAN(ix)) {
-            return x + x;    /* NaN */
+            return x + x;                  /* NaN */
         }
 
-        if (hx > 0) {
+        if ((int32_t)hx > 0) {
             return  atanhi[3] + atanlo[3];
         } else {
             return -atanhi[3] - atanlo[3];
         }
     }
 
-    if (ix < 0x3ee00000) {    /* |x| < 0.4375 */
-        if (ix < 0x31000000) {    /* |x| < 2^-29 */
+    if (ix < 0x3ee00000U) {                 /* |x| < 0.4375 */
+        if (ix < 0x31000000U) {             /* |x| < 2^-29 */
             if (FLT_UWORD_IS_ZERO(ix)) {    /* return x inexact except 0 */
                 return x;
             } else {
@@ -72,19 +73,19 @@ float atanf(float x)
     } else {
         x = fabsf(x);
 
-        if (ix < 0x3f980000) {        /* |x| < 1.1875 */
-            if (ix < 0x3f300000) {    /* 7/16 <=|x|<11/16 */
+        if (ix < 0x3f980000U) {               /* |x| < 1.1875 */
+            if (ix < 0x3f300000U) {           /* 7/16 <=|x|<11/16 */
                 id = 0;
                 x = (2.0f * x - one) / (2.0f + x);
-            } else {            /* 11/16<=|x|< 19/16 */
+            } else {                          /* 11/16<=|x|< 19/16 */
                 id = 1;
                 x  = (x - one) / (x + one);
             }
         } else {
-            if (ix < 0x401c0000) {    /* |x| < 2.4375 */
+            if (ix < 0x401c0000U) {           /* |x| < 2.4375 */
                 id = 2;
                 x  = (x - 1.5f) / (one + 1.5f * x);
-            } else {            /* 2.4375 <= |x| < 2^66 */
+            } else {                          /* 2.4375 <= |x| < 2^66 */
                 id = 3;
                 x  = -1.0f / x;
             }
@@ -102,7 +103,7 @@ float atanf(float x)
         return x - x * (s1 + s2);
     } else {
         z = atanhi[id] - ((x * (s1 + s2) - atanlo[id]) - x);
-        return (hx < 0) ? -z : z;
+        return ((int32_t)hx < 0) ? -z : z;
     }
 }
 

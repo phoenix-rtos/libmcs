@@ -324,7 +324,7 @@ typedef union {
    of a shift is exactly equal to the size of the shifted operand.  */
 
 #define SAFE_RIGHT_SHIFT(op,amt)                        \
-    (((amt) < 8 * sizeof(op)) ? ((op) >> (amt)) : 0)
+    (((amt) < 8U * sizeof(op)) ? ((op) >> (amt)) : 0U)
 
 /* Exception raising and signaling check functions */
 
@@ -396,9 +396,9 @@ static inline float __raise_inexactf(float x) {
 }
 
 static inline int __issignaling(double x) {
-    uint32_t hx;
-    GET_HIGH_WORD(hx, x);
-    if (isnan(x) && (hx & 0x00080000U) == 0) {
+    uint32_t hx, lx;
+    EXTRACT_WORDS(hx, lx, x);
+    if (DBL_WORDS_IS_NAN(hx, lx) && (hx & 0x00080000U) == 0U) {
         return 1;
     }
     else {
@@ -408,7 +408,7 @@ static inline int __issignaling(double x) {
 static inline int __issignalingf(float x) {
     uint32_t ix;
     GET_FLOAT_WORD(ix, x);
-    if (FLT_UWORD_IS_NAN(ix & 0x7fffffffU) && (ix & 0x00400000U) == 0) {
+    if (FLT_UWORD_IS_NAN(ix & 0x7fffffffU) && (ix & 0x00400000U) == 0U) {
         return 1;
     }
     else {

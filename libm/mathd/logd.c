@@ -76,43 +76,43 @@ double log(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double hfsq, f, s, z, R, w, t1, t2, dk;
-    int32_t k, hx, i, j;
-    uint32_t lx;
+    int32_t k;
+    uint32_t hx, lx, i, j;
 
     EXTRACT_WORDS(hx, lx, x);
 
     k = 0;
 
-    if (hx < 0x00100000) {                      /* x < 2**-1022  */
-        if (((hx & 0x7fffffff) | lx) == 0) {
-            return __raise_div_by_zero(-1.0);   /* log(+-0)=-inf */
+    if ((int32_t)hx < 0x00100000) {                      /* x < 2**-1022  */
+        if (((hx & 0x7fffffffU) | lx) == 0U) {
+            return __raise_div_by_zero(-1.0);            /* log(+-0)=-inf */
         }
 
-        if (hx < 0) {
-            if (isnan(x)) {
+        if ((int32_t)hx < 0) {
+            if (DBL_WORDS_IS_NAN(hx, lx)) {
                 return x + x;
             } else {
-                return __raise_invalid();   /* log(-#) = NaN */
+                return __raise_invalid();                /* log(-#) = NaN */
             }
         }
 
         k -= 54;
-        x *= two54;                      /* subnormal number, scale up x */
+        x *= two54;                                      /* subnormal number, scale up x */
         GET_HIGH_WORD(hx, x);
     }
 
-    if (hx >= 0x7ff00000) {                     /* x = NaN/+-Inf */
+    if (hx >= 0x7ff00000U) {                             /* x = NaN/+-Inf */
         return x + x;
     }
 
-    k += (hx >> 20) - 1023;
-    hx &= 0x000fffff;
-    i = (hx + 0x95f64) & 0x100000;
-    SET_HIGH_WORD(x, hx | (i ^ 0x3ff00000)); /* normalize x or x/2 */
-    k += (i >> 20);
+    k += (int32_t)(hx >> 20) - 1023;
+    hx &= 0x000fffffU;
+    i = (hx + 0x00095f64U) & 0x00100000U;
+    SET_HIGH_WORD(x, (hx | (i ^ 0x3ff00000U)));          /* normalize x or x/2 */
+    k += (int32_t)(i >> 20);
     f = x - 1.0;
 
-    if ((0x000fffff & (2 + hx)) < 3) {       /* |f| < 2**-20 */
+    if ((0x000fffffU & (2U + hx)) < 3U) {                 /* |f| < 2**-20 */
         if (f == zero) {
             if (k == 0) {
                 return zero;
@@ -135,15 +135,15 @@ double log(double x)
     s = f / (2.0 + f);
     dk = (double)k;
     z = s * s;
-    i = hx - 0x6147a;
+    i = hx - 0x0006147aU;
     w = z * z;
-    j = 0x6b851 - hx;
+    j = 0x0006b851U - hx;
     t1 = w * (Lg2 + w * (Lg4 + w * Lg6));
     t2 = z * (Lg1 + w * (Lg3 + w * (Lg5 + w * Lg7)));
     i |= j;
     R = t2 + t1;
 
-    if (i > 0) {
+    if ((int32_t)i > 0) {
         hfsq = 0.5 * f * f;
 
         if (k == 0) {

@@ -69,25 +69,25 @@ double atanh(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double t;
-    int32_t hx, ix;
-    uint32_t lx;
-    EXTRACT_WORDS(hx, lx, x);
-    ix = hx & 0x7fffffff;
+    uint32_t hx, lx, ix;
 
-    if ((ix | ((lx | (-lx)) >> 31)) > 0x3ff00000) { /* |x|>1 */
-        if (isnan(x)) {
-            return x + x;
-        } else {
-            return __raise_invalid();
-        }
+    EXTRACT_WORDS(hx, lx, x);
+    ix = hx & 0x7fffffffU;
+
+    if (DBL_WORDS_IS_NAN(hx, lx)) {
+        return x + x;
+    } 
+    
+    if (ix > 0x3ff00000U){      /* |x|>1 */
+        return __raise_invalid();
     }
 
-    if (ix == 0x3ff00000) {
+    if (ix == 0x3ff00000U) {
         return __raise_div_by_zero(x);
     }
 
-    if (ix < 0x3e300000) {     /* x<2**-28 */
-        if (x == 0.0) {        /* return x inexact except 0 */
+    if (ix < 0x3e300000U) {     /* x<2**-28 */
+        if (x == 0.0) {         /* return x inexact except 0 */
             return x;
         } else {
             return __raise_inexact(x);
@@ -96,14 +96,14 @@ double atanh(double x)
 
     SET_HIGH_WORD(x, ix);
 
-    if (ix < 0x3fe00000) {     /* x < 0.5 */
+    if (ix < 0x3fe00000U) {     /* x < 0.5 */
         t = x + x;
         t = 0.5 * log1p(t + t * x / (one - x));
     } else {
         t = 0.5 * log1p((x + x) / (one - x));
     }
 
-    if (hx >= 0) {
+    if ((int32_t)hx >= 0) {
         return t;
     } else {
         return -t;

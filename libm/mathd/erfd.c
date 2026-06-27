@@ -162,24 +162,25 @@ double erf(double x)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t hx, ix;
+    uint32_t hx, lx, ix;
     double R, S, P, Q, s, z, r;
-    GET_HIGH_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    
+    EXTRACT_WORDS(hx, lx, x);
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x7ff00000) {
-        if (isnan(x)) {         /* erf(nan) = nan */
+    if (ix >= 0x7ff00000U) {
+        if (DBL_WORDS_IS_NAN(hx, lx)) {         /* erf(nan) = nan */
             return x + x;
-        } else if (hx > 0) {    /* erf(+inf) = +1 */
+        } else if ((int32_t)hx > 0) {    /* erf(+inf) = +1 */
             return 1.0;
         } else {                /* erf(-inf) = -1 */
             return -1.0;
         }
     }
 
-    if (ix < 0x3feb0000) {                /* |x|<0.84375 */
-        if (ix < 0x3e300000) {            /* |x|<2**-28 */
-            if (ix < 0x00800000) {
+    if (ix < 0x3feb0000U) {                /* |x|<0.84375 */
+        if (ix < 0x3e300000U) {            /* |x|<2**-28 */
+            if (ix < 0x00800000U) {
                 return 0.125 * (8.0 * x + efx8 * x);    /*avoid underflow */
             }
 
@@ -189,20 +190,20 @@ double erf(double x)
         return x + x * __erf_y(x);
     }
 
-    if (ix < 0x3ff40000) {                /* 0.84375 <= |x| < 1.25 */
+    if (ix < 0x3ff40000U) {                /* 0.84375 <= |x| < 1.25 */
         s = fabs(x) - one;
         P = __erf_P(s);
         Q = __erf_Q(s);
 
-        if (hx >= 0) {
+        if ((int32_t)hx >= 0) {
             return erx + P / Q;
         } else {
             return -erx - P / Q;
         }
     }
 
-    if (ix >= 0x40180000) {               /* inf>|x|>=6 */
-        if (hx >= 0) {
+    if (ix >= 0x40180000U) {               /* inf>|x|>=6 */
+        if ((int32_t)hx >= 0) {
             return __raise_inexact(one);
         } else {
             return -__raise_inexact(one);
@@ -212,7 +213,7 @@ double erf(double x)
     x = fabs(x);
     s = one / (x * x);
 
-    if (ix < 0x4006DB6E) {                /* |x| < 1/0.35 */
+    if (ix < 0x4006DB6EU) {                /* |x| < 1/0.35 */
         R = __erf_Ra(s);
         S = __erf_Sa(s);
     } else {                              /* |x| >= 1/0.35 */
@@ -221,10 +222,10 @@ double erf(double x)
     }
 
     z  = x;
-    SET_LOW_WORD(z, 0);
+    SET_LOW_WORD(z, 0U);
     r  =  exp(-z * z - 0.5625) * exp((z - x) * (z + x) + R / S);
 
-    if (hx >= 0) {
+    if ((int32_t)hx >= 0) {
         return one - r / x;
     } else {
         return  r / x - one;

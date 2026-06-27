@@ -40,13 +40,15 @@ float powf(float x, float y)
 {
     float z, ax, z_h, z_l, p_h, p_l;
     float _y1, t1, t2, r, s, t, u, v, w;
-    int32_t i, j, k, yisint, n;
-    int32_t hx, hy, ix, iy, is;
+
+    uint32_t hx, hy, ix, iy;
+    uint32_t i, j, k, yisint, is, un;
+    int32_t n;
 
     GET_FLOAT_WORD(hx, x);
     GET_FLOAT_WORD(hy, y);
-    ix = hx & 0x7fffffff;
-    iy = hy & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
+    iy = hy & 0x7fffffffU;
 
     /* y==zero: x**0 = 1 */
     if (FLT_UWORD_IS_ZERO(iy)) {
@@ -59,7 +61,7 @@ float powf(float x, float y)
 
     /* x|y==NaN return NaN unless x==1 then return 1 */
     if (FLT_UWORD_IS_NAN(ix) || FLT_UWORD_IS_NAN(iy)) {
-        if (hx == 0x3f800000 && __issignalingf(y) == 0) {
+        if (hx == 0x3f800000U && __issignalingf(y) == 0) {
             return one;
         } else {
             return x + y;
@@ -72,8 +74,8 @@ float powf(float x, float y)
 
     GET_FLOAT_WORD(hx, x);
     GET_FLOAT_WORD(hy, y);
-    ix = hx & 0x7fffffff;
-    iy = hy & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
+    iy = hy & 0x7fffffffU;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     /* determine if y is an odd int when x < 0
@@ -81,17 +83,17 @@ float powf(float x, float y)
      * yisint = 1    ... y is an odd int
      * yisint = 2    ... y is an even int
      */
-    yisint  = 0;
+    yisint  = 0U;
 
-    if (hx < 0) {
-        if (iy >= 0x4b800000) {
-            yisint = 2;    /* even integer y */
-        } else if (iy >= 0x3f800000) {
-            k = (iy >> 23) - 0x7f;   /* exponent */
-            j = iy >> (23 - k);
+    if ((int32_t)hx < 0) {
+        if (iy >= 0x4b800000U) {
+            yisint = 2U;    /* even integer y */
+        } else if (iy >= 0x3f800000U) {
+            k = (iy >> 23U) - 0x7fU;   /* exponent */
+            j = iy >> (23U - k);
 
-            if ((j << (23 - k)) == iy) {
-                yisint = 2 - (j & 1);
+            if ((j << (23U - k)) == iy) {
+                yisint = 2U - (j & 1U);
             }
         } else {
             /* No action required */
@@ -100,29 +102,29 @@ float powf(float x, float y)
 
     /* special value of y */
     if (FLT_UWORD_IS_INFINITE(iy)) {    /* y is +-inf */
-        if (ix == 0x3f800000) {
+        if (ix == 0x3f800000U) {
             return one;    /* +-1**+-inf = 1 */
-        } else if (ix > 0x3f800000) { /* (|x|>1)**+-inf = inf,0 */
-            return (hy >= 0) ? y : zero;
+        } else if (ix > 0x3f800000U) { /* (|x|>1)**+-inf = inf,0 */
+            return ((int32_t)hy >= 0) ? y : zero;
         } else {        /* (|x|<1)**-,+inf = inf,0 */
-            return (hy < 0) ? -y : zero;
+            return ((int32_t)hy < 0) ? -y : zero;
         }
     }
 
-    if (iy == 0x3f800000) { /* y is  +-1 */
-        if (hy < 0) {
+    if (iy == 0x3f800000U) { /* y is  +-1 */
+        if ((int32_t)hy < 0) {
             return one / x;
         } else {
             return x;
         }
     }
 
-    if (hy == 0x40000000) {
+    if (hy == 0x40000000U) {
         return x * x;    /* y is  2 */
     }
 
-    if (hy == 0x3f000000) { /* y is  0.5 */
-        if (hx >= 0) { /* x >= +0 */
+    if (hy == 0x3f000000U) { /* y is  0.5 */
+        if ((int32_t)hx >= 0) { /* x >= +0 */
             return sqrtf(x);
         }
     }
@@ -130,10 +132,10 @@ float powf(float x, float y)
     ax   = fabsf(x);
 
     /* special value of x */
-    if (FLT_UWORD_IS_INFINITE(ix) || FLT_UWORD_IS_ZERO(ix) || ix == 0x3f800000) {
+    if (FLT_UWORD_IS_INFINITE(ix) || FLT_UWORD_IS_ZERO(ix) || ix == 0x3f800000U) {
         z = ax;                         /*x is +-0,+-inf,+-1*/
 
-        if (hy < 0) {                   /* z = (1/|x|) */
+        if ((int32_t)hy < 0) {                   /* z = (1/|x|) */
             if (FLT_UWORD_IS_INFINITE(ix)) {
                 z = zero;
             } else if (FLT_UWORD_IS_ZERO(ix)) {
@@ -143,10 +145,10 @@ float powf(float x, float y)
             }
         }
 
-        if (hx < 0) {
-            if (((ix - 0x3f800000) | yisint) == 0) {
+        if ((int32_t)hx < 0) {
+            if (((uint32_t)((int32_t)ix - 0x3f800000) | yisint) == 0U) {
                 z = __raise_invalidf(); /* (-1)**non-int is NaN */
-            } else if (yisint == 1) {
+            } else if (yisint == 1U) {
                 z = -z;                 /* (x<0)**odd = -(|x|**odd) */
             } else {
                 /* No action required */
@@ -157,25 +159,25 @@ float powf(float x, float y)
     }
 
     /* (x<0)**(non-int) is NaN */
-    if (((((uint32_t)hx >> 31U) - 1U) | (uint32_t)yisint) == 0) {
+    if ((((hx >> 31U) - 1U) | yisint) == 0U) {
         return __raise_invalidf();
     }
 
     /* |y| is huge */
-    if (iy > 0x4d000000) { /* if |y| > 2**27 */
+    if (iy > 0x4d000000U) { /* if |y| > 2**27 */
         /* over/underflow if x is not close to one */
         /* Contrary to the double procedure we don't need the sign for these over/underflows as |y| > 2**27 means that y is an even integer (should the border ever be lowered to 2**23 or lower, the sign plays a role). */
-        if (ix < 0x3f7ffff4) {
-            return (hy < 0) ? __raise_overflowf(one) : __raise_underflowf(one);
+        if (ix < 0x3f7ffff4U) {
+            return ((int32_t)hy < 0) ? __raise_overflowf(one) : __raise_underflowf(one);
         }
 
-        if (ix > 0x3f800007) {
-            return (hy > 0) ? __raise_overflowf(one) : __raise_underflowf(one);
+        if (ix > 0x3f800007U) {
+            return ((int32_t)hy > 0) ? __raise_overflowf(one) : __raise_underflowf(one);
         }
 
         /* now |1-x| is tiny <= 2**-20, suffice to compute
            log(x) by x-x^2/2+x^3/3-x^4/4 */
-        t = ax - 1;      /* t has 20 trailing zeros */
+        t = ax - 1.0f;    /* t has 20 trailing zeros */
         w = (t * t) * (0.5f - t * (0.333333333333f - t * 0.25f));
         u = ivln2_h * t;  /* ivln2_h has 16 sig. bits */
         v = t * ivln2_l - w * ivln2;
@@ -194,19 +196,19 @@ float powf(float x, float y)
             GET_FLOAT_WORD(ix, ax);
         }
 
-        n  += ((ix) >> 23) - 0x7f;
-        j  = ix & 0x007fffff;
+        n  += (int32_t)(ix >> 23U) - 0x7f;
+        j  = ix & 0x007fffffU;
         /* determine interval */
-        ix = j | 0x3f800000;      /* normalize ix */
+        ix = j | 0x3f800000U;      /* normalize ix */
 
-        if (j <= 0x1cc471) {
-            k = 0;    /* |x|<sqrt(3/2) */
-        } else if (j < 0x5db3d7) {
-            k = 1;    /* |x|<sqrt(3)   */
+        if (j <= 0x1cc471U) {
+            k = 0U;    /* |x|<sqrt(3/2) */
+        } else if (j < 0x5db3d7U) {
+            k = 1U;    /* |x|<sqrt(3)   */
         } else {
-            k = 0;
+            k = 0U;
             n += 1;
-            ix -= 0x00800000;
+            ix -= 0x00800000U;
         }
 
         SET_FLOAT_WORD(ax, ix);
@@ -219,8 +221,8 @@ float powf(float x, float y)
         GET_FLOAT_WORD(is, s_h);
         SET_FLOAT_WORD(s_h, is & 0xfffff000U);
         /* t_h=ax+bp[k] High */
-        is = ((ix >> 1) & 0xfffff000U) | 0x20000000;
-        SET_FLOAT_WORD(t_h, is + 0x00400000 + (k << 21));
+        is = ((ix >> 1U) & 0xfffff000U) | 0x20000000U;
+        SET_FLOAT_WORD(t_h, is + 0x00400000U + (k << 21U));
         t_l = ax - (t_h - bp[k]);
         s_l = v * ((u - s_h * t_h) - s_h * t_l);
         /* compute log(ax) */
@@ -252,7 +254,7 @@ float powf(float x, float y)
 
     s = one; /* s (sign of result -ve**odd) = -1 else = 1 */
 
-    if (((((uint32_t)hx >> 31U) - 1U) | (uint32_t)(yisint - 1)) == 0) {
+    if ((((hx >> 31U) - 1U) | (yisint - 1U)) == 0U) {
         s = -one;    /* (-ve)**(odd int) */
     }
 
@@ -263,9 +265,9 @@ float powf(float x, float y)
     p_h = _y1 * t1;
     z = p_l + p_h;
     GET_FLOAT_WORD(j, z);
-    i = j & 0x7fffffff;
+    i = j & 0x7fffffffU;
 
-    if (j > 0) {
+    if ((int32_t)j > 0) {
         if (i > FLT_UWORD_EXP_MAX) {
             return __raise_overflowf(s);      /* overflow */
         } else if (i == FLT_UWORD_EXP_MAX) {
@@ -290,16 +292,16 @@ float powf(float x, float y)
     /*
      * compute 2**(p_h+p_l)
      */
-    k = (i >> 23) - 0x7f;
+    k = (i >> 23U) - 0x7fU;
     n = 0;
 
-    if (i > 0x3f000000) {     /* if |z| > 0.5, set n = [z+0.5] */
-        n = j + (0x00800000 >> (k + 1));
-        k = ((n & 0x7fffffff) >> 23) - 0x7f; /* new k for n */
-        SET_FLOAT_WORD(t, n & ~(0x007fffff >> k));
-        n = ((n & 0x007fffff) | 0x00800000) >> (23 - k);
+    if (i > 0x3f000000U) {     /* if |z| > 0.5, set n = [z+0.5] */
+        un = j + (0x00800000U >> (k + 1U));
+        k = ((un & 0x7fffffffU) >> 23U) - 0x7fU; /* new k for n */
+        SET_FLOAT_WORD(t, (un & ~(0x007fffffU >> k)));
+        n = (int32_t)(((un & 0x007fffffU) | 0x00800000U) >> (23U - k));
 
-        if (j < 0) {
+        if ((int32_t)j < 0) {
             n = -n;
         }
 
@@ -318,10 +320,11 @@ float powf(float x, float y)
     r  = (z * t1) / (t1 - two) - (w + z * w);
     z  = one - (r - z);
     GET_FLOAT_WORD(j, z);
-    j += (n << 23);
+    j = j + ((uint32_t)n << 23U);
 
-    if ((j >> 23) <= 0) {
-        z = scalbnf(z, (int32_t)n);    /* subnormal output */
+    /* Computation based on 2-complement arithmetic shift, is in C standard implementation defined. */
+    if (((int32_t)j >> 23) <= 0) {
+        z = scalbnf(z, n);    /* subnormal output */
     } else {
         SET_FLOAT_WORD(z, j);
     }

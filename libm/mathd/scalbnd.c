@@ -89,49 +89,51 @@ double scalbn(double x, int n)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t  k, hx, lx;
-    EXTRACT_WORDS(hx, lx, x);
-    k = (hx & 0x7ff00000) >> 20;  /* extract exponent */
+    int32_t  k;
+    uint32_t hx, lx;
 
-    if (k == 0) {                 /* 0 or subnormal x */
-        if ((lx | (hx & 0x7fffffff)) == 0) {
-            return x;             /* +-0 */
+    EXTRACT_WORDS(hx, lx, x);
+    k = (int32_t)((hx & 0x7ff00000U) >> 20U);  /* extract exponent */
+
+    if (k == 0) {                              /* 0 or subnormal x */
+        if ((lx | (hx & 0x7fffffffU)) == 0U) {
+            return x;                          /* +-0 */
         }
 
         x *= two54;
         GET_HIGH_WORD(hx, x);
-        k = ((hx & 0x7ff00000) >> 20) - 54;
+        k = (int32_t)((hx & 0x7ff00000U) >> 20U) - 54;
 
         if (n < -50000) {
-            return __raise_underflow(x);    /*underflow*/
+            return __raise_underflow(x);       /*underflow*/
         }
     }
 
-    if (k == 0x7ff) {
-        return x + x;             /* NaN or Inf */
+    if (k == 2047) {
+        return x + x;                          /* NaN or Inf */
     }
 
     if (n > 50000) {
-        return __raise_overflow(x);         /*overflow */
+        return __raise_overflow(x);            /*overflow */
     }
 
     k = k + n;
 
-    if (k >  0x7fe) {
-        return __raise_overflow(x);         /*overflow */
+    if (k > 2046) {
+        return __raise_overflow(x);            /*overflow */
     }
 
-    if (k > 0) {                  /* normal result */
-        SET_HIGH_WORD(x, (hx & 0x800fffffU) | (k << 20U));
+    if (k > 0) {                               /* normal result */
+        SET_HIGH_WORD(x, (hx & 0x800fffffU) | ((uint32_t)k << 20U));
         return x;
     }
 
     if (k <= -54) {
-        return __raise_underflow(x);        /*underflow*/
+        return __raise_underflow(x);           /*underflow*/
     }
 
-    k += 54;                      /* subnormal result */
-    SET_HIGH_WORD(x, (hx & 0x800fffffU) | (k << 20U));
+    k += 54;                                   /* subnormal result */
+    SET_HIGH_WORD(x, (hx & 0x800fffffU) | ((uint32_t)k << 20U));
     return x * twom54;
 }
 

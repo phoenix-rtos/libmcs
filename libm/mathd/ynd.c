@@ -84,23 +84,23 @@ double yn(int n, double x)
     x *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t i, hx, ix, lx;
-    int32_t sign;
+    int32_t sign, i; 
+    uint32_t hx, lx, ix, high;
     double a, b, temp;
 
     EXTRACT_WORDS(hx, lx, x);
-    ix = 0x7fffffff & hx;
+    ix = hx & 0x7fffffffU;
 
     /* if Y(n,NaN) is NaN */
-    if (isnan(x)) {         /* yn(n,NaN) = NaN */
+    if (DBL_WORDS_IS_NAN(hx, lx)) {   /* yn(n,NaN) = NaN */
         return x + x;
     }
 
-    if ((ix | lx) == 0) {   /* yn(n,+-0) = +Inf */
+    if ((ix | lx) == 0U) {   /* yn(n,+-0) = +Inf */
         return __raise_div_by_zero(-1.0);
     }
 
-    if (hx < 0) {           /* yn(n,<0) = NaN, y1(n,-Inf) = NaN */
+    if ((int32_t)hx < 0) {           /* yn(n,<0) = NaN, y1(n,-Inf) = NaN */
         return __raise_invalid();
     }
 
@@ -108,7 +108,7 @@ double yn(int n, double x)
 
     if (n < 0) {
         n = -n;
-        sign = 1 - ((n & 1) << 1);
+        sign = 1 - (int32_t)(((uint32_t)n & 1U) << 1U);
     }
 
     if (n == 0) {
@@ -116,14 +116,14 @@ double yn(int n, double x)
     }
 
     if (n == 1) {
-        return (sign * y1(x));
+        return ((double)sign * y1(x));
     }
 
-    if (ix == 0x7ff00000) { /* yn(n,+Inf) = +0.0 */
+    if (ix == 0x7ff00000U) { /* yn(n,+Inf) = +0.0 */
         return zero;
     }
 
-    if (ix >= 0x52D00000) { /* x > 2**302 */
+    if (ix >= 0x52D00000U) { /* x > 2**302 */
         /* (x >> n**2)
          *        Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
          *        Yn(x) = sin(x-(2n+1)*pi/4)*sqrt(2/x*pi)
@@ -137,7 +137,7 @@ double yn(int n, double x)
          *           2    -s+c        -c-s
          *           3     s+c         c-s
          */
-        switch (n & 3) {
+        switch ((uint32_t)n & 3U) {
         default:    /* FALLTHRU */
         case 0:
             temp =  sin(x) - cos(x);
@@ -158,7 +158,6 @@ double yn(int n, double x)
 
         b = invsqrtpi * temp / sqrt(x);
     } else {
-        uint32_t high;
         a = y0(x);
         b = y1(x);
         /* quit if b is -inf */

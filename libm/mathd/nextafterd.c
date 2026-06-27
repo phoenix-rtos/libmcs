@@ -80,20 +80,19 @@ double nextafter(double x, double y)
     y *= __volatile_one;
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
-    int32_t  hx, hy, ix;
-    uint32_t lx, ly;
+    uint32_t hx, lx, hy, ly, ix;
 
     EXTRACT_WORDS(hx, lx, x);
     EXTRACT_WORDS(hy, ly, y);
-    ix = hx & 0x7fffffff;               /* |x| */
+    ix = hx & 0x7fffffffU;               /* |x| */
 
-    if (isnan(x) || isnan(y)) {         /* x or y is nan */
+    if (DBL_WORDS_IS_NAN(hx, lx) || DBL_WORDS_IS_NAN(hy, ly)) {  /* x or y is nan */
         return x + y;
     } else if (hx == hy && lx == ly) {
-        return y;                       /* x == y, return y */
-    } else if ((ix | lx) == 0) {        /* x == 0 */
-        if (ix == (hy & 0x7fffffff) && ly == 0U) {
-            return y;                   /* x == y, return y */
+        return y;                       /* x=y, return x */
+    } else if ((ix | lx) == 0U) {        /* x == 0 */
+        if (ix == (hy & 0x7fffffffU) && ly == 0U) {
+            return y;                   /* x=y, return x */
         }
 #ifdef __LIBMCS_FPU_DAZ
         INSERT_WORDS(x, (hy & 0x80000000U) | 0x00100000U, 0U);  /* return +-minnormal */
@@ -102,43 +101,43 @@ double nextafter(double x, double y)
         (void) __raise_underflow(x);
 #endif /* defined(__LIBMCS_FPU_DAZ) */
         return x;
-    } else if (hx >= 0) {               /* x > 0 */
-        if (hx > hy || ((hx == hy) && (lx > ly))) {             /* x > y, x -= ulp */
-            if (lx == 0) {
-                hx -= 1;
+    } else if ((int32_t)hx >= 0) {               /* x > 0 */
+        if ((int32_t)hx > (int32_t)hy || ((hx == hy) && (lx > ly))) {             /* x > y, x -= ulp */
+            if (lx == 0U) {
+                hx -= 1U;
             }
 
-            lx -= 1;
+            lx -= 1U;
         } else {                        /* x < y, x += ulp */
-            lx += 1;
+            lx += 1U;
 
-            if (lx == 0) {
-                hx += 1;
+            if (lx == 0U) {
+                hx += 1U;
             }
         }
     } else {                            /* x < 0 */
-        if (hy >= 0 || hx > hy || ((hx == hy) && (lx > ly))) {  /* x < y, x -= ulp */
-            if (lx == 0) {
-                hx -= 1;
+        if ((int32_t)hy >= 0 || (int32_t)hx > (int32_t)hy || ((hx == hy) && (lx > ly))) {  /* x < y, x -= ulp */
+            if (lx == 0U) {
+                hx -= 1U;
             }
 
-            lx -= 1;
+            lx -= 1U;
         } else {                        /* x > y, x += ulp */
-            lx += 1;
+            lx += 1U;
 
-            if (lx == 0) {
-                hx += 1;
+            if (lx == 0U) {
+                hx += 1U;
             }
         }
     }
 
-    hy = hx & 0x7ff00000;
+    hy = hx & 0x7ff00000U;
 
-    if (hy >= 0x7ff00000) {
+    if (hy >= 0x7ff00000U) {
         return __raise_overflow(x);     /* overflow if x is finite */
     }
 
-    if (hy < 0x00100000) {              /* underflow */
+    if (hy < 0x00100000U) {              /* underflow */
 #ifdef __LIBMCS_FPU_DAZ
         INSERT_WORDS(x, hx & 0x80000000U, 0U);  /* return +-0.0 */
         return x;

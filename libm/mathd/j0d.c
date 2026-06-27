@@ -80,24 +80,24 @@ double j0(double x)
 #endif /* defined(__LIBMCS_FPU_DAZ) */
 
     double z, s, c, ss, cc, r, u, v;
-    int32_t hx, ix;
+    uint32_t hx, ix;
 
     GET_HIGH_WORD(hx, x);
-    ix = hx & 0x7fffffff;
+    ix = hx & 0x7fffffffU;
 
-    if (ix >= 0x7ff00000) {
+    if (ix >= 0x7ff00000U) {
         return one / (x * x);
     }
 
     x = fabs(x);
 
-    if (ix >= 0x40000000) {   /* |x| >= 2.0 */
+    if (ix >= 0x40000000U) {   /* |x| >= 2.0 */
         s = sin(x);
         c = cos(x);
         ss = s - c;
         cc = s + c;
 
-        if (ix < 0x7fe00000) { /* make sure x+x not overflow */
+        if (ix < 0x7fe00000U) { /* make sure x+x not overflow */
             z = -cos(x + x);
 
             if ((s * c) < zero) {
@@ -111,7 +111,7 @@ double j0(double x)
          * j0(x) = 1/sqrt(pi) * (P(0,x)*cc - Q(0,x)*ss) / sqrt(x)
          * y0(x) = 1/sqrt(pi) * (P(0,x)*ss + Q(0,x)*cc) / sqrt(x)
          */
-        if (ix > 0x48000000) {
+        if (ix > 0x48000000U) {
             z = (invsqrtpi * cc) / sqrt(x);
         } else {
             u = __j0_p(x);
@@ -122,11 +122,11 @@ double j0(double x)
         return z;
     }
 
-    if (ix < 0x3f200000) { /* |x| < 2**-13 */
+    if (ix < 0x3f200000U) { /* |x| < 2**-13 */
         if (x != 0.0) {
             (void)__raise_inexact(x); /* raise inexact if x != 0 */
         }
-        if (ix < 0x3e400000) {
+        if (ix < 0x3e400000U) {
             return one;    /* |x|<2**-27 */
         } else {
             return one - 0.25 * x * x;
@@ -137,7 +137,7 @@ double j0(double x)
     r =  z * (R02 + z * (R03 + z * (R04 + z * R05)));
     s =  one + z * (S01 + z * (S02 + z * (S03 + z * S04)));
 
-    if (ix < 0x3FF00000) {   /* |x| < 1.00 */
+    if (ix < 0x3FF00000U) {   /* |x| < 1.00 */
         return one + z * (-0.25 + (r / s));
     } else {
         u = 0.5 * x;
