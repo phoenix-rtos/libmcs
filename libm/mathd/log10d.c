@@ -79,60 +79,58 @@ double log10(double x)
 
     k = 0;
 
-    if (hx < 0x00100000) {              /* x < 2**-1022  */
+    if (hx < 0x00100000) {                     /* x < 2**-1022  */
         if (((hx & 0x7fffffff) | lx) == 0) {
-            return __raise_div_by_zero(-1.0);     /* log(+-0)=-inf */
+            return __raise_div_by_zero(-1.0);  /* log(+-0)=-inf */
         }
 
         if (hx < 0) {
             if (isnan(x)) {
                 return x + x;
             } else {
-                return __raise_invalid();   /* log(-#) = NaN */
+                return __raise_invalid();      /* log(-#) = NaN */
             }
+        } else {
+            k -= 54;
+            x *= two54;                        /* subnormal number, scale up x */
+            GET_HIGH_WORD(hx, x);
         }
-
-        k -= 54;
-        x *= two54;                     /* subnormal number, scale up x */
-        GET_HIGH_WORD(hx, x);
     }
 
-    if (hx >= 0x7ff00000) {             /* x = NaN/+-Inf */
+    if (hx >= 0x7ff00000) {                    /* x = NaN/+-Inf */
         return x + x;
-    }
-
-    if (hx == 0x3ff00000 && lx == 0) {  /* log(1) = +0 */
+    } else if (hx == 0x3ff00000 && lx == 0) {  /* log(1) = +0 */
         return zero;
+    } else {
+        k += (hx >> 20) - 1023;
+        hx &= 0x000fffff;
+        i = (hx + 0x95f64) & 0x100000;
+        SET_HIGH_WORD(x, hx | (i ^ 0x3ff00000)); /* normalize x or x/2 */
+        k += (i >> 20);
+        y = (double)k;
+        f = x - 1.0;
+        hfsq = 0.5 * f * f;
+        r = __log1pmf(f);
+
+        hi = f - hfsq;
+        SET_LOW_WORD(hi, 0);
+        lo = (f - hi) - hfsq + r;
+        val_hi = hi * ivln10hi;
+        y2 = y * log10_2hi;
+        val_lo = y * log10_2lo + (lo + hi) * ivln10lo + lo * ivln10hi;
+
+        /*
+         * Extra precision in for adding y*log10_2hi is not strictly needed
+         * since there is no very large cancellation near x = sqrt(2) or
+         * x = 1/sqrt(2), but we do it anyway since it costs little on CPUs
+         * with some parallelism and it reduces the error for many args.
+         */
+        w = y2 + val_hi;
+        val_lo += (y2 - w) + val_hi;
+        val_hi = w;
+
+        return val_lo + val_hi;
     }
-
-    k += (hx >> 20) - 1023;
-    hx &= 0x000fffff;
-    i = (hx + 0x95f64) & 0x100000;
-    SET_HIGH_WORD(x, hx | (i ^ 0x3ff00000)); /* normalize x or x/2 */
-    k += (i >> 20);
-    y = (double)k;
-    f = x - 1.0;
-    hfsq = 0.5 * f * f;
-    r = __log1pmf(f);
-
-    hi = f - hfsq;
-    SET_LOW_WORD(hi, 0);
-    lo = (f - hi) - hfsq + r;
-    val_hi = hi * ivln10hi;
-    y2 = y * log10_2hi;
-    val_lo = y * log10_2lo + (lo + hi) * ivln10lo + lo * ivln10hi;
-
-    /*
-     * Extra precision in for adding y*log10_2hi is not strictly needed
-     * since there is no very large cancellation near x = sqrt(2) or
-     * x = 1/sqrt(2), but we do it anyway since it costs little on CPUs
-     * with some parallelism and it reduces the error for many args.
-     */
-    w = y2 + val_hi;
-    val_lo += (y2 - w) + val_hi;
-    val_hi = w;
-
-    return val_lo + val_hi;
 }
 
 #ifdef __LIBMCS_LONG_DOUBLE_IS_64BITS
