@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: NetBSD */
 /* Written by Matthias Drochner. */
 
+// clang-format: off
 #ifndef LIBMCS_COMPLEX_H
 #define LIBMCS_COMPLEX_H
 
@@ -15,8 +16,7 @@
 extern "C"{
 #endif
 
-#include "config.h"
-#include "internal_config.h"
+#include "libm_internal_config.h"
 
 #ifndef __LIBMCS_WANT_COMPLEX
     #error During the configure step you have chosen not to compile complex \

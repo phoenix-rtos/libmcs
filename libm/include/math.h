@@ -1,3 +1,4 @@
+// clang-format: off
 #ifndef LIBMCS_MATH_H
 #define LIBMCS_MATH_H
 
@@ -5,8 +6,8 @@
 extern "C"{
 #endif
 
-#include "config.h"
-#include "internal_config.h"
+#include "numeric_size_config.h"
+#include "libm_internal_config.h"
 
 /*
  * These macros define the errno and exception behaviour of the library. This
@@ -15,7 +16,7 @@ extern "C"{
  */
 #define MATH_ERRNO          1
 #define MATH_ERREXCEPT      2
-#define math_errhandling    MATH_ERREXCEPT
+#define math_errhandling    MATH_ERRNO
 
 typedef float  float_t;
 typedef double double_t;
@@ -36,8 +37,8 @@ typedef double double_t;
 #define M_SQRT2             1.41421356237309504880
 #define M_SQRT1_2           0.70710678118654752440
 
-#define HUGE_VAL            (__infd)
-#define HUGE_VALF           (__inff)
+#define HUGE_VAL            (__builtin_inf())
+#define HUGE_VALF           (__builtin_inff())
 #define HUGE_VALL           ((long double) HUGE_VAL)
 #define INFINITY            HUGE_VALF
 

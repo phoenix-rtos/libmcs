@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: NetBSD */
 /* Copyright (c) 2004 Stefan Farfeleder. */
 
+// clang-format: off
 #ifndef LIBMCS_TGMATH_H
 #define LIBMCS_TGMATH_H
 
